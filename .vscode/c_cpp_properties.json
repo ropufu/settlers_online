@@ -1,0 +1,83 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/usr/local/Cellar/gcc/7.2.0/include/c++/7.2.0",
+                "/usr/include/c++/4.2.1",
+                "/usr/local/include",
+                "/usr/include",
+                "${workspaceRoot}",
+                "${workspaceRoot}/../opensource",
+                "${workspaceRoot}/../aftermath"
+            ],
+            "defines": [],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "/usr/local/Cellar/gcc/7.2.0/include/c++/7.2.0",
+                    "/usr/include/c++/4.2.1",
+                    "/usr/local/include",
+                    "/usr/include",
+                    "${workspaceRoot}",
+                    "${workspaceRoot}/../opensource",
+                    "${workspaceRoot}/../aftermath"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ]
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "/usr/include",
+                "/usr/local/include",
+                "${workspaceRoot}",
+                "${workspaceRoot}/../opensource",
+                "${workspaceRoot}/../aftermath"
+            ],
+            "defines": [],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "/usr/include",
+                    "/usr/local/include",
+                    "${workspaceRoot}",
+                    "${workspaceRoot}/../opensource",
+                    "${workspaceRoot}/../aftermath"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include",
+                "${workspaceRoot}",
+                "${workspaceRoot}/../opensource",
+                "${workspaceRoot}/../aftermath"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "browse": {
+                "path": [
+                    "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/*",
+                    "${workspaceRoot}",
+                    "${workspaceRoot}/../opensource",
+                    "${workspaceRoot}/../aftermath"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 3
+}

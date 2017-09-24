@@ -1,10 +1,10 @@
 
-#ifndef SETTLERS_ONLINE_TEST_UNIT_TYPE_TEST_HPP_INCLUDED
-#define SETTLERS_ONLINE_TEST_UNIT_TYPE_TEST_HPP_INCLUDED
+#ifndef ROPUFU_SETTLERS_ONLINE_TEST_UNIT_TYPE_TEST_HPP_INCLUDED
+#define ROPUFU_SETTLERS_ONLINE_TEST_UNIT_TYPE_TEST_HPP_INCLUDED
 
-#include <settlers_online/special_abilities.hpp>
-#include <settlers_online/unit_category.hpp>
-#include <settlers_online/unit_type.hpp>
+#include "../settlers_online/special_abilities.hpp"
+#include "../settlers_online/unit_category.hpp"
+#include "../settlers_online/unit_type.hpp"
 
 #include <cstdint>
 #include <functional>
@@ -151,4 +151,4 @@ namespace ropufu
 	}
 }
 
-#endif // SETTLERS_ONLINE_TEST_UNIT_TYPE_TEST_HPP_INCLUDED
+#endif // ROPUFU_SETTLERS_ONLINE_TEST_UNIT_TYPE_TEST_HPP_INCLUDED

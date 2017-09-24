@@ -1,7 +1,7 @@
 
-#include <settlers_online_test/army_test.hpp>
-#include <settlers_online_test/unit_group_test.hpp>
-#include <settlers_online_test/unit_type_test.hpp>
+#include "army_test.hpp"
+#include "unit_group_test.hpp"
+#include "unit_type_test.hpp"
 
 #include <chrono>
 #include <cstdint>
