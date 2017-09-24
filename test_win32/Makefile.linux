@@ -1,0 +1,27 @@
+
+CC = g++
+
+CFLAGS = -std=c++14 -Wall
+
+PATHINC = -I./../../aftermath -I./..
+
+PATHLIB =
+
+LDFLAGS =
+
+.VPATH: .
+
+test_win32.x: $(patsubst %.cpp, %.o, $(wildcard *.cpp))
+	$(CC) $^ -o $@ $(PATHLIB) $(LDFLAGS) $(LDLIBS)
+	rm -rf *.o *.d
+
+%.o: %.cpp
+	$(CC) $< $(CFLAGS) -c -MD $(PATHINC)
+
+include $(wildcard *.d)
+
+.PHONY: clean
+
+clean:
+	rm -rf *.o *.d
+
