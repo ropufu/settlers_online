@@ -2,17 +2,15 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_ARMY_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_ARMY_HPP_INCLUDED
 
-#include <aftermath/algebra/elementwise.hpp>
-#include <aftermath/algebra/fraction.hpp>
-#include <aftermath/algebra/permutation.hpp>
+#include <aftermath/algebra.hpp>
 
-#include <settlers_online/attack_sequence.hpp>
-#include <settlers_online/combat_result.hpp>
-#include <settlers_online/flags_type.hpp>
-#include <settlers_online/typedef.hpp>
-#include <settlers_online/unit_category.hpp>
-#include <settlers_online/unit_group.hpp>
-#include <settlers_online/unit_type.hpp>
+#include "attack_sequence.hpp"
+#include "combat_result.hpp"
+#include "flags_type.hpp"
+#include "typedef.hpp"
+#include "unit_category.hpp"
+#include "unit_group.hpp"
+#include "unit_type.hpp"
 
 #include <algorithm>
 #include <array>
@@ -46,6 +44,7 @@ namespace ropufu
 			std::size_t m_camp_hit_points; // Determines the defensive capabilities of the army.
 			// ~~ Permutations of <m_groups> ~~
             aftermath::algebra::permutation m_order_original;      // Original permutation.
+            aftermath::algebra::permutation m_order_by_id;         // Identity permutation.
             aftermath::algebra::permutation m_order_by_hp;         // Permutation when defending agains units with \c do_attack_weakest_target.
             aftermath::algebra::permutation m_order_by_initiative; // Permutation used when attacking.
 			// ~~ Battle modifiers ~~
@@ -199,6 +198,9 @@ namespace ropufu
             /** Original ordering of the units. */
             const aftermath::algebra::permutation& order_original() const noexcept { return this->m_order_original; }
 
+            /** Ordering by unit id. */
+            const aftermath::algebra::permutation& order_by_id() const noexcept { return this->m_order_by_id; }
+
             /** Ordering by unit hit points. */
             const aftermath::algebra::permutation& order_by_hp() const noexcept { return this->m_order_by_hp; }
 
@@ -226,13 +228,13 @@ namespace ropufu
 			/** The mask, specific to this instance of \c army, indicating the surviving groups. */
 			mask_type compute_alive_mask() const noexcept
             {
-                return aftermath::algebra::elementwise::compute_mask(this->m_groups, [] (const unit_group& g) { return g.count() > 0; });
+                return aftermath::algebra::elementwise::to_binary_mask(this->m_groups, [] (const unit_group& g) { return g.count() > 0; });
             }
 
 			/** Returns only the unit groups masked by \p alive_mask. */
 			std::vector<unit_group> by_mask(mask_type alive_mask) const noexcept
 			{
-				return aftermath::algebra::elementwise::numeric_mask(this->m_groups, alive_mask);
+				return aftermath::algebra::elementwise::from_binary_mask(this->m_groups, alive_mask);
 			}
 
 			/** Total number of metagroups (groups of unit groups). */
@@ -304,7 +306,7 @@ namespace ropufu
 
         army::army(const std::vector<unit_group>& groups, std::size_t camp_hit_points)
             : m_groups(0), m_metagroup_masks(0), m_camp_hit_points(camp_hit_points),
-            m_order_by_hp(groups.size()), m_order_by_initiative(groups.size()),
+            m_order_by_id(groups.size()), m_order_by_hp(groups.size()), m_order_by_initiative(groups.size()),
             m_accuracy_bonus(), m_splash_bonus(), m_min_damage_bonus(), m_max_damage_bonus()
         {
             // ~~ Validation ~~
@@ -362,7 +364,7 @@ namespace ropufu
 			for (const auto& p : metagroup_ids)
 			{
 				if (p.second == 1) continue; // Skip singletons.
-				mask_type metagroup_mask = aftermath::algebra::elementwise::compute_mask(
+				mask_type metagroup_mask = aftermath::algebra::elementwise::to_binary_mask(
                     this->m_groups, [&](const unit_group& g) { return g.metagroup_id() == p.first; });
 				this->m_metagroup_masks.push_back(metagroup_mask);
 			}

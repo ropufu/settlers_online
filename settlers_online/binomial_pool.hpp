@@ -2,13 +2,12 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_BINOMIAL_POOL_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_BINOMIAL_POOL_HPP_INCLUDED
 
-#include <aftermath/probability/dist_binomial.hpp>
-#include <aftermath/random/sampler_binomial_lookup.hpp>
-#include <aftermath/random/sampler_bernoulli.hpp>
+#include <aftermath/probability.hpp>
+#include <aftermath/random.hpp>
 
-#include <settlers_online/army.hpp>
-#include <settlers_online/unit_group.hpp>
-#include <settlers_online/unit_type.hpp>
+#include "army.hpp"
+#include "unit_group.hpp"
+#include "unit_type.hpp"
 
 #include <cstddef>
 #include <map>
@@ -52,9 +51,9 @@ namespace ropufu
             }
 
             // ~~ Delete copy and move constructors and assign operators ~~
-            binomial_pool(type const&) = delete;    // Copy constructor.
+            binomial_pool(const type&) = delete;    // Copy constructor.
             binomial_pool(type&&)      = delete;    // Move constructor.
-            type& operator =(type const&) = delete; // Copy assign.
+            type& operator =(const type&) = delete; // Copy assign.
             type& operator =(type&&)      = delete; // Move assign.
 
             /** Updates the sampler cache from a provided instance of \p army. */

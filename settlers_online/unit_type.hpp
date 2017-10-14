@@ -2,9 +2,9 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_UNIT_TYPE_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_UNIT_TYPE_HPP_INCLUDED
 
-#include <settlers_online/flags_type.hpp>
-#include <settlers_online/special_abilities.hpp>
-#include <settlers_online/unit_category.hpp>
+#include "flags_type.hpp"
+#include "special_abilities.hpp"
+#include "unit_category.hpp"
 
 #include <cstdint>
 #include <functional>

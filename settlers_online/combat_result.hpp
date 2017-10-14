@@ -2,7 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_COMBAT_RESULT_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_COMBAT_RESULT_HPP_INCLUDED
 
-#include <settlers_online/typedef.hpp>
+#include "typedef.hpp"
 
 #include <cstddef>
 #include <cstdint>

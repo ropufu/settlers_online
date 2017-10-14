@@ -2,14 +2,13 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_COMBAT_MECHANICS_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_COMBAT_MECHANICS_HPP_INCLUDED
 
-#include <aftermath/algebra/permutation.hpp>
+#include <aftermath/algebra.hpp>
 
-#include <settlers_online/army.hpp>
-#include <settlers_online/attack_sequence.hpp>
-#include <settlers_online/logger.hpp>
-#include <settlers_online/special_abilities.hpp>
-#include <settlers_online/typedef.hpp>
-#include <settlers_online/unit_category.hpp>
+#include "army.hpp"
+#include "attack_sequence.hpp"
+#include "special_abilities.hpp"
+#include "typedef.hpp"
+#include "unit_category.hpp"
 
 #include <cstddef>
 #include <stdexcept>
@@ -154,7 +153,7 @@ namespace ropufu
             template <typename t_sequence_type>
             static void hit(army& defender, const unit_group& attacking_group, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer)
             {
-                if (attacker.empty()) return;
+                if (attacking_group.empty()) return;
                 const unit_type& attacker_t = attacking_group.type();
 
                 // Damage factors.
@@ -170,7 +169,7 @@ namespace ropufu
                 // Optimize in the uniform all splash damage case.
                 if (!has_effective_tower_bonus && attacker_t.splash_chance() == 1.0)
                 {
-                    std::size_t count_attackers = attacker.count_at_snapshot();
+                    std::size_t count_attackers = attacking_group.count_at_snapshot();
                     std::size_t count_high_damage = sequencer.peek_count_high_damage(attacker_t, count_attackers); // Count the number of units in this stack that do maximum damage.
                     sequencer.next_unit(count_attackers);
 
@@ -198,11 +197,11 @@ namespace ropufu
                     std::size_t count_alive = defending_group.count();
                     if (count_alive == 0) continue;
 
-
                     // Optimize when attacking units with low hit points: each non-splash hit will always kill exactly 1 defending unit.
-                    bool is_one_to_one = (min_damage >= defender_t.hit_points()) && (attacker_t.splash_chance() == 0.0);
-                    if (is_one_to_one) attacking_unit_index = combat_mechanics::one_to_one(defending_group, attacker, attacking_unit_index);
-                    else attacking_unit_index = hit(defending_group, attacker, attacking_unit_index, sequencer);
+                    std::size_t effective_min_damage = damage_cast(attacker_t.min_damage(), damage_factor);
+                    bool is_one_to_one = (effective_min_damage >= defender_t.hit_points()) && (attacker_t.splash_chance() == 0.0);
+                    if (is_one_to_one) attacking_unit_index = combat_mechanics::one_to_one(defending_group, attacking_group, attacking_unit_index);
+                    else attacking_unit_index = hit(defending_group, attacking_group, attacking_unit_index, sequencer);
 
                     if (attacking_unit_index == attacking_group.count_at_snapshot()) break;
                     if (attacking_unit_index > attacking_group.count_at_snapshot()) throw std::logic_error("<attacking_unit_index> overflow");
@@ -211,12 +210,13 @@ namespace ropufu
 
             /** Destruct the army's camp by a surviving army (attacker). */
             template <typename t_sequence_type>
-            std::size_t destruct(army& defender, const std::vector<unit_group>& attacker, const attack_phase& phase, attack_sequence<t_sequence_type>& sequencer) const
+            std::size_t destruct(army& defender, const std::vector<unit_group>& attacker, attack_sequence<t_sequence_type>& sequencer) const
             {
                 if (attacker.empty()) return 0;
 
                 std::size_t count_rounds = 0;
-                while (this->m_camp_hit_points > 0)
+                std::size_t camp_hit_points = defender.camp_hit_points();
+                while (camp_hit_points > 0)
                 {
                     for (const unit_group& g : attacker)
                     {
@@ -228,11 +228,12 @@ namespace ropufu
                         std::size_t damage = do_high_damage ? t.max_damage() : t.min_damage();
                         if (t.category() == unit_category::artillery) damage *= 2;
 
-                        if (defender.m_camp_hit_points < damage) defender.m_camp_hit_points = 0;
-                        else defender.m_camp_hit_points -= damage;
+                        if (camp_hit_points < damage) camp_hit_points = 0;
+                        else camp_hit_points -= damage;
                     }
                     count_rounds++;
                 }
+                defender.set_camp_hit_points(camp_hit_points);
                 return count_rounds;
             }
 
@@ -283,7 +284,6 @@ namespace ropufu
 
         void combat_mechanics::uniform_splash(std::size_t reduced_damage, army& defender, const aftermath::algebra::permutation& defender_ordering)
         {
-            std::size_t attacking_unit_index = 0;
             std::vector<unit_group>& defender_groups = defender.groups();
             for (std::size_t j : defender_ordering)
             {

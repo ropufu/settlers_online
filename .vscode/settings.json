@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "cstdint": "cpp",
+        "array": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "chrono": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "ratio": "cpp",
+        "hashtable": "cpp"
+    }
+}

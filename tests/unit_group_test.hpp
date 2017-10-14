@@ -7,6 +7,8 @@
 #include "../settlers_online/unit_group.hpp"
 #include "../settlers_online/unit_type.hpp"
 
+#include "generator.hpp"
+
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -19,20 +21,20 @@ namespace ropufu
 	{
 		struct unit_group_test
 		{
-			typedef unit_group_test type;
-			typedef settlers_online::unit_group tested_type;
+			using type = unit_group_test;
+			using tested_type = settlers_online::unit_group;
 
 			using cat = settlers_online::unit_category;
 			using sa = settlers_online::special_abilities;
 
             static bool test_equality()
             {
-                type tester = {};
+				generator& gen = generator::instance();
 
                 // ~~ Constructor ~~
                 std::size_t count = 27;
-                settlers_online::unit_type u = tester.generate_type("big dummy", 1985);
-                settlers_online::unit_type v = tester.generate_type("big dummy", 1985);
+                settlers_online::unit_type u = gen.next_type("big dummy", 1985);
+                settlers_online::unit_type v = gen.next_type("big dummy", 1985);
                 tested_type g1(u, count, 4);
                 tested_type g2(u, count + 1, 4);
                 tested_type g3(u, count, 5);
@@ -56,12 +58,12 @@ namespace ropufu
 
 			static bool test_properties()
 			{
-                type tester = {};
+				generator& gen = generator::instance();
 
 				// ~~ Constructor ~~
 				std::size_t count = 27;
 				std::int_fast32_t metagroup_id = 4;
-				settlers_online::unit_type u = tester.generate_type("no name, nn", 1985);
+				settlers_online::unit_type u = gen.next_type("no name, nn", 1985);
 				tested_type g(u, count, metagroup_id);
 
 				// ~~ Test Getters ~~
@@ -103,31 +105,6 @@ namespace ropufu
 				
 				return true;
 			}
-
-            std::int_fast32_t m_seed = 0;
-
-            settlers_online::unit_type generate_type(std::string name, std::size_t hit_points)
-            {
-                std::int_fast32_t id = (++this->m_seed);
-                std::int_fast32_t initiative = (this->m_seed % 3);
-                //std::size_t hit_points = 1985;
-                std::size_t experience = 2017;
-                std::size_t capacity = 270;
-                std::size_t min_damage = 10;
-                std::size_t max_damage = 20;
-                double accuracy = 0.9;
-                double splash_chance = 0.5;
-                cat category = cat::artillery;
-                flags_type<sa> abilities = { sa::attack_twice };
-
-                settlers_online::unit_type u(
-                    id, initiative,
-                    name, hit_points, experience, capacity,
-                    min_damage, max_damage, accuracy, splash_chance,
-                    category, abilities);
-
-                return u;
-            }
 		};
 	}
 }

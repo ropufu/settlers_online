@@ -1,9 +1,10 @@
+PNAME = tests.out
 
 CC = clang++
 
 CFLAGS = -std=c++14 -stdlib=libc++ -Wall
 
-PATHINC = -I./../../aftermath -I./..
+PATHINC = -I./../../aftermath -I./../../opensource -I./..
 
 PATHLIB =
 
@@ -11,7 +12,7 @@ LDFLAGS =
 
 .VPATH: .
 
-test_win32.bin: $(patsubst %.cpp, %.o, $(wildcard *.cpp))
+$(PNAME): $(patsubst %.cpp, %.o, $(wildcard *.cpp))
 	$(CC) $^ -o $@ $(PATHLIB) $(LDFLAGS) $(LDLIBS)
 	rm -rf *.o *.d
 

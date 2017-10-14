@@ -2,7 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_TYPEDEF_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_TYPEDEF_HPP_INCLUDED
 
-//#include <aftermath/algebra/fraction.hpp>
+//#include <aftermath/algebra.hpp>
 
 //#include <bitset>
 #include <cstddef>

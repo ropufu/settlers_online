@@ -6,6 +6,8 @@
 #include "../settlers_online/unit_category.hpp"
 #include "../settlers_online/unit_type.hpp"
 
+#include "generator.hpp"
+
 #include <cstdint>
 #include <functional>
 #include <ostream>
@@ -17,8 +19,8 @@ namespace ropufu
 	{
 		struct unit_type_test
 		{
-			typedef unit_type_test type;
-			typedef settlers_online::unit_type tested_type;
+			using type = unit_type_test;
+			using tested_type = settlers_online::unit_type;
 
 			using cat = settlers_online::unit_category;
 			using sa = settlers_online::special_abilities;

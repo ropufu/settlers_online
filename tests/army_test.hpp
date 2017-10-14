@@ -8,11 +8,14 @@
 #include "../settlers_online/unit_group.hpp"
 #include "../settlers_online/unit_type.hpp"
 
+#include "generator.hpp"
+
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <ostream>
 #include <string>
+#include <vector>
 
 namespace ropufu
 {
@@ -20,20 +23,20 @@ namespace ropufu
 	{
 		struct army_test
 		{
-			typedef army_test type;
-			typedef settlers_online::army tested_type;
+			using type = army_test;
+			using tested_type = settlers_online::army;
 
 			using cat = settlers_online::unit_category;
 			using sa = settlers_online::special_abilities;
 
 			static bool test_equality()
 			{
-				type tester = {};
+				generator& gen = generator::instance();
 
-                settlers_online::unit_group g1 = tester.generate_group(12, "a", 1);
-                settlers_online::unit_group g2 = tester.generate_group(100, "b", 2);
-                settlers_online::unit_group g3 = tester.generate_group(8, "c", 1);
-                settlers_online::unit_group g3x = tester.generate_group(8, "c", 2);
+                settlers_online::unit_group g1 = gen.next_group(12, "a", 1);
+                settlers_online::unit_group g2 = gen.next_group(100, "b", 2);
+                settlers_online::unit_group g3 = gen.next_group(8, "c", 1);
+                settlers_online::unit_group g3x = gen.next_group(8, "c", 2);
 
 				// ~~ Constructor ~~
 				std::vector<settlers_online::unit_group> groups_a = { g1, g2, g3 };
@@ -62,37 +65,6 @@ namespace ropufu
                 if (is_matched) return false;
 
 				return true;
-			}
-
-		private:
-			static bool is_match(const tested_type& g,
-				const settlers_online::unit_type& u)
-			{
-				return true;
-			}
-
-			std::int_fast32_t m_seed = 0;
-
-			settlers_online::unit_group generate_group(std::size_t count, std::string name, std::int_fast32_t metagroup_id)
-			{
-				std::int_fast32_t id = (++this->m_seed);
-				std::int_fast32_t initiative = (this->m_seed  % 3);
-				std::size_t hit_points = 1985;
-				std::size_t experience = 2017;
-                std::size_t capacity = 270;
-				std::size_t min_damage = 10;
-				std::size_t max_damage = 20;
-				double accuracy = 0.9;
-				double splash_chance = 0.5;
-				cat category = cat::artillery;
-				flags_type<sa> abilities = { sa::attack_twice };
-
-				settlers_online::unit_type u(
-					id, initiative,
-					name, hit_points, experience, capacity,
-					min_damage, max_damage, accuracy, splash_chance,
-					category, abilities);
-				return settlers_online::unit_group(u, count);
 			}
 		};
 	}

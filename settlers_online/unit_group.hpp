@@ -2,10 +2,10 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_UNIT_GROUP_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_UNIT_GROUP_HPP_INCLUDED
 
-#include <aftermath/algebra/fraction.hpp>
+#include <aftermath/algebra.hpp>
 
-#include <settlers_online/typedef.hpp>
-#include <settlers_online/unit_type.hpp>
+#include "typedef.hpp"
+#include "unit_type.hpp"
 
 #include <cstddef>
 #include <cstdint>

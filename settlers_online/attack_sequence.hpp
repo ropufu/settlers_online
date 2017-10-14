@@ -2,11 +2,12 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_ATTACK_SEQUENCE_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_ATTACK_SEQUENCE_HPP_INCLUDED
 
-#include <settlers_online/unit_type.hpp>
+#include "unit_type.hpp"
 
 #include <cstddef>
 //#include <cstdint>
 #include <exception>
+#include <type_traits>
 
 namespace ropufu
 {
@@ -15,10 +16,10 @@ namespace ropufu
         /** @brief Abstract class (CRTP) for determining attack sequence of an army.
          *  @remark For more information on CRTP see https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
          *  @remark The class has to implement the following functions:
-         *          bool peek_do_high_damage_impl(const unit_type& unit) const noexcept
-         *          std::size_t peek_count_high_damage_impl(const unit_type& unit, std::size_t count_units) const noexcept
-         *          bool peek_do_splash_impl(const unit_type& unit) const noexcept
-         *          bool did_last_splash_impl(const unit_type& unit) const noexcept
+         *          bool peek_do_high_damage(const unit_type& unit) const noexcept
+         *          std::size_t peek_count_high_damage(const unit_type& unit, std::size_t count_units) const noexcept
+         *          bool peek_do_splash(const unit_type& unit) const noexcept
+         *          bool did_last_splash(const unit_type& unit) const noexcept
          */
         template <typename t_derived_type>
         struct attack_sequence
@@ -85,8 +86,12 @@ namespace ropufu
              */
             bool peek_do_high_damage(const unit_type& unit) const noexcept
             {
-                derived_type const& self = static_cast<derived_type const&>(*this);
-                return self.peek_do_high_damage_impl(unit);
+                constexpr bool is_overwritten = std::is_same<
+                    decltype(&derived_type::peek_do_high_damage), 
+                    decltype(&type::peek_do_high_damage)>::value;
+                static_assert(!is_overwritten, "static polymorphic function <peek_do_high_damage> was not overwritten.");
+                const derived_type* that = static_cast<const derived_type*>(this);
+                return that->peek_do_high_damage(unit);
             }
             
             /** @brief Counts the number of units in the range, starting with the current unit, that will do high damage.
@@ -95,8 +100,12 @@ namespace ropufu
              */
             std::size_t peek_count_high_damage(const unit_type& unit, std::size_t count_units) const noexcept
             {
-                derived_type const& self = static_cast<derived_type const&>(*this);
-                return self.peek_count_high_damage_impl(unit, count_units);
+                constexpr bool is_overwritten = std::is_same<
+                    decltype(&derived_type::peek_count_high_damage), 
+                    decltype(&type::peek_count_high_damage)>::value;
+                static_assert(!is_overwritten, "static polymorphic function <peek_count_high_damage> was not overwritten.");
+                const derived_type* that = static_cast<const derived_type*>(this);
+                return that->peek_count_high_damage(unit, count_units);
             }
 
             /** @brief Indicates whether the current unit will do splash damage.
@@ -104,8 +113,12 @@ namespace ropufu
              */
             bool peek_do_splash(const unit_type& unit) const noexcept
             {
-                derived_type const& self = static_cast<derived_type const&>(*this);
-                return self.peek_do_splash_impl(unit);
+                constexpr bool is_overwritten = std::is_same<
+                    decltype(&derived_type::peek_do_splash), 
+                    decltype(&type::peek_do_splash)>::value;
+                static_assert(!is_overwritten, "static polymorphic function <peek_do_splash> was not overwritten.");
+                const derived_type* that = static_cast<const derived_type*>(this);
+                return that->peek_do_splash(unit);
             }
 
             /** @brief Indicates whether the previous unit did splash damage.
@@ -113,16 +126,13 @@ namespace ropufu
              */
             bool did_last_splash(const unit_type& unit) const noexcept
             {
-                derived_type const& self = static_cast<derived_type const&>(*this);
-                return self.did_last_splash_impl(unit);
+                constexpr bool is_overwritten = std::is_same<
+                    decltype(&derived_type::did_last_splash), 
+                    decltype(&type::did_last_splash)>::value;
+                static_assert(!is_overwritten, "static polymorphic function <did_last_splash> was not overwritten.");
+                const derived_type* that = static_cast<const derived_type*>(this);
+                return that->did_last_splash(unit);
             }
-
-            /** ~~ Abstract ~~
-                bool peek_do_high_damage_impl(const unit_type& unit) const noexcept;
-                std::size_t peek_count_high_damage_impl(const unit_type& unit, std::size_t count_units) const noexcept;
-                bool peek_do_splash_impl(const unit_type& unit) const noexcept;
-                bool did_last_splash_impl(const unit_type& unit) const noexcept;
-            */
         };
     }
 }
