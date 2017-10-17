@@ -1,0 +1,47 @@
+{
+    "camps": [
+        {
+            "name": "No Camp",
+            "hit points": 0
+        },
+        {
+            "name": "Trap",
+            "hit points": 125
+        },
+        {
+            "name": "Encampment",
+            "hit points": 250
+        },
+        {
+            "name": "Watchtower",
+            "hit points": 1000,
+            "damage reduction": 0.5
+        },
+        {
+            "name": "Fortified Watchtower",
+            "hit points": 1500,
+            "damage reduction": 0.75
+        },
+        {
+            "name": "Stone Tower",
+            "hit points": 2000,
+            "damage reduction": 0.9
+        },
+        {
+            "name": "Witch Tower",
+            "hit points": 2000
+        },
+        {
+            "name": "Bone Church",
+            "hit points": 2000
+        },
+        {
+            "name": "White Castle",
+            "hit points": 250
+        },
+        {
+            "name": "Dark Castle",
+            "hit points": 2000
+        }
+    ]
+}

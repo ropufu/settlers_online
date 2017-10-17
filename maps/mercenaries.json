@@ -1,0 +1,73 @@
+{
+    "units": [
+        {
+            "id": 4011,
+            "name": "Mercenary Duelist",
+            "faction": "non player expedition",
+            "class": "melee",
+            "initiative": "normal",
+            "hit points": 180,
+            "low damage": 25,
+            "high damage": 25,
+            "accuracy": 1,
+            "rivals": [ { "class": "cavalry", "bonus": 0.75 } ]
+        },
+        {
+            "id": 4012,
+            "name": "Mercenary Sharpshooter",
+            "faction": "non player expedition",
+            "class": "ranged",
+            "initiative": "normal",
+            "hit points": 180,
+            "low damage": 25,
+            "high damage": 25,
+            "accuracy": 1,
+            "rivals": [ { "class": "melee", "bonus": 0.75 } ]
+        },
+        {
+            "id": 4013,
+            "name": "Mercenary Charger",
+            "faction": "non player expedition",
+            "class": "cavalry",
+            "initiative": "normal",
+            "hit points": 180,
+            "low damage": 25,
+            "high damage": 25,
+            "accuracy": 1,
+            "rivals": [ { "class": "ranged", "bonus": 0.75 } ]
+        },
+        {
+            "id": 4014,
+            "name": "Mercenary Infantry",
+            "faction": "non player expedition",
+            "class": "melee",
+            "initiative": "normal",
+            "hit points": 180,
+            "low damage": 35,
+            "high damage": 35,
+            "accuracy": 1
+        },
+        {
+            "id": 4015,
+            "name": "Mercenary Archer",
+            "faction": "non player expedition",
+            "class": "ranged",
+            "initiative": "normal",
+            "hit points": 180,
+            "low damage": 35,
+            "high damage": 35,
+            "accuracy": 1
+        },
+        {
+            "id": 4016,
+            "name": "Mercenary Cavalry",
+            "faction": "non player expedition",
+            "class": "cavalry",
+            "initiative": "normal",
+            "hit points": 180,
+            "low damage": 35,
+            "high damage": 35,
+            "accuracy": 1
+        }
+    ]
+}

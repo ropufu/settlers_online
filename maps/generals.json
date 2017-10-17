@@ -1,0 +1,100 @@
+{
+    "units": [
+        {
+            "id": 9001,
+            "name": [ "General", "((g))" ],
+            "faction": "general",
+            "class": "unknown",
+            "initiative": "normal",
+            "capacity": 270,
+            "hit points": 1,
+            "low damage": 120,
+            "high damage": 120,
+            "accuracy": 1,
+            "special abilities": [ "not weak" ]
+        },
+        {
+            "id": 9002,
+            "name": [ "Master of Martial Arts", "((cxv))" ],
+            "faction": "general",
+            "class": "unknown",
+            "initiative": "first strike",
+            "capacity": 220,
+            "hit points": 1,
+            "low damage": 450,
+            "high damage": 500,
+            "accuracy": 0.8,
+            "special abilities": [ "not weak", "attack weakest target" ]
+        },
+        {
+            "id": 9005,
+            "name": [ "Master of Defense", "((w))" ],
+            "faction": "general",
+            "class": "unknown",
+            "initiative": "normal",
+            "capacity": 200,
+            "hit points": 5000,
+            "low damage": 25,
+            "high damage": 50,
+            "accuracy": 0.8,
+            "special abilities": [ "not weak", "attack weakest target" ]
+        },
+        {
+            "id": 9007,
+            "name": [ "Lord Dracul", "((d))" ],
+            "faction": "general",
+            "class": "unknown",
+            "initiative": "first strike",
+            "capacity": 200,
+            "hit points": 999,
+            "low damage": 111,
+            "high damage": 333,
+            "accuracy": 0.77,
+            "splash chance": 1,
+            "special abilities": [ "not weak" ]
+        },
+        {
+            "id": 9010,
+            "name": [ "Vargus", "((v))" ],
+            "faction": "general",
+            "class": "unknown",
+            "initiative": "first strike",
+            "capacity": 180,
+            "hit points": 200,
+            "low damage": 750,
+            "high damage": 1250,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "special abilities": [ "not weak" ],
+            "traits": [ "intercept" ]
+        },
+        {
+            "id": 9011,
+            "name": [ "Nusala", "((n))" ],
+            "faction": "general",
+            "class": "unknown",
+            "initiative": "first strike",
+            "capacity": 165,
+            "hit points": 150,
+            "low damage": 1000,
+            "high damage": 1500,
+            "accuracy": 0.9,
+            "special abilities": [ "not weak", "attack weakest target" ],
+            "traits": [ "explosive ammunition" ]
+        },
+        {
+            "id": 9012,
+            "name": [ "Anslem", "((a))" ],
+            "faction": "general",
+            "class": "unknown",
+            "initiative": "normal",
+            "capacity": 150,
+            "hit points": 150,
+            "low damage": 1000,
+            "high damage": 1500,
+            "accuracy": 0.5,
+            "special abilities": [ "not weak", "attack weakest target" ],
+            "traits": [ "dazzle" ]
+        }
+    ]
+}

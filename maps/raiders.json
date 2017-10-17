@@ -1,0 +1,85 @@
+{
+    "units": [
+        {
+            "id": 61,
+            "name": "Nomad",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 30,
+            "low damage": 10,
+            "high damage": 20,
+            "accuracy": 0.6,
+            "experience when killed": 2
+        },
+        {
+            "id": 63,
+            "name": "Lance Rider",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 20,
+            "low damage": 5,
+            "high damage": 20,
+            "accuracy": 0.9,
+            "experience when killed": 4,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 64,
+            "name": "Riding Bowman",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 20,
+            "low damage": 30,
+            "high damage": 40,
+            "accuracy": 0.9,
+            "experience when killed": 6,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 65,
+            "name": "Riding Amazonian Guard",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 20,
+            "low damage": 40,
+            "high damage": 60,
+            "accuracy": 0.9,
+            "experience when killed": 8,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 66,
+            "name": "Cataphract",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 20,
+            "low damage": 90,
+            "high damage": 90,
+            "accuracy": 1,
+            "experience when killed": 12,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 67,
+            "name": "Uproarious Bull",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 2000,
+            "low damage": 120,
+            "high damage": 120,
+            "accuracy": 1,
+            "experience when killed": 50
+        },
+        {
+            "id": 68,
+            "name": "Composite Bowman",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 20,
+            "low damage": 20,
+            "high damage": 40,
+            "accuracy": 0.8,
+            "experience when killed": 2
+        }
+    ]
+}

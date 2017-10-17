@@ -1,0 +1,117 @@
+{
+    "units": [
+        {
+            "id": 1,
+            "name": [ "Recruit", "r" ],
+            "faction": "common",
+            "class": "melee",
+            "initiative": "normal",
+            "hit points": 40,
+            "low damage": 15,
+            "high damage": 30,
+            "accuracy": 0.8,
+            "experience when killed": 2
+        },
+        {
+            "id": 2,
+            "name": [ "Militia", "m" ],
+            "faction": "common",
+            "class": "melee",
+            "initiative": "normal",
+            "hit points": 60,
+            "low damage": 20,
+            "high damage": 40,
+            "accuracy": 0.8,
+            "experience when killed": 9
+        },
+        {
+            "id": 3,
+            "name": [ "Soldier", "s" ],
+            "faction": "common",
+            "class": "melee",
+            "initiative": "normal",
+            "hit points": 90,
+            "low damage": 20,
+            "high damage": 40,
+            "accuracy": 0.85,
+            "experience when killed": 10
+        },
+        {
+            "id": 4,
+            "name": [ "Elite Soldier", "Elite", "e" ],
+            "faction": "common",
+            "class": "melee",
+            "initiative": "normal",
+            "hit points": 120,
+            "low damage": 20,
+            "high damage": 40,
+            "accuracy": 0.9,
+            "experience when killed": 20
+        },
+        {
+            "id": 5,
+            "name": [ "Cavalry", "c" ],
+            "faction": "common",
+            "class": "cavalry",
+            "initiative": "first strike",
+            "hit points": 5,
+            "low damage": 5,
+            "high damage": 10,
+            "accuracy": 0.8,
+            "experience when killed": 8,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 6,
+            "name": [ "Bowman", "b" ],
+            "faction": "common",
+            "class": "ranged",
+            "initiative": "normal",
+            "hit points": 10,
+            "low damage": 20,
+            "high damage": 40,
+            "accuracy": 0.8,
+            "experience when killed": 3,
+            "special abilities": [ "tower bonus" ]
+        },
+        {
+            "id": 7,
+            "name": [ "Longbowman", "lb" ],
+            "faction": "common",
+            "class": "ranged",
+            "initiative": "normal",
+            "hit points": 10,
+            "low damage": 30,
+            "high damage": 60,
+            "accuracy": 0.8,
+            "experience when killed": 8,
+            "special abilities": [ "tower bonus" ]
+        },
+        {
+            "id": 8,
+            "name": [ "Crossbowman", "a", "x", "xb" ],
+            "faction": "common",
+            "class": "ranged",
+            "initiative": "normal",
+            "hit points": 10,
+            "low damage": 45,
+            "high damage": 90,
+            "accuracy": 0.8,
+            "experience when killed": 20,
+            "special abilities": [ "tower bonus" ]
+        },
+        {
+            "id": 9,
+            "name": [ "Cannoneer", "k" ],
+            "faction": "common",
+            "class": "artillery",
+            "initiative": "last strike",
+            "hit points": 60,
+            "low damage": 60,
+            "high damage": 120,
+            "accuracy": 0.9,
+            "experience when killed": 30,
+            "special abilities": [ "tower bonus" ]
+        }
+    ]
+}

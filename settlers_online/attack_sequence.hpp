@@ -49,7 +49,7 @@ namespace ropufu
             /** Sets the destruction flag. */
             void start_destruction()
             {
-                if (this->m_is_destruction) throw std::logic_error("<start_destruction> cannot be called twice");
+                //if (this->m_is_destruction) throw std::logic_error("<start_destruction> cannot be called twice");
 
                 this->m_is_destruction = true;
                 this->m_round_index = 0;

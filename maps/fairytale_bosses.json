@@ -1,0 +1,179 @@
+{
+    "units": [
+        {
+            "id": 520,
+            "name": "Giant",
+            "class": "melee",
+            "initiative": "last strike",
+            "hit points": 160,
+            "low damage": 60,
+            "high damage": 90,
+            "accuracy": 0.95,
+            "splash chance": 1,
+            "experience when killed": 26
+        },
+        {
+            "id": 521,
+            "name": "Iron Fist",
+            "class": "melee",
+            "initiative": "first strike",
+            "hit points": 45000,
+            "low damage": 200,
+            "high damage": 250,
+            "accuracy": 0.85,
+            "splash chance": 1,
+            "experience when killed": 300
+        },
+        {
+            "id": 522,
+            "name": "Giant Bogor",
+            "class": "melee",
+            "initiative": "last strike",
+            "hit points": 90000,
+            "low damage": 100,
+            "high damage": 300,
+            "accuracy": 0.6,
+            "splash chance": 1,
+            "experience when killed": 400
+        },
+        {
+            "id": 523,
+            "name": "Giant Gogor",
+            "class": "melee",
+            "initiative": "last strike",
+            "hit points": 70000,
+            "low damage": 100,
+            "high damage": 250,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 350
+        },
+        {
+            "id": 539,
+            "name": "Cudgel Claus",
+            "class": "melee",
+            "initiative": "normal",
+            "hit points": 40000,
+            "low damage": 200,
+            "high damage": 300,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 250
+        },
+        {
+            "id": 540,
+            "name": "Evil King",
+            "class": "melee",
+            "initiative": "normal",
+            "hit points": 30000,
+            "low damage": 200,
+            "high damage": 300,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 800
+        },
+        {
+            "id": 541,
+            "name": "Assassin",
+            "class": "melee",
+            "initiative": "first strike",
+            "hit points": 30000,
+            "low damage": 200,
+            "high damage": 300,
+            "accuracy": 0.8,
+            "experience when killed": 350,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 542,
+            "name": "Greedy Inn-Keeper",
+            "class": "melee",
+            "initiative": "last strike",
+            "hit points": 50000,
+            "low damage": 1500,
+            "high damage": 2000,
+            "accuracy": 0.8,
+            "experience when killed": 950,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 543,
+            "name": "Rivaling Tailor",
+            "class": "melee",
+            "initiative": "last strike",
+            "hit points": 40000,
+            "low damage": 150,
+            "high damage": 250,
+            "accuracy": 0.75,
+            "experience when killed": 350,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 544,
+            "name": "Dark Magician",
+            "class": "melee",
+            "initiative": "normal",
+            "hit points": 30000,
+            "low damage": 2000,
+            "high damage": 2500,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 1000
+        },
+        {
+            "id": 1545,
+            "name": "Evil Queen",
+            "class": "melee",
+            "initiative": "normal",
+            "hit points": 95000,
+            "low damage": 400,
+            "high damage": 600,
+            "accuracy": 0.8,
+            "splash chance": 1
+        },
+        {
+            "id": 1551,
+            "name": "Pied Piper",
+            "class": "melee",
+            "initiative": "first strike",
+            "hit points": 55000,
+            "low damage": 200,
+            "high damage": 450,
+            "accuracy": 0.9,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 1552,
+            "name": "King of Rats",
+            "class": "melee",
+            "initiative": "last strike",
+            "hit points": 40000,
+            "low damage": 200,
+            "high damage": 800,
+            "accuracy": 0.6,
+            "splash chance": 1
+        },
+        {
+            "id": 1565,
+            "name": "Mayor",
+            "class": "melee",
+            "initiative": "normal",
+            "hit points": 95000,
+            "low damage": 400,
+            "high damage": 600,
+            "accuracy": 0.8,
+            "splash chance": 1
+        },
+        {
+            "id": 1566,
+            "name": "Evil Stepmother",
+            "class": "melee",
+            "initiative": "normal",
+            "hit points": 95000,
+            "low damage": 400,
+            "high damage": 600,
+            "accuracy": 0.8,
+            "splash chance": 1
+        }
+    ]
+}

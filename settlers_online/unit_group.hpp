@@ -19,7 +19,7 @@ namespace ropufu
 {
     namespace settlers_online
     {
-		/** Descriptor for groups of units. */
+        /** Descriptor for groups of units. */
         struct unit_group
         {
             friend struct combat_mechanics;
@@ -28,30 +28,30 @@ namespace ropufu
             unit_type m_type = {};
             std::size_t m_count = 0;             // Count of living units in the group.
             std::size_t m_count_at_snapshot = 0; // Count of living units in the group at the moment of latest \c snapshot.
-			std::size_t m_damage_taken = 0;             // Damage taken by the top unit.
+            std::size_t m_damage_taken = 0;             // Damage taken by the top unit.
             std::size_t m_damage_taken_at_snapshot = 0; // Damage taken by the top unit at the moment of latest \c snapshot.
-			std::int_fast32_t m_metagroup_id = 0; // An index for (hyper-)grouping purposes.
+            std::int_fast32_t m_metagroup_id = 0; // An index for (hyper-)grouping purposes.
 
         public:
             /** Default constructor intended for initializing arrays etc. */
             unit_group() noexcept { }
 
             /** Detailed constructor. */
-			unit_group(unit_type type, std::size_t count, std::int_fast32_t metagroup_id = 0) noexcept
-				: m_type(type), m_count(count), m_count_at_snapshot(count), m_metagroup_id(metagroup_id)
-			{
-			}
+            unit_group(unit_type type, std::size_t count, std::int_fast32_t metagroup_id = 0) noexcept
+                : m_type(type), m_count(count), m_count_at_snapshot(count), m_metagroup_id(metagroup_id)
+            {
+            }
 
             /** Common unit type for the group. */
             const unit_type& type() const noexcept { return this->m_type; }
             /** Common unit type for the group. */
-			void set_type(const unit_type& value) noexcept { this->m_type = value; }
+            void set_type(const unit_type& value) noexcept { this->m_type = value; }
 
             /** Indicates if the group is empty. */
-			bool empty() const noexcept { return this->m_count == 0; }
+            bool empty() const noexcept { return this->m_count == 0; }
 
             /** Number of units in the group. */
-			std::size_t count() const noexcept { return this->m_count; }
+            std::size_t count() const noexcept { return this->m_count; }
 
             /** Number of units in the group at the moment of latest \c snapshot. */
             std::size_t count_at_snapshot() const noexcept { return this->m_count_at_snapshot; }
@@ -63,7 +63,7 @@ namespace ropufu
             std::size_t damage_taken_at_snapshot() const noexcept { return this->m_damage_taken_at_snapshot; }
 
             /** Index of the sub-group the group is in. */
-			std::int_fast32_t metagroup_id() const noexcept { return this->m_metagroup_id; }
+            std::int_fast32_t metagroup_id() const noexcept { return this->m_metagroup_id; }
 
             /** Indicates whether the group has been changed since the latest \c snapshot. */
             bool is_dirty() const noexcept
@@ -118,42 +118,42 @@ namespace ropufu
             /** @brief Heals the top unit.
              *  @remark Does nothing if the group is empty.
              */
-			void heal_top() noexcept
-			{
-				this->m_damage_taken = 0;
-			}
+            void heal_top() noexcept
+            {
+                this->m_damage_taken = 0;
+            }
 
             /** @brief Damages the top unit without splash.
              *  @remark Excess damage will be ignored.
              *  @remark Does nothing if the group is empty.
              */
-			bool try_kill_top(std::size_t no_splash_damage) noexcept
-			{
-				if (this->m_count == 0) return false;
+            bool try_kill_top(std::size_t no_splash_damage) noexcept
+            {
+                if (this->m_count == 0) return false;
 
-				this->m_damage_taken += no_splash_damage;
-				if (this->m_damage_taken >= this->m_type.hit_points())
-				{
-					this->m_damage_taken = 0;
-					this->m_count--;
+                this->m_damage_taken += no_splash_damage;
+                if (this->m_damage_taken >= this->m_type.hit_points())
+                {
+                    this->m_damage_taken = 0;
+                    this->m_count--;
                     return true;
-				}
+                }
                 return false;
-			}
+            }
 
             /** @brief Kill the top unit in the group.
              *  @remark Does nothing if the group is empty.
              */
-			void kill_top() noexcept
-			{
-				if (this->m_count == 0) return;
+            void kill_top() noexcept
+            {
+                if (this->m_count == 0) return;
 
-				this->m_damage_taken = 0;
-				this->m_count--;
-			}
+                this->m_damage_taken = 0;
+                this->m_count--;
+            }
 
-			/** Kill all units in the group. */
-			void kill_all() noexcept
+            /** Kill all units in the group. */
+            void kill_all() noexcept
             {
                 this->m_damage_taken = 0;
                 this->m_count = 0;
@@ -162,14 +162,14 @@ namespace ropufu
             /** @brief Kills \p count units (top unit being the first to die).
              *  @remark Equivalent to \c kill_all if \p count exceeds the number of units.
              */
-			void kill(std::size_t count) noexcept
-			{
-				if (count == 0) return;
-				if (count > this->m_count) count = this->m_count;
+            void kill(std::size_t count) noexcept
+            {
+                if (count == 0) return;
+                if (count > this->m_count) count = this->m_count;
 
-				this->m_damage_taken = 0;
-				this->m_count -= count;
-			}
+                this->m_damage_taken = 0;
+                this->m_count -= count;
+            }
             
             /** @brief Checks two groups for equality.
              *  @remark Ignores \c snapshots.
@@ -177,9 +177,9 @@ namespace ropufu
             bool operator ==(const unit_group& other) const noexcept
             {
                 return 
-					this->m_type == other.m_type &&
-					this->m_count == other.m_count &&
-					this->m_damage_taken == other.m_damage_taken &&
+                    this->m_type == other.m_type &&
+                    this->m_count == other.m_count &&
+                    this->m_damage_taken == other.m_damage_taken &&
                     this->m_metagroup_id == other.m_metagroup_id;
             }
             
@@ -193,7 +193,7 @@ namespace ropufu
 
             friend std::ostream& operator <<(std::ostream& os, const unit_group& that)
             {
-                os << that.m_count << " " << that.m_type.name();
+                os << that.m_count << " " << that.m_type.names().front();
                 return os;
             }
         };
@@ -210,14 +210,14 @@ namespace std
 
         result_type operator()(const argument_type& x) const
         {
-			std::hash<std::int_fast32_t> int_fast32_hash = {};
-			std::hash<std::size_t> size_hash = {};
+            std::hash<std::int_fast32_t> int_fast32_hash = {};
+            std::hash<std::size_t> size_hash = {};
 
-			return
-				std::hash<ropufu::settlers_online::unit_type>()(x.type()) ^
-				size_hash(x.count()) ^
-				size_hash(x.damage_taken()) ^
-				int_fast32_hash(x.metagroup_id());
+            return
+                std::hash<ropufu::settlers_online::unit_type>()(x.type()) ^
+                size_hash(x.count()) ^
+                size_hash(x.damage_taken()) ^
+                int_fast32_hash(x.metagroup_id());
         }
     };
 }

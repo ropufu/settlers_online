@@ -1,0 +1,124 @@
+{
+    "units": [
+        {
+            "id": 848,
+            "name": "Shrewd Thief",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 1000,
+            "low damage": 250,
+            "high damage": 500,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 52
+        },
+        {
+            "id": 850,
+            "name": "Scarred Thief",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 500,
+            "low damage": 150,
+            "high damage": 300,
+            "accuracy": 0.8,
+            "experience when killed": 39,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 852,
+            "name": "Smart Thief",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 5000,
+            "low damage": 500,
+            "high damage": 1000,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 200
+        },
+        {
+            "id": 854,
+            "name": "Snooty Thief",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 150000,
+            "low damage": 500,
+            "high damage": 1000,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 5000
+        },
+        {
+            "id": 856,
+            "name": "Silly Thief",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 50000,
+            "low damage": 2000,
+            "high damage": 4000,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 1800
+        },
+        {
+            "id": 862,
+            "name": "Greedy Thief",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 10000,
+            "low damage": 2500,
+            "high damage": 5000,
+            "accuracy": 0.8,
+            "experience when killed": 470,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 864,
+            "name": "Mysterious Thief",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 20000,
+            "low damage": 1000,
+            "high damage": 2000,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 740
+        },
+        {
+            "id": 865,
+            "name": "Grayed Thief",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 500,
+            "low damage": 375,
+            "high damage": 750,
+            "accuracy": 0.8,
+            "experience when killed": 53,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 866,
+            "name": "Treacherous Thief",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 50000,
+            "low damage": 250,
+            "high damage": 500,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 1700
+        },
+        {
+            "id": 867,
+            "name": "Sneaking Thief",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 1000,
+            "low damage": 250,
+            "high damage": 500,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 62
+        }
+    ]
+}

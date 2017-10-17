@@ -15,7 +15,7 @@
             "options": {
                 "cwd": "${workspaceRoot}/tests"
             },
-            "args": ["-f", "Makefile.mac"],
+            "args": ["-f", "Makefile"],
             // Use the standard less compilation problem matcher.
             "problemMatcher": {
                 "owner": "cpp",

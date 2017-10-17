@@ -1,0 +1,74 @@
+{
+    "units": [
+        {
+            "id": 31,
+            "name": "Deckscrubber",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 15,
+            "low damage": 10,
+            "high damage": 15,
+            "accuracy": 0.5,
+            "experience when killed": 1
+        },
+        {
+            "id": 32,
+            "name": "Sabrerattler",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 30,
+            "low damage": 10,
+            "high damage": 20,
+            "accuracy": 0.5,
+            "experience when killed": 2
+        },
+        {
+            "id": 33,
+            "name": "Crazy Cook",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 5000,
+            "low damage": 200,
+            "high damage": 300,
+            "accuracy": 0.66,
+            "splash chance": 1,
+            "experience when killed": 200
+        },
+        {
+            "id": 36,
+            "name": "Gunman",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 5,
+            "low damage": 20,
+            "high damage": 30,
+            "accuracy": 0.5,
+            "experience when killed": 2,
+            "special abilities": [ "tower bonus" ]
+        },
+        {
+            "id": 37,
+            "name": "Knifethrower",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 5,
+            "low damage": 10,
+            "high damage": 20,
+            "accuracy": 0.5,
+            "experience when killed": 1,
+            "special abilities": [ "tower bonus" ]
+        },
+        {
+            "id": 38,
+            "name": "Petty Officer",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 60,
+            "low damage": 40,
+            "high damage": 60,
+            "accuracy": 0.7,
+            "experience when killed": 6,
+            "special abilities": [ "attack weakest target" ]
+        }
+    ]
+}

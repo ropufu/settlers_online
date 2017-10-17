@@ -1,0 +1,124 @@
+{
+    "units": [
+        {
+            "id": 880,
+            "name": "Boulder Worm",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 200000,
+            "low damage": 150,
+            "high damage": 300,
+            "accuracy": 0.8,
+            "experience when killed": 6600,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 882,
+            "name": "Giant Bat",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 150000,
+            "low damage": 450,
+            "high damage": 900,
+            "accuracy": 0.9,
+            "splash chance": 1,
+            "experience when killed": 5000
+        },
+        {
+            "id": 888,
+            "name": "Oasis Guardian",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 40000,
+            "low damage": 5000,
+            "high damage": 10000,
+            "accuracy": 0.9,
+            "splash chance": 1,
+            "experience when killed": 1700
+        },
+        {
+            "id": 890,
+            "name": "Hungry Blossom",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 10000,
+            "low damage": 2250,
+            "high damage": 4500,
+            "accuracy": 0.9,
+            "experience when killed": 680,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 891,
+            "name": "Fierce Blossom",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 15000,
+            "low damage": 2750,
+            "high damage": 5500,
+            "accuracy": 0.9,
+            "experience when killed": 930,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 892,
+            "name": "Bulbous Blossom",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 20000,
+            "low damage": 3250,
+            "high damage": 6500,
+            "accuracy": 0.9,
+            "experience when killed": 920,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 902,
+            "name": "Informant",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 50000,
+            "low damage": 4500,
+            "high damage": 9000,
+            "accuracy": 0.9,
+            "splash chance": 1,
+            "experience when killed": 2000
+        },
+        {
+            "id": 904,
+            "name": "Giant Sea Snake",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 700000,
+            "low damage": 300,
+            "high damage": 600,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 23000
+        },
+        {
+            "id": 906,
+            "name": "Grumpy Guard",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 25000,
+            "low damage": 500,
+            "high damage": 1000,
+            "accuracy": 0.9,
+            "experience when killed": 910,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 908,
+            "name": "Insane Guard",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 50000,
+            "low damage": 250,
+            "high damage": 500,
+            "accuracy": 0.9,
+            "experience when killed": 1700,
+            "special abilities": [ "attack weakest target" ]
+        }
+    ]
+}

@@ -1,0 +1,133 @@
+{
+    "units": [
+        {
+            "id": 11,
+            "name": "Wild Mary",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 60000,
+            "low damage": 740,
+            "high damage": 800,
+            "accuracy": 0.5,
+            "splash chance": 1,
+            "experience when killed": 430
+        },
+        {
+            "id": 12,
+            "name": "Chuck",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 9000,
+            "low damage": 2000,
+            "high damage": 2500,
+            "accuracy": 0.5,
+            "splash chance": 1,
+            "experience when killed": 250
+        },
+        {
+            "id": 13,
+            "name": "Metal Tooth",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 11000,
+            "low damage": 250,
+            "high damage": 500,
+            "accuracy": 0.5,
+            "splash chance": 1,
+            "experience when killed": 160
+        },
+        {
+            "id": 14,
+            "name": "Scavenger",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 40,
+            "low damage": 15,
+            "high damage": 30,
+            "accuracy": 0.6,
+            "experience when killed": 4
+        },
+        {
+            "id": 15,
+            "name": "Thug",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 60,
+            "low damage": 20,
+            "high damage": 40,
+            "accuracy": 0.6,
+            "experience when killed": 3
+        },
+        {
+            "id": 16,
+            "name": "Guard Dog",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 5,
+            "low damage": 5,
+            "high damage": 10,
+            "accuracy": 0.6,
+            "experience when killed": 4,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 17,
+            "name": "Roughneck",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 90,
+            "low damage": 20,
+            "high damage": 40,
+            "accuracy": 0.6,
+            "experience when killed": 6
+        },
+        {
+            "id": 18,
+            "name": "Stone Thrower",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 10,
+            "low damage": 20,
+            "high damage": 40,
+            "accuracy": 0.6,
+            "experience when killed": 3,
+            "special abilities": [ "tower bonus" ]
+        },
+        {
+            "id": 19,
+            "name": "Ranger",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 10,
+            "low damage": 30,
+            "high damage": 60,
+            "accuracy": 0.6,
+            "experience when killed": 4,
+            "special abilities": [ "tower bonus" ]
+        },
+        {
+            "id": 20,
+            "name": "Skunk",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 5000,
+            "low damage": 1,
+            "high damage": 100,
+            "accuracy": 0.5,
+            "splash chance": 1,
+            "experience when killed": 200
+        },
+        {
+            "id": 21,
+            "name": "One-Eyed Bert",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 6000,
+            "low damage": 300,
+            "high damage": 500,
+            "accuracy": 0.5,
+            "splash chance": 1,
+            "experience when killed": 100
+        }
+    ]
+}

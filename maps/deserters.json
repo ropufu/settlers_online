@@ -1,0 +1,120 @@
+{
+    "units": [
+        {
+            "id": 40,
+            "name": "Recruit Deserter",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 40,
+            "low damage": 15,
+            "high damage": 30,
+            "accuracy": 0.6,
+            "experience when killed": 2
+        },
+        {
+            "id": 41,
+            "name": "Militia Deserter",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 60,
+            "low damage": 20,
+            "high damage": 40,
+            "accuracy": 0.6,
+            "experience when killed": 4
+        },
+        {
+            "id": 42,
+            "name": "Cavalry Deserter",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 5,
+            "low damage": 5,
+            "high damage": 10,
+            "accuracy": 0.6,
+            "experience when killed": 4,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 43,
+            "name": "Soldier Deserter",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 90,
+            "low damage": 20,
+            "high damage": 40,
+            "accuracy": 0.65,
+            "experience when killed": 6
+        },
+        {
+            "id": 44,
+            "name": "Elite Deserter",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 120,
+            "low damage": 20,
+            "high damage": 40,
+            "accuracy": 0.7,
+            "experience when killed": 8
+        },
+        {
+            "id": 45,
+            "name": "Bowman Deserter",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 10,
+            "low damage": 20,
+            "high damage": 40,
+            "accuracy": 0.6,
+            "experience when killed": 3,
+            "special abilities": [ "tower bonus" ]
+        },
+        {
+            "id": 46,
+            "name": "Longbowman Deserter",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 10,
+            "low damage": 30,
+            "high damage": 60,
+            "accuracy": 0.6,
+            "experience when killed": 5,
+            "special abilities": [ "tower bonus" ]
+        },
+        {
+            "id": 47,
+            "name": "Crossbowman Deserter",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 10,
+            "low damage": 45,
+            "high damage": 90,
+            "accuracy": 0.6,
+            "experience when killed": 7,
+            "special abilities": [ "tower bonus" ]
+        },
+        {
+            "id": 48,
+            "name": "Cannoneer Deserter",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 60,
+            "low damage": 60,
+            "high damage": 120,
+            "accuracy": 0.7,
+            "experience when killed": 15,
+            "special abilities": [ "tower bonus" ]
+        },
+        {
+            "id": 49,
+            "name": "Sir Robin",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 12000,
+            "low damage": 200,
+            "high damage": 600,
+            "accuracy": 0.8,
+            "experience when killed": 200,
+            "special abilities": [ "attack weakest target" ]
+        }
+    ]
+}

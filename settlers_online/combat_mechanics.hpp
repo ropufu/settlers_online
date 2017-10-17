@@ -6,13 +6,16 @@
 
 #include "army.hpp"
 #include "attack_sequence.hpp"
-#include "special_abilities.hpp"
+#include "battle_phase.hpp"
+#include "combat_result.hpp"
+#include "enum_array.hpp"
+#include "special_ability.hpp"
 #include "typedef.hpp"
 #include "unit_category.hpp"
 
-#include <cstddef>
-#include <stdexcept>
-#include <vector>
+#include <cstddef> // std::size_t
+#include <stdexcept> // std::logic_error
+#include <vector> // std::vector
 
 namespace ropufu
 {
@@ -21,10 +24,21 @@ namespace ropufu
         struct combat_mechanics
         {
         private:
+            template <typename t_data_type>
+            using phase_array = enum_array<battle_phase, t_data_type>;
+
+            static constexpr std::size_t count_phases = enum_capacity<battle_phase>::value;
+
             army m_left;
             army m_right;
+            std::vector<std::size_t> m_left_counts = { };
+            std::vector<std::size_t> m_right_counts = { };
+            phase_array<std::vector<std::size_t>> left_group_indices = { };
+            phase_array<std::vector<std::size_t>> right_group_indices = { };
+            combat_result m_outcome = { };
             bool m_is_left_conditioned = false;
             bool m_is_right_conditioned = false;
+            bool m_is_in_destruction_phase = false;
 
         public:
             /** Adjusts \p damage by \p factor (multiplicative). */
@@ -50,13 +64,81 @@ namespace ropufu
                 : m_left(left), m_right(right)
             {
                 this->condition();
+                this->m_left_counts = left.counts_by_type();
+                this->m_right_counts = right.counts_by_type();
+                combat_mechanics::build_phase_grouping(left, left_group_indices);
+                combat_mechanics::build_phase_grouping(right, right_group_indices);
+            }
+
+            void calculate_losses(std::vector<std::size_t>& left_losses, std::vector<std::size_t>& right_losses) const
+            {
+                left_losses = this->m_left_counts;
+                right_losses = this->m_right_counts;
+                aftermath::algebra::elementwise::subtract_assign(left_losses, this->m_left.counts_by_type());
+                aftermath::algebra::elementwise::subtract_assign(right_losses, this->m_right.counts_by_type());
+            }
+
+            /** Runs the combat sequence.
+             *  @todo Think of merging the two sequencers into one, to reduce the chances of errors.
+             */
+            template <typename t_left_sequence_type, typename t_right_sequence_type>
+            combat_result execute(attack_sequence<t_left_sequence_type>& left_sequencer, attack_sequence<t_right_sequence_type>& right_sequencer)
+            {
+                if (this->m_is_in_destruction_phase) throw std::logic_error("<execute> cannot be called twice.");
+                
+                double left_frenzy_factor = 1.0;
+                double right_frenzy_factor = 1.0;
+                std::size_t count_rounds = 0;
+                while (this->m_left.count_units() > 0 && this->m_right.count_units() > 0)
+                {
+                    for (std::size_t k = 0; k < count_phases; k++)
+                    {
+                        battle_phase phase = static_cast<battle_phase>(k);
+                        for (std::size_t i : this->left_group_indices[phase]) combat_mechanics::hit(this->m_right, this->m_left[i], left_frenzy_factor, left_sequencer);
+                        for (std::size_t i : this->right_group_indices[phase]) combat_mechanics::hit(this->m_left, this->m_right[i], right_frenzy_factor, right_sequencer);
+
+                        this->m_left.snapshot();
+                        this->m_right.snapshot();
+                        left_sequencer.next_phase();
+                        right_sequencer.next_phase();
+                    }
+
+                    left_frenzy_factor *= (1 + this->m_left.frenzy_bonus());
+                    right_frenzy_factor *= (1 + this->m_right.frenzy_bonus());
+                    left_sequencer.next_round();
+                    right_sequencer.next_round();
+                    ++count_rounds;
+                }
+                mask_type left_alive_mask = this->m_left.compute_alive_mask();
+                mask_type right_alive_mask = this->m_right.compute_alive_mask();
+
+                this->m_is_in_destruction_phase = true;
+                this->m_outcome = combat_result(left_alive_mask, right_alive_mask, count_rounds);
+                return this->m_outcome;
+            }
+
+            /** @brief Destruvtion sequence.
+             *  @remark Can be called any number of times. Could be beneficial, since destruction sequence is a lot simpler (faster) than execution.
+             */
+            template <typename t_left_sequence_type, typename t_right_sequence_type>
+            std::size_t destruct(attack_sequence<t_left_sequence_type>& left_sequencer, attack_sequence<t_right_sequence_type>& right_sequencer) const
+            {
+                if (!this->m_is_in_destruction_phase) throw std::logic_error("<execute> has to be called prior to destruction phase.");
+                left_sequencer.start_destruction();
+                right_sequencer.start_destruction();
+
+                if (this->m_outcome.is_left_victorious())
+                    return combat_mechanics::destruct(this->m_right, this->m_left.by_mask(this->m_outcome.left_alive_mask()), left_sequencer);
+                else if (this->m_outcome.is_rihgt_victorious())
+                    return combat_mechanics::destruct(this->m_left, this->m_right.by_mask(this->m_outcome.right_alive_mask()), right_sequencer);
+                else return 0;
             }
 
         private:
             /** @brief Inflicts \p pure_damage splash onto \p defending_group, taking into account \p damage_factor damage multiplier.
              *  @return Remaining \p pure_damage.
              */
-            static double splash(std::size_t pure_damage, double damage_factor, unit_group& defending_group);
+            static std::size_t splash(std::size_t pure_damage, double damage_factor, unit_group& defending_group);
 
             /** Inflicts the reduced damage, \p reduced_damage, onto \p defender, assuming the attaker always deals splash damage and there is no effective tower bonus. */
             static void uniform_splash(std::size_t reduced_damage, army& defender, const aftermath::algebra::permutation& defender_ordering);
@@ -82,8 +164,8 @@ namespace ropufu
                 // Proceed to next attaking unit.
                 std::size_t attacking_units_remaining = attacking_group.count_at_snapshot() - attacking_unit_index;
 
-                std::size_t effective_min_damage = damage_cast(attacker_t.min_damage(), damage_factor); // Potential effective minumum damage dealt by one attacking unit.
-                std::size_t effective_max_damage = damage_cast(attacker_t.max_damage(), damage_factor); // Potential effective mamimum damage dealt by one attacking unit.
+                std::size_t effective_min_damage = damage_cast(attacker_t.low_damage(), damage_factor); // Potential effective minumum damage dealt by one attacking unit.
+                std::size_t effective_max_damage = damage_cast(attacker_t.high_damage(), damage_factor); // Potential effective mamimum damage dealt by one attacking unit.
                 // Loop through attacking units.
                 while (attacking_units_remaining > 0)
                 {
@@ -99,7 +181,7 @@ namespace ropufu
                     attacking_units_remaining -= count_attackers;
 
                     std::size_t effective_damage = effective_max_damage * count_high_damage + effective_min_damage * (count_attackers - count_high_damage); // Effective damage dealt by the attacker.
-                    std::size_t pure_damage = attacker_t.max_damage() * count_high_damage + attacker_t.min_damage() * (count_attackers - count_high_damage); // Pure damage dealt by the attacker.
+                    std::size_t pure_damage = attacker_t.high_damage() * count_high_damage + attacker_t.low_damage() * (count_attackers - count_high_damage); // Pure damage dealt by the attacker.
                     std::size_t damage_required = inverse_damage_cast(hit_points, damage_factor); // Pure damage required to kill the defending unit.
 
                     // In general, it is not(!) enough to check (effective_damage > hit_points).
@@ -147,6 +229,7 @@ namespace ropufu
                         }
                     }
                 }
+                return attacking_unit_index;
             }
 
             /** Initiates and attack on this army (defender) by a \c unit_group (attacker). */
@@ -157,13 +240,13 @@ namespace ropufu
                 const unit_type& attacker_t = attacking_group.type();
 
                 // Damage factors.
-                bool do_ignore_tower_bonus = attacker_t.has(special_abilities::ignore_tower_bonus);
+                bool do_ignore_tower_bonus = attacker_t.has(special_ability::ignore_tower_bonus);
                 bool has_effective_tower_bonus = (!do_ignore_tower_bonus && defender.has_tower_bonus());
                 double damage_factor_normal = frenzy_factor * (1.0 - defender.direct_damage_reduction());
                 double damage_factor_in_tower = frenzy_factor * (1.0 - defender.direct_damage_reduction()) * (1.0 - defender.tower_damage_reduction());
 
                 // Figure out which ordering to use.
-                bool do_attack_weakest_target = defender.do_intercept() ? false : attacker_t.do_attack_weakest_target();
+                bool do_attack_weakest_target = defender.do_intercept() ? false : attacker_t.has(special_ability::attack_weakest_target);
                 const aftermath::algebra::permutation& defender_ordering = do_attack_weakest_target ? defender.order_by_hp() : defender.order_by_id();
 
                 // Optimize in the uniform all splash damage case.
@@ -174,8 +257,8 @@ namespace ropufu
                     sequencer.next_unit(count_attackers);
 
                     std::size_t total_reduced_damage = 
-                        damage_cast(attacker_t.min_damage(), damage_factor_normal) * (count_attackers - count_high_damage) +
-                        damage_cast(attacker_t.max_damage(), damage_factor_normal) * count_high_damage;
+                        damage_cast(attacker_t.low_damage(), damage_factor_normal) * (count_attackers - count_high_damage) +
+                        damage_cast(attacker_t.high_damage(), damage_factor_normal) * count_high_damage;
 
                     combat_mechanics::uniform_splash(total_reduced_damage, defender, defender_ordering);
                     return;
@@ -188,7 +271,7 @@ namespace ropufu
                 {
                     unit_group& defending_group = defender_groups[j];
                     const unit_type& defender_t = defending_group.type();
-                    bool do_tower_bonus = (!do_ignore_tower_bonus && defender_t.has(special_abilities::tower_bonus));
+                    bool do_tower_bonus = (!do_ignore_tower_bonus && defender_t.has(special_ability::tower_bonus));
                     double damage_factor = do_tower_bonus ? damage_factor_in_tower : damage_factor_normal;
                     // First take care of the overshoot damage.
                     overshoot_damage = combat_mechanics::splash(overshoot_damage, damage_factor, defending_group);
@@ -198,19 +281,19 @@ namespace ropufu
                     if (count_alive == 0) continue;
 
                     // Optimize when attacking units with low hit points: each non-splash hit will always kill exactly 1 defending unit.
-                    std::size_t effective_min_damage = damage_cast(attacker_t.min_damage(), damage_factor);
+                    std::size_t effective_min_damage = damage_cast(attacker_t.low_damage(), damage_factor);
                     bool is_one_to_one = (effective_min_damage >= defender_t.hit_points()) && (attacker_t.splash_chance() == 0.0);
                     if (is_one_to_one) attacking_unit_index = combat_mechanics::one_to_one(defending_group, attacking_group, attacking_unit_index);
-                    else attacking_unit_index = hit(defending_group, attacking_group, attacking_unit_index, sequencer);
+                    else attacking_unit_index = combat_mechanics::hit(overshoot_damage, defending_group, attacking_group, attacking_unit_index, damage_factor, sequencer);
 
                     if (attacking_unit_index == attacking_group.count_at_snapshot()) break;
-                    if (attacking_unit_index > attacking_group.count_at_snapshot()) throw std::logic_error("<attacking_unit_index> overflow");
+                    if (attacking_unit_index > attacking_group.count_at_snapshot()) throw std::logic_error("<attacking_unit_index> overflow.");
                 }
             }
 
             /** Destruct the army's camp by a surviving army (attacker). */
             template <typename t_sequence_type>
-            std::size_t destruct(army& defender, const std::vector<unit_group>& attacker, attack_sequence<t_sequence_type>& sequencer) const
+            static std::size_t destruct(const army& defender, const std::vector<unit_group>& attacker, attack_sequence<t_sequence_type>& sequencer)
             {
                 if (attacker.empty()) return 0;
 
@@ -225,7 +308,7 @@ namespace ropufu
                         bool do_high_damage = sequencer.peek_do_high_damage(t);
                         sequencer.next_unit();
 
-                        std::size_t damage = do_high_damage ? t.max_damage() : t.min_damage();
+                        std::size_t damage = do_high_damage ? t.high_damage() : t.low_damage();
                         if (t.category() == unit_category::artillery) damage *= 2;
 
                         if (camp_hit_points < damage) camp_hit_points = 0;
@@ -233,7 +316,7 @@ namespace ropufu
                     }
                     count_rounds++;
                 }
-                defender.set_camp_hit_points(camp_hit_points);
+                //defender.set_camp_hit_points(camp_hit_points);
                 return count_rounds;
             }
 
@@ -242,20 +325,28 @@ namespace ropufu
              */
             void condition()
             {
-                if (this->m_is_left_conditioned || this->m_is_right_conditioned) throw std::logic_error("<condition> cannot be called twice");
-
-                this->m_is_left_conditioned = true;
-                this->m_is_right_conditioned = true;
+                if (this->m_is_left_conditioned || this->m_is_right_conditioned) throw std::logic_error("<condition> cannot be called twice.");
 
                 this->condition_defender(this->m_left, this->m_right);
                 this->condition_defender(this->m_right, this->m_left);
+
+                this->m_is_left_conditioned = true;
+                this->m_is_right_conditioned = true;
             }
 
             /** Conditions the \p defender against \p attacker. */
             static void condition_defender(army& defender, const army& attacker);
+
+            static void build_phase_grouping(const army& attacker, phase_array<std::vector<std::size_t>>& group_indices) noexcept
+            {
+                for (std::size_t i = 0; i < attacker.count_groups(); i++)
+                {
+                    for (battle_phase phase : attacker[i].type().attack_phases()) group_indices[phase].push_back(i);
+                }
+            }
         };
 
-        double combat_mechanics::splash(std::size_t pure_damage, double damage_factor, unit_group& defending_group)
+        std::size_t combat_mechanics::splash(std::size_t pure_damage, double damage_factor, unit_group& defending_group)
         {
             if (pure_damage == 0) return 0;
             // Total hit points in the defending group.
@@ -326,20 +417,20 @@ namespace ropufu
                 unit_category cat = t.category();
 
                 std::size_t hit_points = t.hit_points();
-                std::size_t min_damage = t.min_damage() + defender.min_damage_bonus_for(cat);
-                std::size_t max_damage = t.max_damage() + defender.max_damage_bonus_for(cat);
+                std::size_t low_damage = t.low_damage() + defender.low_damage_bonus_for(cat);
+                std::size_t high_damage = t.high_damage() + defender.high_damage_bonus_for(cat);
                 double accuracy = t.accuracy() + defender.accuracy_bonus_for(cat);
                 double splash_chance = t.splash_chance() + defender.splash_bonus_for(cat);
 
-                if (defender.do_explosive_ammunition() && (cat == unit_category::ranged)) t.set_do_attack_weakest_target(true);
-                if (attacker.do_intercept()) t.set_do_attack_weakest_target(false);
+                if (defender.do_explosive_ammunition() && (cat == unit_category::ranged)) t.set_ability(special_ability::attack_weakest_target, true);
+                if (attacker.do_intercept()) t.set_ability(special_ability::attack_weakest_target, false);
 
-                if (t.has(special_abilities::boss)) hit_points = hit_points_cast(hit_points, 1.0 - attacker.boss_health_reduction());
+                if (t.has(special_ability::boss)) hit_points = hit_points_cast(hit_points, 1.0 - attacker.boss_health_reduction());
 
                 if (attacker.do_dazzle()) accuracy = 0.0;
                 if (accuracy > 1.0) accuracy = 1.0;
 
-                t.set_damage(min_damage, max_damage, accuracy, splash_chance);
+                t.set_damage(low_damage, high_damage, accuracy, splash_chance);
                 t.set_hit_points(hit_points);
                 g.set_type(t);
             }

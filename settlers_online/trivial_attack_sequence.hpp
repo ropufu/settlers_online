@@ -20,7 +20,6 @@ namespace ropufu
             using type = trivial_attack_sequence<is_always_high, is_always_splash>;
             using base_type = attack_sequence<type>;
 
-        private:
             /** @brief Indicates whether the current unit will do high damage.
              *  @param unit Type of attacking unit.
              */

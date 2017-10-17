@@ -14,8 +14,8 @@ namespace ropufu
     namespace settlers_online
     {
         static constexpr std::size_t byte_size_in_bits = 8;
-		// The maximum number of <unit_group_bluepring> stored in an army.
-		static constexpr std::size_t army_capacity = byte_size_in_bits * sizeof(mask_type);
+        // The maximum number of <unit_group_bluepring> stored in an army.
+        static constexpr std::size_t army_capacity = byte_size_in_bits * sizeof(mask_type);
 
         struct combat_result
         {
@@ -33,20 +33,20 @@ namespace ropufu
 
             }
 
-			bool is_left_victorious() const { return this->m_left_alive_mask != 0; }
+            bool is_left_victorious() const { return this->m_left_alive_mask != 0; }
 
-			bool is_rihgt_victorious() const { return this->m_right_alive_mask != 0; }
+            bool is_rihgt_victorious() const { return this->m_right_alive_mask != 0; }
 
-			mask_type left_alive_mask() const { return this->m_left_alive_mask; }
+            mask_type left_alive_mask() const { return this->m_left_alive_mask; }
 
-			mask_type right_alive_mask() const { return this->m_right_alive_mask; }
+            mask_type right_alive_mask() const { return this->m_right_alive_mask; }
 
-			std::size_t number_of_rounds() const { return this->m_number_of_rounds; }
+            std::size_t number_of_rounds() const { return this->m_number_of_rounds; }
 
             bool operator ==(const combat_result& other) const
             {
                 return
-					this->m_left_alive_mask == other.m_left_alive_mask &&
+                    this->m_left_alive_mask == other.m_left_alive_mask &&
                     this->m_right_alive_mask == other.m_right_alive_mask &&
                     this->m_number_of_rounds == other.m_number_of_rounds;
             }
@@ -75,13 +75,13 @@ namespace std
 
         result_type operator()(const argument_type& x) const
         {
-			std::hash<ropufu::settlers_online::mask_type> mask_hash = {};
-			std::hash<std::size_t> size_hash = {};
+            std::hash<ropufu::settlers_online::mask_type> mask_hash = {};
+            std::hash<std::size_t> size_hash = {};
 
             return
-				mask_hash(x.left_alive_mask()) ^
-				mask_hash(x.right_alive_mask()) ^
-				size_hash(x.number_of_rounds());
+                mask_hash(x.left_alive_mask()) ^
+                mask_hash(x.right_alive_mask()) ^
+                size_hash(x.number_of_rounds());
         }
     };
 }

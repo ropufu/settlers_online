@@ -1,0 +1,136 @@
+{
+    "units": [
+        {
+            "id": 810,
+            "name": "Sailor",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 100,
+            "low damage": 50,
+            "high damage": 100,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 21
+        },
+        {
+            "id": 811,
+            "name": "Battle Hardened Sailor",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 200,
+            "low damage": 25,
+            "high damage": 50,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 26
+        },
+        {
+            "id": 812,
+            "name": "Mounted Sailor",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 50,
+            "low damage": 35,
+            "high damage": 70,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 17
+        },
+        {
+            "id": 813,
+            "name": "Boatswain",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 40,
+            "low damage": 25,
+            "high damage": 50,
+            "accuracy": 0.8,
+            "experience when killed": 15,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 814,
+            "name": "Petty Officer Second Class",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 70,
+            "low damage": 35,
+            "high damage": 70,
+            "accuracy": 0.8,
+            "experience when killed": 17,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 815,
+            "name": "Cannon Master",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 100,
+            "low damage": 100,
+            "high damage": 200,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 27
+        },
+        {
+            "id": 868,
+            "name": "Bandit Lord",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 30000,
+            "low damage": 3500,
+            "high damage": 7000,
+            "accuracy": 0.9,
+            "experience when killed": 1400,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 894,
+            "name": "Steersman",
+            "class": "unknown",
+            "initiative": "normal",
+            "hit points": 250000,
+            "low damage": 250,
+            "high damage": 500,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 8300
+        },
+        {
+            "id": 896,
+            "name": "Mutineer",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 5000,
+            "low damage": 2500,
+            "high damage": 5000,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 450
+        },
+        {
+            "id": 898,
+            "name": "Captain",
+            "class": "unknown",
+            "initiative": "last strike",
+            "hit points": 10000,
+            "low damage": 4000,
+            "high damage": 8000,
+            "accuracy": 0.8,
+            "splash chance": 1,
+            "experience when killed": 560
+        },
+        {
+            "id": 878,
+            "name": "Grumpy Parrot",
+            "class": "unknown",
+            "initiative": "first strike",
+            "hit points": 25000,
+            "low damage": 2000,
+            "high damage": 4000,
+            "accuracy": 0.95,
+            "experience when killed": 1100,
+            "special abilities": [ "attack weakest target" ]
+        }
+    ]
+}
