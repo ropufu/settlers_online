@@ -62,7 +62,7 @@
         },
         {
             "id": 992,
-            "name": "Giant Cannon #1",
+            "name": "Giant Cannon One",
             "class": "unknown",
             "initiative": "last strike",
             "hit points": 35000,
@@ -74,7 +74,7 @@
         },
         {
             "id": 993,
-            "name": "Giant Cannon #2",
+            "name": "Giant Cannon Two",
             "class": "unknown",
             "initiative": "normal",
             "hit points": 40000,

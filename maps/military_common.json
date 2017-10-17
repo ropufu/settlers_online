@@ -89,7 +89,7 @@
         },
         {
             "id": 8,
-            "name": [ "Crossbowman", "a", "x", "xb" ],
+            "name": [ "Crossbowman", "x", "xb" ],
             "faction": "common",
             "class": "ranged",
             "initiative": "normal",

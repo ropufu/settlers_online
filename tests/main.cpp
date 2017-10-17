@@ -1,4 +1,9 @@
 
+#include <aftermath/not_an_error.hpp>
+
+#include "../settlers_online/unit_database.hpp"
+#include "../settlers_online/army_parser.hpp"
+
 #include "army_test.hpp"
 #include "combat_mechanics_test.hpp"
 #include "unit_group_test.hpp"
@@ -9,18 +14,15 @@
 #include <ctime>
 #include <exception>
 #include <iostream>
-#include <fstream>
 #include <string>
-
-#include <experimental/filesystem>
-#include <nlohmann/json.hpp>
 
 using army_test = ropufu::settlers_online_test::army_test;
 using combat_mechanics_test = ropufu::settlers_online_test::combat_mechanics_test;
 using unit_type_test = ropufu::settlers_online_test::unit_type_test;
 using unit_group_test = ropufu::settlers_online_test::unit_group_test;
 
-namespace fs = std::experimental::filesystem;
+using unit_database = ropufu::settlers_online::unit_database;
+using quiet_error = ropufu::aftermath::quiet_error;
 
 template <typename t_test>
 bool run_test(t_test test, std::string name)
@@ -39,46 +41,26 @@ bool run_test(t_test test, std::string name)
     return result;
 }
 
-/** Load units from .json files. */
-void load(const std::string& folder_path = "./../maps/") noexcept
+std::int32_t main(std::int32_t argc, char* argv[], char* envp[])
 {
-    for (const fs::directory_entry& p : fs::directory_iterator(folder_path))
+    quiet_error& err = quiet_error::instance();
+    unit_database& db = unit_database::instance();
+
+    std::cout << "Loaded " << db.load_from_folder("./../maps/") << " units." << std::endl;
+
+    std::string army_string = (argc > 1 ? std::string(argv[1]) : "1r 32 s 12 Bowman");
+    ropufu::settlers_online::army_parser parser = army_string;
+    std::cout << "Parsing army \"" << army_string << "\"...";
+    if (!parser.good()) std::cout << " failed." << std::endl;
+    else
     {
-        std::ifstream i(p.path()); // Try to open the file for reading.
-        if (!i.good()) continue; // Stop on failure.
-
-        try
-        {
-            nlohmann::json map;// = nlohmann::json::parse(i);
-			i >> map;
-			if (map.count("units") != 0)
-			{
-				for (const nlohmann::json& unit : map["units"])
-				{
-					ropufu::settlers_online::unit_type u = unit;
-					//std::string unit_names = unit.at("names");
-					std::cout << u.names().front() << std::endl;
-				}
-			}
-        }
-        catch (const std::exception& e)
-        {
-            std::cout << "Failed while reading " << p.path() << ": " << e.what() << std::endl;
-            continue;
-        }
-        catch (...)
-        {
-            std::cout << "Oh no!.." << std::endl;
-            continue;
-        }
+        std::cout << " succeed: " << parser.size() << " groups acknowledged." << std::endl;
+        ropufu::settlers_online::army a;
+        if (!parser.try_build_fast(db, a)) std::cout << "Unit not recognized." << std::endl;
+        else std::cout << "Army of " << a.groups().size() << " created." << std::endl;
     }
-}
 
-std::int32_t main()
-{
-    load();
     //run_test([]() { return false; });
-
     // ~~ Unit type tests ~~
     run_test(unit_type_test::test_equality, "<unit_type> equality");
     run_test(unit_type_test::test_properties, "<unit_type> properties");
@@ -90,6 +72,20 @@ std::int32_t main()
     //run_test(army_test::test_properties, "<army> properties");
     // ~~ Combat tests ~~
     run_test(combat_mechanics_test::test_deterministic, "<combat_mechanics> deterministic");
+
+    
+    if (!err.good()) std::cout << "~~ Oh no! Errors encoutered: ~~" << std::endl;
+    else if (!err.empty()) std::cout << "~~ Something to keep in mind: ~~" << std::endl;
+    while (!err.empty())
+    {
+        ropufu::aftermath::quiet_error_descriptor desc = err.pop();
+        if (desc.severity() == ropufu::aftermath::severity_level::not_at_all) continue; // Skip information messages.
+        std::cout << '\t' <<
+            " level " << static_cast<std::size_t>(desc.severity()) <<
+            " error # " << static_cast<std::size_t>(desc.error_code()) <<
+            " on line " << desc.caller_line_number() <<
+            " of <" << desc.caller_function_name() << ">:\t" << desc.description() << std::endl;
+    }
 
     return 0;
 }

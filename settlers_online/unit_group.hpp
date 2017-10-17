@@ -37,7 +37,7 @@ namespace ropufu
             unit_group() noexcept { }
 
             /** Detailed constructor. */
-            unit_group(unit_type type, std::size_t count, std::int_fast32_t metagroup_id = 0) noexcept
+            unit_group(const unit_type& type, std::size_t count, std::int_fast32_t metagroup_id = 0) noexcept
                 : m_type(type), m_count(count), m_count_at_snapshot(count), m_metagroup_id(metagroup_id)
             {
             }
