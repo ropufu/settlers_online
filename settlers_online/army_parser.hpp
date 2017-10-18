@@ -26,9 +26,24 @@ namespace ropufu
         {
             using type = army_parser;
 
-            static bool is_whitespace(char c) noexcept
+            static bool is_space(char c) noexcept
             {
                 return std::isspace(static_cast<unsigned char>(c));
+            }
+
+            static void space_to_whitespace(std::string& value)
+            {
+                for (std::size_t i = 0; i < value.size(); ++i) if (is_space(value[i])) value[i] = ' ';
+            }
+
+            static void remove_repeated_whitespace(std::string& value)
+            {
+                std::size_t index = value.find("  ");
+                while (index != std::string::npos)
+                {
+                    value.erase(index, 1);
+                    index = value.find("  "); // Move on to the next repeated double space.
+                }
             }
 
         private:
@@ -43,7 +58,7 @@ namespace ropufu
                 std::string key = "";
 
                 std::size_t position = 0;
-                for (; position < value.size(); ++position) if (!is_whitespace(value[position])) break; // Skip the leading whitespaces.
+                for (; position < value.size(); ++position) if (value[position] != ' ') break; // Skip the leading whitespaces.
 
                 std::size_t first_index = 0;
                 std::size_t last_index = 0;
@@ -71,7 +86,7 @@ namespace ropufu
                         aftermath::severity_level::not_at_all,
                         "Group size aknowledged.", value, count);
 
-                    for (; position < value.size(); ++position) if (!is_whitespace(value[position])) break; // Skip the leading whitespaces.
+                    for (; position < value.size(); ++position) if (value[position] != ' ') break; // Skip the leading whitespaces.
 
                     aftermath::quiet_error::instance().push(
                         aftermath::not_an_error::all_good,
@@ -85,7 +100,7 @@ namespace ropufu
                     {
                         char c = value[position];
                         if (c >= '0' && c <= '9') break; // Digit encountered!
-                        if (!is_whitespace(c)) last_index = position; // Skip the trailing whitespaces.
+                        if (c != ' ') last_index = position; // Skip the trailing whitespaces.
                     }
                     if (last_index == 0) return; // The first non-whitespace character was a digit (not a letter!): invalid format.
                     key = value.substr(first_index, last_index - first_index + 1);
@@ -103,7 +118,10 @@ namespace ropufu
             /** Clears the contents of the database. */
             army_parser(const std::string& value) noexcept
             {
-                this->blueprint(value);
+                std::string str = value;
+                space_to_whitespace(str);
+                remove_repeated_whitespace(str);
+                this->blueprint(str);
                 if (!this->m_is_valid) this->m_army_blueprint.clear();
             }
 

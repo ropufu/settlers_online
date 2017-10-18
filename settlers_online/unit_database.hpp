@@ -25,10 +25,24 @@ namespace ropufu
         struct unit_database
         {
             using type = unit_database;
+            using key_type = std::string;
+            using weak_key_type = std::string;
 
         private:
-            std::map<std::string, unit_type> m_database = { };
-            std::set<std::size_t> m_ids = { }; // Keep track of id's to prevent collision.
+            std::map<key_type, unit_type> m_database = { }; // Primary key: shortest name.
+            std::set<std::size_t> m_ids = { }; // Keep track of id's to prevent group collision in \army.
+            std::map<weak_key_type, std::vector<key_type>> m_multiple_relaxed = { }; // Keeps track of which lowercase-version keys have multiple occurrences.
+
+            weak_key_type relax(const key_type& key)
+            {
+                weak_key_type weak_key = key;
+                return weak_key;
+            }
+
+            void build_weak_keys(const key_type& key, const unit_type& unit)
+            {
+
+            }
 
         protected:
             unit_database() noexcept { }
@@ -40,6 +54,7 @@ namespace ropufu
             {
                 this->m_database.clear();
                 this->m_ids.clear();
+                this->m_multiple_relaxed.clear();
             }
 
             const unit_type& at(const std::string& key) const noexcept 
@@ -50,9 +65,12 @@ namespace ropufu
             bool try_find(const std::string& key, unit_type& unit) const noexcept 
             {
                 auto search = this->m_database.find(key);
-                if (search == this->m_database.end()) return false;
-                unit = search->second;
-                return true;
+                if (search != this->m_database.end())
+                {
+                    unit = search->second;
+                    return true;
+                }
+                return false;
             }
 
             bool try_full_name(const std::string& name, unit_type& unit) const noexcept 
@@ -90,7 +108,12 @@ namespace ropufu
                                 unit_type u = unit;
                                 std::string key = u.names().front();
                                 for (const std::string& name : u.names())
-                                { 
+                                {
+                                    if (name.find("  ") != std::string::npos) 
+                                        aftermath::quiet_error::instance().push(
+                                            aftermath::not_an_error::all_good,
+                                            aftermath::severity_level::not_at_all,
+                                            "Name has repeated whitespace.", p.path().string(), __LINE__);
                                     // Take the shortest name as the key.
                                     if (name.length() < key.length()) key = name;
                                 }
@@ -100,31 +123,32 @@ namespace ropufu
                                     aftermath::quiet_error::instance().push(
                                         aftermath::not_an_error::logic_error,
                                         aftermath::severity_level::negligible,
-                                        "Unit with same name already exists.", p.path(), __LINE__);
+                                        "Unit with same name already exists.", p.path().string(), __LINE__);
                                 }
                                 else if (this->m_ids.count(u.id()) != 0)
                                 {
                                     aftermath::quiet_error::instance().push(
                                         aftermath::not_an_error::logic_error,
                                         aftermath::severity_level::negligible,
-                                        "Unit with same id already exists.", p.path(), __LINE__);
+                                        "Unit with same id already exists.", p.path().string(), __LINE__);
                                 }
                                 else
                                 {
                                     this->m_database.emplace(key, u);
                                     this->m_ids.insert(u.id());
+                                    this->build_weak_keys(key, u);
                                     count++;
                                 }
                             }
                         }
                     }
-                    catch (const std::exception& e)
+                    catch (const std::exception& /*e*/)
                     {
                         //std::cout << "Failed while reading " << p.path() << ": " << e.what() << std::endl;
                         aftermath::quiet_error::instance().push(
                             aftermath::not_an_error::runtime_error,
                             aftermath::severity_level::minor,
-                            "Parsing error encountered.", p.path(), __LINE__);
+                            "Parsing error encountered.", p.path().string(), __LINE__);
                         continue;
                     }
                     catch (...)

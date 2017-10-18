@@ -65,6 +65,8 @@
         "xlocmes": "cpp",
         "xlocmon": "cpp",
         "xloctime": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "cctype": "cpp",
+        "iomanip": "cpp"
     }
 }
