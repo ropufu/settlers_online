@@ -13,6 +13,30 @@
                 "isDefault": true
             },
             "options": {
+                "cwd": "${workspaceRoot}/black_marsh"
+            },
+            "args": ["-f", "Makefile"],
+            // Use the standard less compilation problem matcher.
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": ["relative", "${workspaceRoot}"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
+        },
+        {
+            "taskName": "build tests on mac",
+            "type": "shell",
+            "command": "make",
+            // Make this the default build command.
+            "group": "test",
+            "options": {
                 "cwd": "${workspaceRoot}/tests"
             },
             "args": ["-f", "Makefile"],

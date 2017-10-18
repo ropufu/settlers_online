@@ -4,12 +4,12 @@
 
 #include <aftermath/not_an_error.hpp>
 
+#include "string_more.hpp"
 #include "unit_database.hpp"
 #include "unit_type.hpp"
 #include "unit_group.hpp"
 #include "army.hpp"
 
-#include <cctype> // std::isspace
 #include <cstddef> // std::size_t
 #include <string> // std::string
 #include <utility> // std::pair, std::make_pair
@@ -26,31 +26,12 @@ namespace ropufu
         {
             using type = army_parser;
 
-            static bool is_space(char c) noexcept
-            {
-                return std::isspace(static_cast<unsigned char>(c));
-            }
-
-            static void space_to_whitespace(std::string& value)
-            {
-                for (std::size_t i = 0; i < value.size(); ++i) if (is_space(value[i])) value[i] = ' ';
-            }
-
-            static void remove_repeated_whitespace(std::string& value)
-            {
-                std::size_t index = value.find("  ");
-                while (index != std::string::npos)
-                {
-                    value.erase(index, 1);
-                    index = value.find("  "); // Move on to the next repeated double space.
-                }
-            }
-
         private:
             bool m_is_valid = false;
             std::vector<std::pair<std::size_t, std::string>> m_army_blueprint = { };
 
-            void blueprint(const std::string& value)
+            /** Parses the provided \p value. It is assumed that the string has already been trimmed, and all spaces replaced with whitespaces. */
+            void blueprint(std::string&& value)
             {
                 constexpr std::size_t zero = static_cast<std::size_t>('0');
                 this->m_is_valid = false;
@@ -58,17 +39,10 @@ namespace ropufu
                 std::string key = "";
 
                 std::size_t position = 0;
-                for (; position < value.size(); ++position) if (value[position] != ' ') break; // Skip the leading whitespaces.
-
                 std::size_t first_index = 0;
                 std::size_t last_index = 0;
                 while (position < value.size())
                 {
-                    aftermath::quiet_error::instance().push(
-                        aftermath::not_an_error::all_good,
-                        aftermath::severity_level::not_at_all,
-                        "Starting scanning for count.", value, position);
-
                     // Scan mode: we are building a number.
                     count = 0;
                     first_index = position;
@@ -81,17 +55,12 @@ namespace ropufu
                         count += (static_cast<std::size_t>(c) - zero);
                     }
                     if (first_index == position) return; // The first non-whitespace character was not a digit: invalid format.
-                    aftermath::quiet_error::instance().push(
-                        aftermath::not_an_error::all_good,
-                        aftermath::severity_level::not_at_all,
-                        "Group size aknowledged.", value, count);
+                    // aftermath::quiet_error::instance().push(
+                    //     aftermath::not_an_error::all_good,
+                    //     aftermath::severity_level::not_at_all,
+                    //     "Group size aknowledged.", value, count);
 
-                    for (; position < value.size(); ++position) if (value[position] != ' ') break; // Skip the leading whitespaces.
-
-                    aftermath::quiet_error::instance().push(
-                        aftermath::not_an_error::all_good,
-                        aftermath::severity_level::not_at_all,
-                        "Starting scanning for name.", value, position);
+                    for (; position < value.size(); ++position) if (value[position] != ' ') break; // Skip the leading whitespaces (at most one---cf. assumptions).
 
                     // Scan mode: we are now building a name.
                     first_index = position;
@@ -106,10 +75,10 @@ namespace ropufu
                     key = value.substr(first_index, last_index - first_index + 1);
                     this->m_army_blueprint.emplace_back(count, key);
                     
-                    aftermath::quiet_error::instance().push(
-                        aftermath::not_an_error::all_good,
-                        aftermath::severity_level::not_at_all,
-                        "Group parsed.", key, count);
+                    // aftermath::quiet_error::instance().push(
+                    //     aftermath::not_an_error::all_good,
+                    //     aftermath::severity_level::not_at_all,
+                    //     "Group parsed.", key, count);
                 }
                 this->m_is_valid = true;
             }
@@ -118,10 +87,7 @@ namespace ropufu
             /** Clears the contents of the database. */
             army_parser(const std::string& value) noexcept
             {
-                std::string str = value;
-                space_to_whitespace(str);
-                remove_repeated_whitespace(str);
-                this->blueprint(str);
+                this->blueprint(string_more::deep_trim_copy(value));
                 if (!this->m_is_valid) this->m_army_blueprint.clear();
             }
 
@@ -145,11 +111,6 @@ namespace ropufu
                 }
                 a = groups;
                 return true;
-            }
-
-            bool try_build_comprehensive(const unit_database& db, army& a) noexcept
-            {
-                return false;
             }
         };
     }

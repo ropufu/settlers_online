@@ -67,6 +67,12 @@
         "xloctime": "cpp",
         "optional": "cpp",
         "cctype": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "*.tcc": "cpp",
+        "clocale": "cpp",
+        "cstdarg": "cpp",
+        "cwctype": "cpp",
+        "numeric": "cpp",
+        "string_view": "cpp"
     }
 }

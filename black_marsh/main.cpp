@@ -21,10 +21,7 @@ void benchmark(t_action_type action, const std::string& name)
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
     double elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1'000.0;
-
     std::cout << "Elapsed time: " << elapsed_seconds << "s." << std::endl;
-
-    return result;
 }
 
 bool try_parse_army(const std::string& str, ropufu::settlers_online::army& value)
@@ -45,7 +42,7 @@ bool try_parse_army(const std::string& str, ropufu::settlers_online::army& value
     return true;
 }
 
-void unwind_errors(bool do_skip_log = false)
+void unwind_errors(bool do_skip_log)
 {
     quiet_error& err = quiet_error::instance();
 
@@ -57,11 +54,31 @@ void unwind_errors(bool do_skip_log = false)
         if (do_skip_log && desc.severity() == ropufu::aftermath::severity_level::not_at_all) continue; // Skip log messages.
 
         std::cout << '\t' <<
-            " level " << std::to_string(desc.severity()) <<
-            " error # " << std::to_string(desc.error_code()) <<
+            " " << std::to_string(desc.severity()) <<
+            " " << std::to_string(desc.error_code()) <<
             " on line " << desc.caller_line_number() <<
             " of <" << desc.caller_function_name() << ">:\t" << desc.description() << std::endl;
     }
+}
+
+void welcome() noexcept
+{
+    std::cout << R"?(
+ ~~~ Lucy Turtle Simulator ~~~
+
+///////|////////////////////////|
+///|//////------------\\\|\\|\\\\
+//|///////    ______   \\\|\\\\|\
+////////|    |      |   |\\\\\\\\
+////// //   | o = 0 |   \\\ \\\\\
+//||   ||   |       |    ||   |||
+//||...||||||||||||||||||||. .|||
+///////////|////|||//|\\\\\\\\\\|
+
+If you need help at any time, please type "help" without quotation marks.
+If for some reason you want to quit, type "exit" or "quit" or "q".
+
+)?";
 }
 
 std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
@@ -74,6 +91,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
         std::cout << "For example: black_marsh \"100r 1((cxv))\" \"20 Fox 1 Giant\"." << std::endl;
         return 0;
     }
+    welcome();
     std::string left_army_string = std::string(argv[1]);
     std::string right_army_string = std::string(argv[2]);
 
@@ -81,14 +99,14 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
 
     // ~~ Build unit database ~~
     std::cout << "Loaded " << db.load_from_folder("./../maps/") << " units." << std::endl;
-    unwind_errors();
+    unwind_errors(false);
 
     // ~~ Parse armies ~~
     ropufu::settlers_online::army left = { };
     ropufu::settlers_online::army right = { };
     if (!try_parse_army(left_army_string, left) || !try_parse_army(right_army_string, right))
     {
-        unwind_errors();
+        unwind_errors(false);
         return 0;
     }
 
