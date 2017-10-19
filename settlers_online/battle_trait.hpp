@@ -12,6 +12,8 @@ namespace ropufu
 {
     namespace settlers_online
     {
+        static constexpr std::size_t intercept_damage_percent = 95;
+
         /** @brief Traits that some units may have that modify the course of the entire battle.
          *  @remark Used internally as an indexer for \c enum_array, so don't go too high or negative. 
          **/

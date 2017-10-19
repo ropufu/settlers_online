@@ -14,7 +14,7 @@ namespace ropufu
     {
         //typedef aftermath::algebra::fraction<std::size_t> non_integer_type;
         //typedef std::bitset<max_size> mask_type;
-        typedef std::uint_fast64_t mask_type;
+        using mask_type = std::uint_fast64_t;
 
         /** Divides <numerator> by <denominator> and rounds down. Both arguments should be positive. */
         template <typename t_integer_type>
@@ -43,6 +43,24 @@ namespace ropufu
         {
             //static constexpr t_integer_type factor_upper_bound = 10;
             return (t_factor_upper_bound * value) - static_cast<t_integer_type>(value * (t_factor_upper_bound - factor)); // Rounds away from zero (equivalent to ceiling with positive numbers).
+        }
+
+        /** Adjusts \p damage by \p factor (multiplicative). */
+        static std::size_t damage_cast(std::size_t damage, double factor)
+        {
+            return product_floor(damage, factor);
+        }
+
+        /** Determines the smallest pure damage required to eliminate a unit with \p hit_points with (multiplicative) \p factor damage modifier. */
+        static std::size_t inverse_damage_cast(std::size_t hit_points, double factor)
+        {
+            return product_ceiling(hit_points, 1.0 / factor);
+        }
+
+        /** Adjusts \p hit_points by \p factor (multiplicative). */
+        static std::size_t hit_points_cast(std::size_t hit_points, double factor)
+        {
+            return product_ceiling(hit_points, factor);
         }
     }
 }

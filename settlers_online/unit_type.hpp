@@ -188,13 +188,13 @@ namespace ropufu
             /** Determines whether the two objects are in order (by weakness, hit points, id). */
             static bool compare_by_hit_points(const type& x, const type& y) noexcept
             {
-                // Check whether the objects share the same \c is_not_weak property.
-                if (x.m_abilities.has(special_ability::not_weak) ^ y.m_abilities.has(special_ability::not_weak))
-                {
-                    if (x.m_hit_points == y.m_hit_points) return type::compare_by_id(x, y); // If hit points are the same, fall back to \c id comparison.
-                    return x.m_hit_points < y.m_hit_points;
-                }
-                return y.m_abilities.has(special_ability::not_weak);
+                bool is_x_not_weak = x.m_abilities.has(special_ability::not_weak);
+                bool is_y_not_weak = y.m_abilities.has(special_ability::not_weak);
+                // If one is weak, and another is not.
+                if (is_x_not_weak ^ is_y_not_weak) return is_y_not_weak;
+                // Otherwise do hit points comparison.
+                if (x.m_hit_points == y.m_hit_points) return type::compare_by_id(x, y); // If hit points are the same, fall back to \c id comparison.
+                return x.m_hit_points < y.m_hit_points;
             }
 
             /** Checks two types for equality; ignores names. */

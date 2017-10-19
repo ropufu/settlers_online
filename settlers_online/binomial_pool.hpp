@@ -13,6 +13,8 @@
 #include <map> // std::map
 #include <random> // std::default_random_engine
 
+//#include <iostream>
+
 namespace ropufu
 {
     namespace settlers_online
@@ -63,6 +65,7 @@ namespace ropufu
                     auto existing_sampler_it = this->m_binomial_lookup_cache.find(accuracy); // See if the sampler already exists.
                     if (existing_sampler_it == this->m_binomial_lookup_cache.end()) // Sampler not found.
                     {
+                        //std::cout << "Building binomial lookup " << accuracy << " from " << bernoulli_for_damage.number_of_trials() << " to " << binomial_for_damage.number_of_trials() << std::endl;
                         this->m_binomial_lookup_cache.emplace(accuracy, binomial_lookup_sampler_type(bernoulli_for_damage, binomial_for_damage)); // Does nothing if the sampler already exists.
                     }
                     else
@@ -71,6 +74,7 @@ namespace ropufu
                         // Update existing sampler if the number of units in the current group is greater.
                         if (existing_sampler.number_of_trials_max() < count)
                         {
+                            //std::cout << "Updating binomial lookup " << accuracy << " from " << bernoulli_for_damage.number_of_trials() << " to " << binomial_for_damage.number_of_trials() << std::endl;
                             existing_sampler = binomial_lookup_sampler_type(bernoulli_for_damage, binomial_for_damage);
                         }
                     }

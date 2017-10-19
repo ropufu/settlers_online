@@ -73,7 +73,7 @@ void unwind_errors(bool do_skip_log)
             " " << std::to_string(desc.severity()) <<
             " " << std::to_string(desc.error_code()) <<
             " on line " << desc.caller_line_number() <<
-            " of <" << desc.caller_function_name() << ">:" << desc.description() << std::endl;
+            " of <" << desc.caller_function_name() << ">: " << desc.description() << std::endl;
     }
 }
 
@@ -132,8 +132,12 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
     ropufu::settlers_online::combat_mechanics combat(left, right);
     ropufu::settlers_online::combat_mechanics snapshot = combat;
 
+    std::cout << "Building left cache..." << std::endl;
     sequencer_type::pool_type::instance().cache(combat.left());
+    unwind_errors(true);
+    std::cout << "Building right cache..." << std::endl;
     sequencer_type::pool_type::instance().cache(combat.right());
+    unwind_errors(true);
 
     // ~~ Choose sequencers
     sequencer_type left_seq = { };
@@ -141,7 +145,10 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
     std::size_t count_combat_sims = 1000;
     std::size_t count_destruct_sims_per_combat = 10;
 
-    std::cout << "~~ Combat phase ~~" << std::endl;
+    std::cout << "~~ Combat ~~" << std::endl;
+    combat.set_do_log(true);
+    combat.execute(left_seq, right_seq);
+    combat = snapshot;
 
     double combat_rounds = 0;
     std::vector<std::size_t> x;

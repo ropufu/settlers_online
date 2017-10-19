@@ -55,7 +55,7 @@ namespace ropufu
             double m_boss_health_reduction = 0.0;   // Reduce (multiplicative) the \c hit_points of enemy bosses.
             bool m_do_dazzle = false;               // Enemy accuracy is reduced to 0%.
             bool m_do_intercept = false;            // Enemy ability \c do_attack_weakest_target is ignored.
-            bool m_do_explosive_ammunition = false; // Ranged units get \c do_attack_weakest_target.
+            bool m_do_explosive_ammunition = false; // Ranged units get \c do_attack_weakest_target and 100\% \c splash_chance.
             cat_array<double> m_accuracy_bonus;         // Increases (additive) the \c accuracy by category.
             cat_array<double> m_splash_bonus;           // Increases (additive) the \c splash_chance by category.
             cat_array<std::size_t> m_low_damage_bonus;  // Increases (additive) the \c low_damage by category.
