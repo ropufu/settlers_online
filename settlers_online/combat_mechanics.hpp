@@ -70,6 +70,9 @@ namespace ropufu
                 combat_mechanics::build_phase_grouping(right, right_group_indices);
             }
 
+            const army& left() const noexcept { return this->m_left; }
+            const army& right() const noexcept { return this->m_right; }
+
             void calculate_losses(std::vector<std::size_t>& left_losses, std::vector<std::size_t>& right_losses) const
             {
                 left_losses = this->m_left_counts;

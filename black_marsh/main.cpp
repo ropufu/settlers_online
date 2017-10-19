@@ -1,17 +1,33 @@
 
 #include <aftermath/not_an_error.hpp>
+#include <aftermath/probability.hpp>
 
 #include "../settlers_online/unit_database.hpp"
 #include "../settlers_online/army_parser.hpp"
+#include "../settlers_online/army.hpp"
+#include "../settlers_online/binomial_pool.hpp"
+#include "../settlers_online/combat_mechanics.hpp"
+#include "../settlers_online/combat_result.hpp"
+#include "../settlers_online/randomized_attack_sequence.hpp"
+#include "../settlers_online/trivial_attack_sequence.hpp"
 
 #include <chrono> // std::chrono::steady_clock, std::chrono::duration_cast
 #include <cstddef> // std::size_t
 #include <cstdint> // std::int32_t
+#include <exception> // std::exception
 #include <iostream> // std::cout, std::endl
 #include <string> // std::string, std::to_string
+#include <vector> // std::vector
 
+// ~~ Singleton types ~~
 using unit_database = ropufu::settlers_online::unit_database;
 using quiet_error = ropufu::aftermath::quiet_error;
+
+using sequencer_type = ropufu::settlers_online::randomized_attack_sequence<>;
+using sequencer_type_low = ropufu::settlers_online::trivial_attack_sequence<false>;
+using sequencer_type_high = ropufu::settlers_online::trivial_attack_sequence<true>;
+
+using empirical_measure = ropufu::aftermath::probability::empirical_measure<std::size_t, std::size_t, double>;
 
 template <typename t_action_type>
 void benchmark(t_action_type action, const std::string& name)
@@ -57,7 +73,7 @@ void unwind_errors(bool do_skip_log)
             " " << std::to_string(desc.severity()) <<
             " " << std::to_string(desc.error_code()) <<
             " on line " << desc.caller_line_number() <<
-            " of <" << desc.caller_function_name() << ">:\t" << desc.description() << std::endl;
+            " of <" << desc.caller_function_name() << ">:" << desc.description() << std::endl;
     }
 }
 
@@ -67,12 +83,12 @@ void welcome() noexcept
  ~~~ Lucy Turtle Simulator ~~~
 
 ///////|////////////////////////|
-///|//////------------\\\|\\|\\\\
+///|//////"--,-------;\\\|\\|\\\\
 //|///////    ______   \\\|\\\\|\
 ////////|    |      |   |\\\\\\\\
 ////// //   | o = 0 |   \\\ \\\\\
-//||   ||   |       |    ||   |||
-//||...||||||||||||||||||||. .|||
+//||   ||   \       /    ||   |||
+//||.".||||||||||||||||||||" .|||
 ///////////|////|||//|\\\\\\\\\\|
 
 If you need help at any time, please type "help" without quotation marks.
@@ -108,6 +124,50 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
     {
         unwind_errors(false);
         return 0;
+    }
+    unwind_errors(false);
+
+    // ~~ Combat phase ~~
+    std::cout << "~~ Simulations ~~" << std::endl;
+    ropufu::settlers_online::combat_mechanics combat(left, right);
+    ropufu::settlers_online::combat_mechanics snapshot = combat;
+
+    sequencer_type::pool_type::instance().cache(combat.left());
+    sequencer_type::pool_type::instance().cache(combat.right());
+
+    // ~~ Choose sequencers
+    sequencer_type left_seq = { };
+    sequencer_type right_seq = { };
+    std::size_t count_combat_sims = 1000;
+    std::size_t count_destruct_sims_per_combat = 10;
+
+    std::cout << "~~ Combat phase ~~" << std::endl;
+
+    double combat_rounds = 0;
+    std::vector<std::size_t> x;
+    std::vector<std::size_t> y;
+    std::vector<empirical_measure> left_losses(left.count_groups());
+    
+    for (std::size_t i = 0; i < count_combat_sims; ++i)
+    {
+        ropufu::settlers_online::combat_result result = combat.execute(left_seq, right_seq);
+        combat.calculate_losses(x, y);
+        for (std::size_t k = 0; k < x.size(); k++) left_losses[k].observe(x[k]);
+
+        double destruction_rounds = 0;
+        for (std::size_t j = 0; j < count_destruct_sims_per_combat; ++j) destruction_rounds += combat.destruct(left_seq, right_seq);
+        destruction_rounds /= count_destruct_sims_per_combat;
+
+        combat_rounds += result.number_of_rounds() + destruction_rounds;
+        combat = snapshot;
+    }
+    combat_rounds /= count_combat_sims;
+    
+    std::cout << "Rounds = " << combat_rounds << std::endl;
+    for (std::size_t k = 0; k < left.count_groups(); k++)
+    {
+        std::cout << "Losses in " << left[k].type().names().front() << ":" << std::endl;
+        std::cout << left_losses[k] << std::endl;
     }
 
     unwind_errors(false);

@@ -9,9 +9,9 @@
 #include "unit_group.hpp"
 #include "unit_type.hpp"
 
-#include <cstddef>
-#include <map>
-#include <random>
+#include <cstddef> // std::size_t
+#include <map> // std::map
+#include <random> // std::default_random_engine
 
 namespace ropufu
 {
@@ -23,39 +23,22 @@ namespace ropufu
         template <typename t_engine_type = std::default_random_engine>
         struct binomial_pool
         {
-            typedef binomial_pool<t_engine_type> type;
-            typedef t_engine_type engine_type;
-            typedef typename engine_type::result_type uniform_type;
-            typedef aftermath::probability::dist_binomial binomial_distribution_type;
-            typedef typename aftermath::random::sampler_bernoulli_from_engine<t_engine_type>::type       bernoulli_sampler_type;
-            typedef typename aftermath::random::sampler_binomial_lookup_from_engine<t_engine_type>::type binomial_lookup_sampler_type;
+            using type = binomial_pool<t_engine_type>;
+            using engine_type = t_engine_type;
+            using uniform_type = typename engine_type::result_type;
+            using binomial_distribution_type = aftermath::probability::dist_binomial;
+            using bernoulli_sampler_type = aftermath::random::default_sampler_bernoulli_t<t_engine_type>;
+            using binomial_lookup_sampler_type = aftermath::random::default_sampler_binomial_lookup_t<t_engine_type>;
 
         private:
-            std::map<double, bernoulli_sampler_type> m_bernoulli_cache = {};
-            std::map<double, binomial_lookup_sampler_type> m_binomial_lookup_cache = {};
+            std::map<double, bernoulli_sampler_type> m_bernoulli_cache = { };
+            std::map<double, binomial_lookup_sampler_type> m_binomial_lookup_cache = { };
 
         protected:
             binomial_pool() noexcept { }
             ~binomial_pool() noexcept { }
 
         public:
-            /** The only instance of this type. */
-            static type& instance()
-            {
-                // Since it's a static variable, if the class has already been created, it won't be created again.
-                // Note: it is thread-safe in C++11.
-                static type s_instance;
-
-                // Return a reference to our instance.
-                return s_instance;
-            }
-
-            // ~~ Delete copy and move constructors and assign operators ~~
-            binomial_pool(const type&) = delete;    // Copy constructor.
-            binomial_pool(type&&)      = delete;    // Move constructor.
-            type& operator =(const type&) = delete; // Copy assign.
-            type& operator =(type&&)      = delete; // Move assign.
-
             /** Updates the sampler cache from a provided instance of \p army. */
             void cache(const army& army)
             {
@@ -80,7 +63,7 @@ namespace ropufu
                     auto existing_sampler_it = this->m_binomial_lookup_cache.find(accuracy); // See if the sampler already exists.
                     if (existing_sampler_it == this->m_binomial_lookup_cache.end()) // Sampler not found.
                     {
-                        this->m_bernoulli_cache.emplace(accuracy, binomial_lookup_sampler_type(bernoulli_for_damage, binomial_for_damage)); // Does nothing if the sampler already exists.
+                        this->m_binomial_lookup_cache.emplace(accuracy, binomial_lookup_sampler_type(bernoulli_for_damage, binomial_for_damage)); // Does nothing if the sampler already exists.
                     }
                     else
                     {
@@ -113,6 +96,22 @@ namespace ropufu
                 if (probability_of_success < 0.0 || probability_of_success > 1.0) throw std::out_of_range("<probability_of_success> must be in the range from 0 to 1");
                 return this->m_binomial_lookup_cache.at(probability_of_success);
             }
+            
+            /** The only instance of this type. */
+            static type& instance()
+            {
+                // Since it's a static variable, if the class has already been created, it won't be created again.
+                // Note: it is thread-safe in C++11.
+                static type s_instance;
+                // Return a reference to our instance.
+                return s_instance;
+            }
+
+            // ~~ Delete copy and move constructors and assign operators ~~
+            binomial_pool(const type&) = delete;    // Copy constructor.
+            binomial_pool(type&&)      = delete;    // Move constructor.
+            type& operator =(const type&) = delete; // Copy assign.
+            type& operator =(type&&)      = delete; // Move assign.
         };
     }
 }

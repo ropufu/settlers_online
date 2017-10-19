@@ -3,6 +3,7 @@
 #define ROPUFU_SETTLERS_ONLINE_TRIVIAL_ATTACK_SEQUENCE_HPP_INCLUDED
 
 #include "attack_sequence.hpp"
+#include "unit_type.hpp"
 
 #include <cstddef>
 
@@ -23,7 +24,7 @@ namespace ropufu
             /** @brief Indicates whether the current unit will do high damage.
              *  @param unit Type of attacking unit.
              */
-            bool peek_do_high_damage(const unit_type& unit) const noexcept
+            bool peek_do_high_damage(const unit_type& unit) noexcept
             {
                 if (unit.accuracy() == 0) return false;
                 if (unit.accuracy() == 1) return true;
@@ -34,7 +35,7 @@ namespace ropufu
              *  @param unit Type of attacking units.
              *  @param count_units Number of attacking units.
              */
-            std::size_t peek_count_high_damage(const unit_type& unit, std::size_t count_units) const noexcept
+            std::size_t peek_count_high_damage(const unit_type& unit, std::size_t count_units) noexcept
             {
                 if (unit.accuracy() == 0) return 0;
                 if (unit.accuracy() == 1) return count_units;
@@ -44,7 +45,7 @@ namespace ropufu
             /** @brief Indicates whether the current unit will do splash damage.
              *  @param unit Type of attacking unit.
              */
-            bool peek_do_splash(const unit_type& unit) const noexcept
+            bool peek_do_splash(const unit_type& unit) noexcept
             {
                 if (unit.splash_chance() == 0) return false;
                 if (unit.splash_chance() == 1) return true;
@@ -54,7 +55,7 @@ namespace ropufu
             /** @brief Indicates whether the previous unit did splash damage.
              *  @param unit Type of attacking unit.
              */
-            bool did_last_splash(const unit_type& unit) const noexcept
+            bool did_last_splash(const unit_type& unit) noexcept
             {
                 if (unit.splash_chance() == 0) return false;
                 if (unit.splash_chance() == 1) return true;

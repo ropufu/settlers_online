@@ -4,7 +4,7 @@
 
 #include <aftermath/not_an_error.hpp>
 
-#include "string_more.hpp"
+#include "char_string.hpp"
 #include "unit_database.hpp"
 #include "unit_type.hpp"
 #include "unit_group.hpp"
@@ -87,7 +87,7 @@ namespace ropufu
             /** Clears the contents of the database. */
             army_parser(const std::string& value) noexcept
             {
-                this->blueprint(string_more::deep_trim_copy(value));
+                this->blueprint(char_string::deep_trim_copy(value));
                 if (!this->m_is_valid) this->m_army_blueprint.clear();
             }
 

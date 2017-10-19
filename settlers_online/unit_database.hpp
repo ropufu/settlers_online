@@ -4,7 +4,7 @@
 
 #include <aftermath/not_an_error.hpp>
 
-#include "string_more.hpp"
+#include "char_string.hpp"
 #include "unit_type.hpp"
 
 #include <cstddef> // std::size_t
@@ -76,24 +76,60 @@ namespace ropufu
         {
             using type = unit_database;
             using key_type = std::string;
-            using skeleton_type = std::string;
 
         private:
             std::map<key_type, unit_type> m_database = { }; // Primary key: shortest name.
             std::set<std::size_t> m_ids = { }; // Keep track of id's to prevent group collision in \army.
-            lookup<key_type, skeleton_type> m_lowercase_name_lookup = { };
+            lookup<key_type, key_type> m_lowercase_lookup = { }; // Lookup for lowercase names.
+            lookup<key_type, key_type> m_misspelled_lookup = { }; // Lookup for misspelled names.
+
+            /** Relaxed lookup stage 1. */
+            static key_type relax_to_lowercase(const key_type& query) noexcept
+            {
+                key_type relaxed = query;
+                char_string::to_lower(relaxed);
+                return relaxed;
+            }
+
+            /** Relaxed lookup stage 2. Assuming stage 1 has already been applied. */
+            static key_type relax_spelling(const key_type& query) noexcept
+            {
+                key_type relaxed = query;
+                // Plural: man -> men.
+                char_string::replace(relaxed, "men", "man");
+                // Plural: ...es or ...s.
+                if (char_string::ends_with(relaxed, "es")) relaxed = relaxed.substr(0, relaxed.length() - 2);
+                else if (char_string::ends_with(relaxed, "s")) relaxed = relaxed.substr(0, relaxed.length() - 1);
+
+                // Collapse all repeated letters for "reasonably" long words.
+                if (relaxed.length() > 4)
+                {
+                    char previous = relaxed[0];
+                    for (std::size_t i = 1; i < relaxed.size(); ++i)
+                    {
+                        if (relaxed[i] == previous) relaxed.erase(i, 1);
+                        else previous = relaxed[i];
+                    }
+                }
+                
+                return relaxed;
+            }
 
             /** Assuming the unit names have already been subject to \c deep_trim_copy. */
-            void update_lookup(const key_type& key, const unit_type& unit)
+            void update_lookup(const key_type& key, const unit_type& unit) noexcept
             {
-                std::set<skeleton_type> weak_names = { };
+                std::set<key_type> relaxed_names = { };
+                std::set<key_type> misspelled_names = { };
                 for (const std::string& name : unit.names())
                 {
-                    std::string weak = name;
-                    string_more::to_lower(weak);
-                    weak_names.insert(weak);
+                    key_type stage1 = unit_database::relax_to_lowercase(name);
+                    key_type stage2 = unit_database::relax_spelling(stage1);
+                    relaxed_names.insert(stage1);
+                    misspelled_names.insert(stage2);
                 }
-                this->m_lowercase_name_lookup.update(key, weak_names);
+
+                this->m_lowercase_lookup.update(key, relaxed_names);
+                this->m_misspelled_lookup.update(key, misspelled_names);
             }
 
         protected:
@@ -106,7 +142,8 @@ namespace ropufu
             {
                 this->m_database.clear();
                 this->m_ids.clear();
-                this->m_lowercase_name_lookup.clear();
+                this->m_lowercase_lookup.clear();
+                this->m_misspelled_lookup.clear();
             }
 
             const unit_type& at(const key_type& key) const noexcept 
@@ -122,38 +159,27 @@ namespace ropufu
                     unit = search->second;
                     return true;
                 }
+
                 // Primary search failed. Secondary search: all lowercase!
                 key_type key;
-                std::string lowercase = query;
-                string_more::to_lower(lowercase);
-                std::size_t count_matches = this->m_lowercase_name_lookup.try_find(lowercase, key);
+                key_type lowercase = unit_database::relax_to_lowercase(query);
+                key_type misspelled = unit_database::relax_spelling(lowercase);
+                std::size_t count_matches;
+                count_matches = this->m_lowercase_lookup.try_find(lowercase, key);
                 if (count_matches >= 1)
                 {
                     unit = this->m_database.at(key);
-                    if (count_matches > 1)
-                    {
-                        aftermath::quiet_error::instance().push(
-                            aftermath::not_an_error::runtime_error,
-                            aftermath::severity_level::minor,
-                            "Multiple units match the specified name.", query, count_matches);
-                        return false;
-                    }
-                    return true;
+                    if (count_matches == 1) return true;
+                    aftermath::quiet_error::instance().push(aftermath::not_an_error::runtime_error, aftermath::severity_level::minor, "Multiple units match the specified query.", lowercase, count_matches);
+                    return false;
                 }
-                return false;
-            }
-
-            bool try_full_name(const std::string& name, unit_type& unit) const noexcept 
-            {
-                for (const auto& pair : this->m_database)
+                count_matches = this->m_misspelled_lookup.try_find(misspelled, key);
+                if (count_matches >= 1)
                 {
-                    bool is_match = false;
-                    for (const std::string& s : pair.second.names()) if (s == name) is_match = true;
-                    if (is_match)
-                    {
-                        unit = pair.second;
-                        return true;
-                    }
+                    unit = this->m_database.at(key);
+                    if (count_matches == 1) return true;
+                    aftermath::quiet_error::instance().push(aftermath::not_an_error::runtime_error, aftermath::severity_level::minor, "Multiple units match the specified query.", misspelled, count_matches);
+                    return false;
                 }
                 return false;
             }
@@ -177,7 +203,7 @@ namespace ropufu
                             {
                                 unit_type u = unit;
                                 std::vector<std::string>& names = u.names();
-                                for (std::string& name : names) name = string_more::deep_trim_copy(name);
+                                for (std::string& name : names) name = char_string::deep_trim_copy(name);
 
                                 std::string key = names.front();
                                 for (const std::string& name : names)
