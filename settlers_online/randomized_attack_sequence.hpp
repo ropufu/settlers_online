@@ -55,8 +55,8 @@ namespace ropufu
             std::size_t peek_count_high_damage(const unit_type& unit, std::size_t count_units) noexcept
             {
                 double x = unit.accuracy();
-                if (x == 0) return false;
-                if (x == 1) return true;
+                if (x == 0) return 0;
+                if (x == 1) return count_units;
                 return this->m_pool.binomial_lookup_sampler(x)(count_units, this->m_engine);
             }
 

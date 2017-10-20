@@ -127,7 +127,7 @@ namespace ropufu
 
             /** Initiates and attack by this army on its opponent \c other. */
             template <typename t_sequence_type>
-            void hit(army& other, battle_phase phase, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, bool do_log) const;
+            void initiate_phase(battle_phase phase, conditioned_army& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, bool do_log) const;
         };
 
         /** @brief Constructs a version of the army \p a conditioned for a fight against \p other.
@@ -197,22 +197,18 @@ namespace ropufu
             this->m_caches.shrink_to_fit();
         }
 
+        /** Initiates and attack by this army on its opponent \c other. */
         template <typename t_sequence_type>
-        void conditioned_army::hit(army& other, battle_phase phase, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, bool do_log) const
+        void conditioned_army::initiate_phase(battle_phase phase, conditioned_army& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, bool do_log) const
         {
             for (std::size_t i : this->m_group_indices[phase])
             {
                 const unit_group& attacking_group = this->m_army[i];
                 const attack_group_cache& cache = this->m_caches[i];
 
-                if (attacking_group.empty_at_snapshot()) continue; // Skip empty groups.
                 const unit_type& attacker_t = attacking_group.type();
-                if (do_log)
-                {
-                    std::cout << '\t' <<
-                        attacking_group.count_at_snapshot() << " " <<
-                        attacker_t.names().front() << " attacking..." << std::endl;
-                }
+                std::size_t count_attackers = attacking_group.count_at_snapshot();
+                if (count_attackers == 0) continue; // Skip empty groups.
 
                 // Optimize in the uniform all splash damage case.
                 if (cache.is_uniform_splash())
@@ -221,7 +217,6 @@ namespace ropufu
                     // Adjust damage factor for current round.
                     damage_factor *= frenzy_factor;
 
-                    std::size_t count_attackers = attacking_group.count_at_snapshot();
                     std::size_t count_high_damage = sequencer.peek_count_high_damage(attacker_t, count_attackers); // Count the number of units in this stack that do maximum damage.
                     sequencer.next_unit(count_attackers);
 
@@ -229,13 +224,28 @@ namespace ropufu
                         damage_cast(attacker_t.low_damage(), damage_factor) * (count_attackers - count_high_damage) +
                         damage_cast(attacker_t.high_damage(), damage_factor) * count_high_damage;
 
-                    detail::uniform_splash(total_reduced_damage, other, cache.order(), do_log); // technical_combat.hpp.
-                    continue;
+                    if (do_log)
+                    {
+                        std::cout << '\t' <<
+                            count_attackers << " " << attacker_t.names().front() <<
+                            " dealing " << total_reduced_damage <<
+                            " (" << (count_attackers - count_high_damage) << " low, " << count_high_damage << " high)" <<
+                            " splash damage..." << std::endl;
+                    }
+                    detail::uniform_splash(total_reduced_damage, other.underlying(), cache.order(), do_log); // technical_combat.hpp.
+                    continue; // Proceed to the next attacking group.
+                }
+
+                if (do_log)
+                {
+                    std::cout << '\t' <<
+                        count_attackers << " " << attacker_t.names().front() <<
+                        " attacking..." << std::endl;
                 }
 
                 std::size_t attacking_unit_index = 0;
                 std::size_t pure_overshoot_damage = 0; // Pure damage spilled between consequent groups.
-                std::vector<unit_group>& defender_groups = other.groups();
+                std::vector<unit_group>& defender_groups = other.underlying().groups();
                 for (std::size_t j : cache.order())
                 {
                     // Get cached properties.

@@ -43,11 +43,9 @@ namespace ropufu
                 std::size_t defenders_killed = defending_units_remaining;
                 if (do_log)
                 {
-                    std::cout << '\t' <<
-                        attacking_group.count_at_snapshot() << " " <<
-                        attacker_t.names().front() << " hit " <<
-                        defending_units_remaining << " " <<
-                        defender_t.names().front() << " killing ";
+                    std::cout << '\t' << "..." <<
+                        defending_units_remaining << " " << defender_t.names().front() <<
+                        " [" << defending_group.total_hit_points() << " hit points]";
                 }
 
                 // Proceed to next attaking unit.
@@ -61,7 +59,7 @@ namespace ropufu
                     // If this group has been eliminated proceed to the next group.
                     if (defending_units_remaining == 0) 
                     {
-                        if (do_log) std::cout << defenders_killed << "." << std::endl;
+                        if (do_log) std::cout << " killing " << defenders_killed << "." << std::endl;
                         return attacking_unit_index;
                     }
                     std::size_t hit_points = defending_group.top_hit_points(); // Hit points of the top unit.
@@ -105,7 +103,7 @@ namespace ropufu
                         // If this group has been eliminated proceed to the next group.
                         if (defending_units_remaining == 0) 
                         {
-                            if (do_log) std::cout << defenders_killed << "." << std::endl;
+                            if (do_log) std::cout << " killing " << defenders_killed << "." << std::endl;
                             return attacking_unit_index;
                         }
 
@@ -126,8 +124,8 @@ namespace ropufu
                         }
                     }
                 }
-                if (do_log) std::cout << (defenders_killed - defending_group.count()) << "." << std::endl;
-                return attacking_unit_index;
+                if (do_log) std::cout << " killing " << (defenders_killed - defending_group.count()) << "." << std::endl;
+                return attacking_group.count_at_snapshot();
             }
 
             /** @brief Inflicts \p pure_damage splash onto \p defending_group, taking into account \p damage_factor damage multiplier.
@@ -176,20 +174,19 @@ namespace ropufu
 
                     if (do_log)
                     {
-                        std::cout << '\t' <<
-                            defending_units_remaining << " " <<
-                            defending_group.type().names().front() <<
-                            " with " << reduced_damage << " reduced damage, killing ";
+                        std::cout << '\t' << "...against " <<
+                            defending_units_remaining << " " << defending_group.type().names().front() <<
+                            " [" << total_hit_points << " hit points]";
                     }
 
                     if (total_hit_points >= reduced_damage) // All the splash damage has been accounted for.
                     {
                         defending_group.set_total_hit_points(total_hit_points - reduced_damage); // Damage the defending group.
-                        if (do_log) std::cout << (defending_units_remaining - defending_group.count()) << "." << std::endl;
+                        if (do_log) std::cout << " killing " << (defending_units_remaining - defending_group.count()) << "." << std::endl;
                         return;
                     }
                     defending_group.kill_all();
-                    if (do_log) std::cout << defending_units_remaining << "." << std::endl;
+                    if (do_log) std::cout << " killing " << defending_units_remaining << "." << std::endl;
                     reduced_damage -= total_hit_points;
                 }
             }

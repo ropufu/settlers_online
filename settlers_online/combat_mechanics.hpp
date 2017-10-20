@@ -69,8 +69,8 @@ namespace ropufu
                         battle_phase phase = static_cast<battle_phase>(k);
                         if (this->m_do_log) std::cout << "Begin " << std::to_string(phase) << " phase." << std::endl;
 
-                        this->m_left.hit(this->m_right.underlying(), phase, left_frenzy_factor, left_sequencer, this->m_do_log);
-                        this->m_right.hit(this->m_left.underlying(), phase, right_frenzy_factor, right_sequencer, this->m_do_log);
+                        this->m_left.initiate_phase(phase, this->m_right, left_frenzy_factor, left_sequencer, this->m_do_log);
+                        this->m_right.initiate_phase(phase, this->m_left, right_frenzy_factor, right_sequencer, this->m_do_log);
 
                         this->m_left.underlying().snapshot();
                         this->m_right.underlying().snapshot();
