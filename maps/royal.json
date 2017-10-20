@@ -45,7 +45,8 @@
             "high damage": 140,
             "accuracy": 0.95,
             "splash chance": 1,
-            "experience when killed": 16
+            "experience when killed": 16,
+            "special abilities": [ "tower bonus" ]
         },
         {
             "id": 517,
@@ -62,14 +63,15 @@
         {
             "id": 518,
             "name": "Royal Cannoneer",
-            "class": "ranged",
+            "class": "artillery",
             "initiative": "last strike",
             "hit points": 200,
             "low damage": 60,
             "high damage": 90,
             "accuracy": 0.95,
             "splash chance": 1,
-            "experience when killed": 28
+            "experience when killed": 28,
+            "special abilities": [ "tower bonus", "ignore tower bonus" ]
         },
         {
             "id": 1444,

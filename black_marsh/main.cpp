@@ -8,6 +8,7 @@
 #include "../settlers_online/binomial_pool.hpp"
 #include "../settlers_online/combat_mechanics.hpp"
 #include "../settlers_online/combat_result.hpp"
+#include "../settlers_online/conditioned_army.hpp"
 #include "../settlers_online/randomized_attack_sequence.hpp"
 #include "../settlers_online/trivial_attack_sequence.hpp"
 
@@ -133,32 +134,31 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
     ropufu::settlers_online::combat_mechanics snapshot = combat;
 
     std::cout << "Building left cache..." << std::endl;
-    sequencer_type::pool_type::instance().cache(combat.left());
+    sequencer_type::pool_type::instance().cache(combat.left().underlying());
     unwind_errors(true);
     std::cout << "Building right cache..." << std::endl;
-    sequencer_type::pool_type::instance().cache(combat.right());
+    sequencer_type::pool_type::instance().cache(combat.right().underlying());
     unwind_errors(true);
 
     // ~~ Choose sequencers
     sequencer_type left_seq = { };
     sequencer_type right_seq = { };
-    std::size_t count_combat_sims = 1000;
-    std::size_t count_destruct_sims_per_combat = 10;
+    std::size_t count_combat_sims = 10'000;
+    std::size_t count_destruct_sims_per_combat = 50;
 
-    std::cout << "~~ Combat ~~" << std::endl;
+    std::cout << "~~ Combat Log ~~" << std::endl;
     combat.set_do_log(true);
     combat.execute(left_seq, right_seq);
     combat = snapshot;
 
+    std::cout << "~~ Monte Carlo ~~" << std::endl;
     double combat_rounds = 0;
-    std::vector<std::size_t> x;
-    std::vector<std::size_t> y;
-    std::vector<empirical_measure> left_losses(left.count_groups());
     
+    std::vector<empirical_measure> left_losses(left.count_groups());
     for (std::size_t i = 0; i < count_combat_sims; ++i)
     {
         ropufu::settlers_online::combat_result result = combat.execute(left_seq, right_seq);
-        combat.calculate_losses(x, y);
+        std::vector<std::size_t> x = combat.left().calculate_losses();
         for (std::size_t k = 0; k < x.size(); k++) left_losses[k].observe(x[k]);
 
         double destruction_rounds = 0;

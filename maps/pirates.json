@@ -67,6 +67,7 @@
             "low damage": 40,
             "high damage": 60,
             "accuracy": 0.7,
+            "splash chance": 1,
             "experience when killed": 6,
             "special abilities": [ "attack weakest target" ]
         }

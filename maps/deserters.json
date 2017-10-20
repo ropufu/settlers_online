@@ -95,14 +95,14 @@
         {
             "id": 48,
             "name": "Cannoneer Deserter",
-            "class": "unknown",
+            "class": "artillery",
             "initiative": "last strike",
             "hit points": 60,
             "low damage": 60,
             "high damage": 120,
             "accuracy": 0.7,
             "experience when killed": 15,
-            "special abilities": [ "tower bonus" ]
+            "special abilities": [ "tower bonus", "ignore tower bonus" ]
         },
         {
             "id": 49,
@@ -113,6 +113,7 @@
             "low damage": 200,
             "high damage": 600,
             "accuracy": 0.8,
+            "splash chance": 1,
             "experience when killed": 200,
             "special abilities": [ "attack weakest target" ]
         }

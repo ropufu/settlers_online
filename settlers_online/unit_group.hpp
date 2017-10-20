@@ -50,6 +50,9 @@ namespace ropufu
             /** Indicates if the group is empty. */
             bool empty() const noexcept { return this->m_count == 0; }
 
+            /** Indicates if the group is empty at the moment of latest \c snapshot. */
+            bool empty_at_snapshot() const noexcept { return this->m_count_at_snapshot == 0; }
+
             /** Number of units in the group. */
             std::size_t count() const noexcept { return this->m_count; }
 

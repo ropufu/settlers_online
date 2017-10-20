@@ -21,6 +21,7 @@
             "low damage": 150,
             "high damage": 300,
             "accuracy": 0.8,
+            "splash chance": 1,
             "experience when killed": 39,
             "special abilities": [ "attack weakest target" ]
         },
@@ -69,6 +70,7 @@
             "low damage": 2500,
             "high damage": 5000,
             "accuracy": 0.8,
+            "splash chance": 1,
             "experience when killed": 470,
             "special abilities": [ "attack weakest target" ]
         },
@@ -93,6 +95,7 @@
             "low damage": 375,
             "high damage": 750,
             "accuracy": 0.8,
+            "splash chance": 1,
             "experience when killed": 53,
             "special abilities": [ "attack weakest target" ]
         },

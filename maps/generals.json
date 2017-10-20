@@ -24,6 +24,7 @@
             "low damage": 450,
             "high damage": 500,
             "accuracy": 0.8,
+            "splash chance": 1,
             "special abilities": [ "not weak", "attack weakest target" ]
         },
         {
@@ -37,6 +38,7 @@
             "low damage": 25,
             "high damage": 50,
             "accuracy": 0.8,
+            "splash chance": 1,
             "special abilities": [ "not weak", "attack weakest target" ]
         },
         {
@@ -79,6 +81,7 @@
             "low damage": 1000,
             "high damage": 1500,
             "accuracy": 0.9,
+            "splash chance": 1,
             "special abilities": [ "not weak", "attack weakest target" ],
             "traits": [ "explosive ammunition" ]
         },
@@ -93,6 +96,7 @@
             "low damage": 1000,
             "high damage": 1500,
             "accuracy": 0.5,
+            "splash chance": 1,
             "special abilities": [ "not weak", "attack weakest target" ],
             "traits": [ "dazzle" ]
         }

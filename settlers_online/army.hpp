@@ -214,18 +214,6 @@ namespace ropufu
             /** Ordering by unit hit points. */
             const aftermath::algebra::permutation& order_by_hp() const noexcept { return this->m_order_by_hp; }
 
-            /** Access groups in original order. */
-            const unit_group& in_original(std::size_t index) const noexcept
-            {
-                return this->m_groups[this->m_order_original[index]];
-            }
-
-            /** Access groups ordered by hit points. */
-            const unit_group& by_hp(std::size_t index) const noexcept
-            {
-                return this->m_groups[this->m_order_by_hp[index]];
-            }
-
             /** The mask, specific to this instance of \c army, indicating the surviving groups. */
             mask_type compute_alive_mask() const noexcept
             {
@@ -242,14 +230,6 @@ namespace ropufu
             std::size_t count_metagroups() const noexcept
             {
                 return this->m_metagroup_masks.size();
-            }
-
-            /** Calculates if at least one unit in the army will be affected by \c special_abilities::tower_bonus. */
-            bool has_tower_bonus() const noexcept
-            {
-                if (this->m_tower_damage_reduction == 0.0) return false;
-                for (const unit_group& g : this->m_groups) if (g.type().has(special_ability::tower_bonus)) return true;
-                return false;
             }
 
             /** Checks two armies for equality. */

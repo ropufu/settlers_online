@@ -150,6 +150,7 @@
             "low damage": 200,
             "high damage": 500,
             "accuracy": 0.7,
+            "splash chance": 1,
             "experience when killed": 5,
             "special abilities": [ "attack weakest target" ]
         },

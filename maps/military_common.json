@@ -89,7 +89,7 @@
         },
         {
             "id": 8,
-            "name": [ "Crossbowman", "x", "xb" ],
+            "name": [ "Crossbowman", "a", "x", "xb" ],
             "faction": "common",
             "class": "ranged",
             "initiative": "normal",
@@ -111,7 +111,7 @@
             "high damage": 120,
             "accuracy": 0.9,
             "experience when killed": 30,
-            "special abilities": [ "tower bonus" ]
+            "special abilities": [ "tower bonus", "ignore tower bonus" ]
         }
     ]
 }
