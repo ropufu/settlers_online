@@ -266,16 +266,16 @@ namespace ropufu
                 return !(this->operator ==(other));
             }
 
-            friend std::ostream& operator <<(std::ostream& os, const army& that)
+            friend std::ostream& operator <<(std::ostream& os, const army& self)
             {
                 bool is_first = true;
-                for (const unit_group& g : that.m_groups)
+                if (self.m_groups.empty()) os << "Empty";
+                for (const unit_group& g : self.m_groups)
                 {
                     if (is_first) is_first = false;
                     else os << " ";
                     os << g;
                 }
-                os << std::endl;
                 return os;
             }
          };

@@ -1,34 +1,19 @@
 
 #include <aftermath/not_an_error.hpp>
-#include <aftermath/probability.hpp>
 
-#include "../settlers_online/unit_database.hpp"
-#include "../settlers_online/army_parser.hpp"
-#include "../settlers_online/army.hpp"
-#include "../settlers_online/binomial_pool.hpp"
-#include "../settlers_online/combat_mechanics.hpp"
-#include "../settlers_online/combat_result.hpp"
-#include "../settlers_online/conditioned_army.hpp"
-#include "../settlers_online/randomized_attack_sequence.hpp"
-#include "../settlers_online/trivial_attack_sequence.hpp"
+#include "turtle.hpp"
+#include "../settlers_online/char_string.hpp"
 
 #include <chrono> // std::chrono::steady_clock, std::chrono::duration_cast
 #include <cstddef> // std::size_t
 #include <cstdint> // std::int32_t
-#include <exception> // std::exception
-#include <iostream> // std::cout, std::endl
-#include <string> // std::string, std::to_string
-#include <vector> // std::vector
+#include <iostream> // std::cout, std::endl, std::cin
+#include <string> // std::string, std::to_string, std::getline, std::stoi
 
 // ~~ Singleton types ~~
 using unit_database = ropufu::settlers_online::unit_database;
+using char_string = ropufu::settlers_online::char_string;
 using quiet_error = ropufu::aftermath::quiet_error;
-
-using sequencer_type = ropufu::settlers_online::randomized_attack_sequence<>;
-using sequencer_type_low = ropufu::settlers_online::trivial_attack_sequence<false>;
-using sequencer_type_high = ropufu::settlers_online::trivial_attack_sequence<true>;
-
-using empirical_measure = ropufu::aftermath::probability::empirical_measure<std::size_t, std::size_t, double>;
 
 template <typename t_action_type>
 void benchmark(t_action_type action, const std::string& name)
@@ -39,43 +24,6 @@ void benchmark(t_action_type action, const std::string& name)
 
     double elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1'000.0;
     std::cout << "Elapsed time: " << elapsed_seconds << "s." << std::endl;
-}
-
-bool try_parse_army(const std::string& str, ropufu::settlers_online::army& value)
-{
-    const unit_database& db = unit_database::instance();
-
-    ropufu::settlers_online::army_parser parser = str;
-    if (!parser.good())
-    {
-        std::cout << "Parsing army \"" << str << "\" failed." << std::endl;
-        return false;
-    }
-    if (!parser.try_build_fast(db, value)) 
-    {
-        std::cout << "Reconstructing army \"" << str << "\" from database failed." << std::endl;
-        return false;
-    }
-    return true;
-}
-
-void unwind_errors(bool do_skip_log)
-{
-    quiet_error& err = quiet_error::instance();
-
-    if (!err.good()) std::cout << "~~ Oh no! Errors encoutered: ~~" << std::endl;
-    else if (!err.empty()) std::cout << "~~ Something to keep in mind: ~~" << std::endl;
-    while (!err.empty())
-    {
-        ropufu::aftermath::quiet_error_descriptor desc = err.pop();
-        if (do_skip_log && desc.severity() == ropufu::aftermath::severity_level::not_at_all) continue; // Skip log messages.
-
-        std::cout << '\t' <<
-            " " << std::to_string(desc.severity()) <<
-            " " << std::to_string(desc.error_code()) <<
-            " on line " << desc.caller_line_number() <<
-            " of <" << desc.caller_function_name() << ">: " << desc.description() << std::endl;
-    }
 }
 
 void welcome() noexcept
@@ -98,85 +46,145 @@ If for some reason you want to quit, type "exit" or "quit" or "q".
 )?";
 }
 
+void help()
+{
+    std::cout << R"?(
+    Command Name   | Description
+==============================================================
+    quit, q, exit  | Exit the program.
+    help, h, ?     | Display help.
+    units, u       | Lists all units.
+    left, l        | Get or set left army.
+    right, r       | Get or set right army.
+    n              | Gets or sets the number of simulations.
+    log            | Displays one battle report.
+    run            | Executes the simulations.
+==============================================================
+Commands with get or set option will take an optional argument to set the
+value of corresponding parameter.
+
+You can also run the program with arguments: "left army" "string army" [/s]
+The first two are required (don't omit the quotation marks) and will
+automatically populate the left and right armies.
+The third is optional and may be one of: /l /r. When provided, the program
+will automatically execute "log" for /l, or "run" for 'r', and then quit. 
+)?";
+}
+
+enum struct command_name
+{
+    not_recognized,
+    quit, // Exit the program.
+    help, // Display help.
+    units, // Lists all units.
+    left, // Left army.
+    right, // Right army.
+    n, // Number of sumulations.
+    log, // Run simulation in log mode.
+    run // Run simulation in regular mode.
+};
+
+command_name parse_command(const std::string& command, std::string& argument)
+{
+    std::string key = char_string::deep_trim_copy(command);
+    argument = "";
+
+    std::size_t index_of_space = key.find(" ");
+    if (index_of_space != std::string::npos) 
+    {
+        argument = key.substr(index_of_space + 1);
+        key = key.substr(0, index_of_space);
+    }
+
+    if (key == "quit" || key == "q" || key == "exit") return command_name::quit;
+    if (key == "help" || key == "h" || key == "?") return command_name::help;
+    if (key == "units" || key == "u") return command_name::units;
+    if (key == "left" || key == "l") return command_name::left;
+    if (key == "right" || key == "r") return command_name::right;
+    if (key == "n") return command_name::n;
+    if (key == "log") return command_name::log;
+    if (key == "run") return command_name::run;
+
+    return command_name::not_recognized;
+}
+
+std::int32_t quit()
+{
+    std::cout << "Buh-bye ^^//~~" << std::endl;
+    return 0;
+}
+
+std::string read_line()
+{
+    std::string line;
+    std::getline(std::cin, line);
+    return line;
+}
+
 std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
 {
-    if (argc < 3)
+    ropufu::settlers_online::black_marsh::turtle lucy { };
+    if (argc > 2)
     {
-        std::cout << "Usage: black_marsh \"A1\" \"A2\"" << std::endl
-            << '\t' << "where A1 and A2 are string representations of two armies.";
+        std::string left_army_string = std::string(argv[1]);
+        std::string right_army_string = std::string(argv[2]);
+        lucy.parse_left(left_army_string);
+        lucy.parse_right(right_army_string);
 
-        std::cout << "For example: black_marsh \"100r 1((cxv))\" \"20 Fox 1 Giant\"." << std::endl;
-        return 0;
+        if (argc > 3)
+        {
+            std::string sw = std::string(argv[3]);
+            if (sw == "/l")
+            {
+                lucy.run(true);
+                return 0;
+            }
+            if (sw == "/r")
+            {
+                lucy.run(false);
+                return 0;
+            }
+        }
     }
+
     welcome();
-    std::string left_army_string = std::string(argv[1]);
-    std::string right_army_string = std::string(argv[2]);
-
-    unit_database& db = unit_database::instance();
-
-    // ~~ Build unit database ~~
-    std::cout << "Loaded " << db.load_from_folder("./../maps/") << " units." << std::endl;
-    unwind_errors(false);
-
-    // ~~ Parse armies ~~
-    ropufu::settlers_online::army left = { };
-    ropufu::settlers_online::army right = { };
-    if (!try_parse_army(left_army_string, left) || !try_parse_army(right_army_string, right))
+    while (true)
     {
-        unwind_errors(false);
-        return 0;
+        std::string command;
+        std::string argument;
+
+        ropufu::settlers_online::black_marsh::turtle::unwind_errors(false);
+        std::cout << "> ";
+        command = read_line();
+
+        switch (parse_command(command, argument))
+        {
+            case command_name::quit: return quit();
+            case command_name::help:
+                help();
+                break;
+            case command_name::left:
+                if (argument.empty()) std::cout << lucy.left() << std::endl;
+                else lucy.parse_left(argument);
+                break;
+            case command_name::right:
+                if (argument.empty()) std::cout << lucy.right() << std::endl;
+                else lucy.parse_right(argument);
+                break;
+            case command_name::n:
+                if (argument.empty()) std::cout << lucy.simulation_count() << std::endl;
+                else lucy.set_simulation_count(static_cast<std::size_t>(std::stol(argument)));
+                break;
+            case command_name::log:
+                lucy.run(true);
+                break;
+            case command_name::run:
+                lucy.run(false);
+                break;
+            default:
+                std::cout << "Command \"" << command << "\" not recognized. Try \"help\" without quotation marks to get a list of avaiable commands, or \"quit\" to quit." << std::endl;
+                break;
+        }
     }
-    unwind_errors(false);
-
-    // ~~ Combat phase ~~
-    std::cout << "~~ Simulations ~~" << std::endl;
-    ropufu::settlers_online::combat_mechanics combat(left, right);
-    ropufu::settlers_online::combat_mechanics snapshot = combat;
-
-    std::cout << "Building left cache..." << std::endl;
-    sequencer_type::pool_type::instance().cache(combat.left().underlying());
-    unwind_errors(true);
-    std::cout << "Building right cache..." << std::endl;
-    sequencer_type::pool_type::instance().cache(combat.right().underlying());
-    unwind_errors(true);
-
-    // ~~ Choose sequencers
-    sequencer_type left_seq = { };
-    sequencer_type right_seq = { };
-    std::size_t count_combat_sims = 10'000;
-    std::size_t count_destruct_sims_per_combat = 50;
-
-    std::cout << "~~ Combat Log ~~" << std::endl;
-    combat.set_do_log(true);
-    combat.execute(left_seq, right_seq);
-    combat = snapshot;
-
-    std::cout << "~~ Monte Carlo ~~" << std::endl;
-    double combat_rounds = 0;
-    
-    std::vector<empirical_measure> left_losses(left.count_groups());
-    for (std::size_t i = 0; i < count_combat_sims; ++i)
-    {
-        ropufu::settlers_online::combat_result result = combat.execute(left_seq, right_seq);
-        std::vector<std::size_t> x = combat.left().calculate_losses();
-        for (std::size_t k = 0; k < x.size(); k++) left_losses[k].observe(x[k]);
-
-        double destruction_rounds = 0;
-        for (std::size_t j = 0; j < count_destruct_sims_per_combat; ++j) destruction_rounds += combat.destruct(left_seq, right_seq);
-        destruction_rounds /= count_destruct_sims_per_combat;
-
-        combat_rounds += result.number_of_rounds() + destruction_rounds;
-        combat = snapshot;
-    }
-    combat_rounds /= count_combat_sims;
-    
-    std::cout << "Rounds = " << combat_rounds << std::endl;
-    for (std::size_t k = 0; k < left.count_groups(); k++)
-    {
-        std::cout << "Losses in " << left[k].type().names().front() << ":" << std::endl;
-        std::cout << left_losses[k] << std::endl;
-    }
-
-    unwind_errors(false);
     return 0;
 }
