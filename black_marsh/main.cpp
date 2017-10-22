@@ -3,6 +3,7 @@
 
 #include "turtle.hpp"
 #include "../settlers_online/char_string.hpp"
+#include "../settlers_online/unit_faction.hpp"
 
 #include <chrono> // std::chrono::steady_clock, std::chrono::duration_cast
 #include <cstddef> // std::size_t
@@ -11,6 +12,7 @@
 #include <string> // std::string, std::to_string, std::getline, std::stoi
 
 // ~~ Singleton types ~~
+using unit_faction = ropufu::settlers_online::unit_faction;
 using unit_database = ropufu::settlers_online::unit_database;
 using char_string = ropufu::settlers_online::char_string;
 using quiet_error = ropufu::aftermath::quiet_error;
@@ -46,31 +48,6 @@ If for some reason you want to quit, type "exit" or "quit" or "q".
 )?";
 }
 
-void help()
-{
-    std::cout << R"?(
-    Command Name   | Description
-==============================================================
-    quit, q, exit  | Exit the program.
-    help, h, ?     | Display help.
-    units, u       | Lists all units.
-    left, l        | Get or set left army.
-    right, r       | Get or set right army.
-    n              | Gets or sets the number of simulations.
-    log            | Displays one battle report.
-    run            | Executes the simulations.
-==============================================================
-Commands with get or set option will take an optional argument to set the
-value of corresponding parameter.
-
-You can also run the program with arguments: "left army" "string army" [/s]
-The first two are required (don't omit the quotation marks) and will
-automatically populate the left and right armies.
-The third is optional and may be one of: /l /r. When provided, the program
-will automatically execute "log" for /l, or "run" for 'r', and then quit. 
-)?";
-}
-
 enum struct command_name
 {
     not_recognized,
@@ -98,7 +75,7 @@ command_name parse_command(const std::string& command, std::string& argument)
 
     if (key == "quit" || key == "q" || key == "exit") return command_name::quit;
     if (key == "help" || key == "h" || key == "?") return command_name::help;
-    if (key == "units" || key == "u") return command_name::units;
+    if (key == "units" || key == "unit" || key == "u") return command_name::units;
     if (key == "left" || key == "l") return command_name::left;
     if (key == "right" || key == "r") return command_name::right;
     if (key == "n") return command_name::n;
@@ -106,6 +83,68 @@ command_name parse_command(const std::string& command, std::string& argument)
     if (key == "run") return command_name::run;
 
     return command_name::not_recognized;
+}
+
+void help(const std::string& argument)
+{
+    std::string dummy { };
+    command_name command = parse_command(argument, dummy);
+    switch (command)
+    {
+        case command_name::units:
+            std::cout << "You can either type \"units\" to display all units, or \"units <faction name>\"," << std::endl << "where faction is one of:" << std::endl;
+            for (std::size_t i = 0; i < ropufu::settlers_online::enum_capacity<unit_faction>::value; i++)
+            {
+                std::string faction_name = std::to_string(static_cast<unit_faction>(i));
+                if (faction_name.length() > 2) std::cout << '\t' << faction_name << std::endl;
+            }
+            break;
+        default:
+        std::cout << R"?(
+    Command Name   | Description
+==============================================================
+    quit, q, exit  | Exit the program.
+    help, h, ?     | Display help.
+    units, u       | Lists units from a specified faction.
+    left, l        | Get or set left army.
+    right, r       | Get or set right army.
+    n              | Gets or sets the number of simulations.
+    log            | Displays one battle report.
+    run            | Executes the simulations.
+==============================================================
+Commands with get or set option will take an optional argument to set the
+value of corresponding parameter.
+
+You can also run the program with arguments: "left army" "string army" [/s]
+The first two are required (don't omit the quotation marks) and will
+automatically populate the left and right armies.
+The third is optional and may be one of: /l /r. When provided, the program
+will automatically execute "log" for /l, or "run" for 'r', and then quit. 
+)?";
+            break;
+    }
+}
+
+void display_units(const std::string& faction_name)
+{
+    unit_faction faction = unit_faction::general;
+    bool do_take_all = !ropufu::settlers_online::try_parse(faction_name, faction);
+    for (const auto& pair : unit_database::instance().data())
+    {
+        const ropufu::settlers_online::unit_type& u = pair.second;
+        if (do_take_all || u.faction() == faction)
+        {
+            bool is_first = true;
+            std::cout << '\t';
+            for (const std::string& name : u.names())
+            {
+                if (!is_first) std::cout << ", ";
+                std::cout << name;
+                is_first = false;
+            }
+            std::cout << std::endl;
+        }
+    }
 }
 
 std::int32_t quit()
@@ -123,6 +162,12 @@ std::string read_line()
 
 std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
 {
+    if (!ropufu::settlers_online::black_marsh::turtle::is_config_valid())
+    {
+        std::cout << "Failed to read config file." << std::endl;
+        return 1;
+    }
+
     ropufu::settlers_online::black_marsh::turtle lucy { };
     if (argc > 2)
     {
@@ -161,19 +206,23 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
         {
             case command_name::quit: return quit();
             case command_name::help:
-                help();
+                help(argument);
+                break;
+            case command_name::units:
+                display_units(argument);
                 break;
             case command_name::left:
-                if (argument.empty()) std::cout << lucy.left() << std::endl;
-                else lucy.parse_left(argument);
+                if (!argument.empty()) lucy.parse_left(argument);
+                std::cout << "Left army: " << lucy.left() << std::endl;
+                if (!(lucy.left().empty() || lucy.left().has(unit_faction::general))) std::cout << "Warning! Left army does not have any generals. Type \"units general\" for suggestions." << std::endl;
                 break;
             case command_name::right:
-                if (argument.empty()) std::cout << lucy.right() << std::endl;
-                else lucy.parse_right(argument);
+                if (!argument.empty()) lucy.parse_right(argument);
+                std::cout << "Right army: " << lucy.right() << std::endl;
                 break;
             case command_name::n:
-                if (argument.empty()) std::cout << lucy.simulation_count() << std::endl;
-                else lucy.set_simulation_count(static_cast<std::size_t>(std::stol(argument)));
+                if (!argument.empty()) lucy.set_simulation_count(static_cast<std::size_t>(std::stol(argument)));
+                std::cout << "Number of simulations: " << lucy.simulation_count() << std::endl;
                 break;
             case command_name::log:
                 lucy.run(true);
@@ -182,7 +231,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
                 lucy.run(false);
                 break;
             default:
-                std::cout << "Command \"" << command << "\" not recognized. Try \"help\" without quotation marks to get a list of avaiable commands, or \"quit\" to quit." << std::endl;
+                std::cout << "Command \"" << command << "\" not recognized. Try \"help\" to get a list of avaiable commands, or \"quit\" to quit." << std::endl;
                 break;
         }
     }

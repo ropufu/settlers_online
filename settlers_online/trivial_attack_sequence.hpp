@@ -26,8 +26,9 @@ namespace ropufu
              */
             bool peek_do_high_damage(const unit_type& unit) noexcept
             {
-                if (unit.accuracy() == 0) return false;
-                if (unit.accuracy() == 1) return true;
+                double x = unit.damage().accuracy();
+                if (x == 0) return false;
+                if (x == 1) return true;
                 return is_always_high;
             }
             
@@ -37,8 +38,9 @@ namespace ropufu
              */
             std::size_t peek_count_high_damage(const unit_type& unit, std::size_t count_units) noexcept
             {
-                if (unit.accuracy() == 0) return 0;
-                if (unit.accuracy() == 1) return count_units;
+                double x = unit.damage().accuracy();
+                if (x == 0) return 0;
+                if (x == 1) return count_units;
                 return is_always_high ? count_units : 0;
             }
 
@@ -47,8 +49,9 @@ namespace ropufu
              */
             bool peek_do_splash(const unit_type& unit) noexcept
             {
-                if (unit.splash_chance() == 0) return false;
-                if (unit.splash_chance() == 1) return true;
+                double x = unit.damage().splash_chance();
+                if (x == 0) return false;
+                if (x == 1) return true;
                 return is_always_splash;
             }
 
@@ -57,8 +60,9 @@ namespace ropufu
              */
             bool did_last_splash(const unit_type& unit) noexcept
             {
-                if (unit.splash_chance() == 0) return false;
-                if (unit.splash_chance() == 1) return true;
+                double x = unit.damage().splash_chance();
+                if (x == 0) return false;
+                if (x == 1) return true;
                 return is_always_splash;
             }
         };

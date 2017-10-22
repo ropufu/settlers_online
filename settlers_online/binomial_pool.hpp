@@ -51,8 +51,8 @@ namespace ropufu
                     if (count == 0) continue; // Skip empty groups.
 
                     const unit_type& t = g.type(); // Unit type in the group.
-                    double accuracy = t.accuracy(); // Accuracy of the units.
-                    double splash_chance = t.splash_chance(); // Splash chance of the units.
+                    double accuracy = t.damage().accuracy(); // Accuracy of the units.
+                    double splash_chance = t.damage().splash_chance(); // Splash chance of the units.
 
                     // Bernoulli samplers for damage and splash.
                     binomial_distribution_type bernoulli_for_damage(1, accuracy);

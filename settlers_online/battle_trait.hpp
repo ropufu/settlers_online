@@ -5,7 +5,6 @@
 #include "enum_array.hpp"
 
 #include <cstddef> // std::size_t
-#include <cstdint> // std::int32_t
 #include <string> // std::string, std::to_string
 
 namespace ropufu
@@ -20,9 +19,9 @@ namespace ropufu
         enum class battle_trait : std::size_t
         {
             none = 0,
-            dazzle = 1,
-            intercept = 2,
-            explosive_ammunition = 3
+            dazzle = 1,              // Enemy accuracy is reduced to 0%.
+            intercept = 2,           // Enemy units deal 5% less damage and their ability \c do_attack_weakest_target is ignored.
+            explosive_ammunition = 3 // Ranged units get \c do_attack_weakest_target and 100\% \c splash_chance.
         };
 
         /** Mark \c battle_trait as suitable for \c enum_array storage. */

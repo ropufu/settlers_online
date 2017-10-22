@@ -5,6 +5,7 @@
 #include "../settlers_online/army.hpp"
 #include "../settlers_online/battle_phase.hpp"
 #include "../settlers_online/battle_trait.hpp"
+#include "../settlers_online/damage.hpp"
 #include "../settlers_online/unit_category.hpp"
 #include "../settlers_online/unit_faction.hpp"
 #include "../settlers_online/unit_group.hpp"
@@ -67,7 +68,7 @@ namespace ropufu
                 settlers_online::unit_type u(
                     id, name, initiative,
                     fac::non_player_adventure, cat::artillery, experience, capacity,
-                    hit_points, min_damage, max_damage, accuracy, splash_chance);
+                    hit_points, settlers_online::detail::damage(min_damage, max_damage, accuracy, splash_chance));
                 u.set_trait(bat::dazzle, this->m_seed % 4 == 0);
                 u.set_trait(bat::intercept, this->m_seed % 5 == 0);
 

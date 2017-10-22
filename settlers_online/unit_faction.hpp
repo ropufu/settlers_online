@@ -21,7 +21,7 @@ namespace ropufu
             general = 2,    // Generals / champions.
             expedition = 3, // Combat academy (expedition) units.
             common = 4,     // Common barracks units.
-            elite = 5,      // Elite barracks units.
+            elite = 5       // Elite barracks units.
         };
 
         /** Mark \c unit_faction as suitable for \c enum_array storage. */

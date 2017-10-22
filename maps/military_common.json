@@ -46,7 +46,8 @@
             "low damage": 20,
             "high damage": 40,
             "accuracy": 0.9,
-            "experience when killed": 20
+            "experience when killed": 20,
+            "special abilities": [ "cleave" ]
         },
         {
             "id": 5,
@@ -72,7 +73,7 @@
             "high damage": 40,
             "accuracy": 0.8,
             "experience when killed": 3,
-            "special abilities": [ "tower bonus" ]
+            "special abilities": [ "tower bonus", "rapid fire" ]
         },
         {
             "id": 7,
@@ -85,7 +86,7 @@
             "high damage": 60,
             "accuracy": 0.8,
             "experience when killed": 8,
-            "special abilities": [ "tower bonus" ]
+            "special abilities": [ "tower bonus", "sniper training" ]
         },
         {
             "id": 8,

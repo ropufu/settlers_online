@@ -6,15 +6,18 @@
 
 #include "attack_sequence.hpp"
 #include "battle_trait.hpp"
+#include "battle_skill.hpp"
 #include "combat_result.hpp"
+#include "damage.hpp"
 #include "enum_array.hpp"
 #include "special_ability.hpp"
 #include "typedef.hpp"
 #include "unit_category.hpp"
+#include "unit_faction.hpp"
 #include "unit_group.hpp"
 #include "unit_type.hpp"
 
-#include <algorithm>
+#include <algorithm> // std::sort
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -38,28 +41,22 @@ namespace ropufu
             //friend struct combat_mechanics;
 
         private:
-            template <typename t_data_type>
-            using cat_array = enum_array<unit_category, t_data_type>;
-
             std::vector<unit_group> m_groups; // Unit groups, sorted by \c id.
             std::vector<mask_type> m_metagroup_masks; // For each non-singleton metagroup store its mask (default-sorted).
             std::size_t m_camp_hit_points; // Determines the defensive capabilities of the army.
+            double m_tower_damage_reduction = 0.0;  // Reduce (multiplicative) damage dealt by enemy to units with \c special_abilities::tower_bonus.
             // ~~ Permutations of <m_groups> ~~
             aftermath::algebra::permutation m_order_original; // Original permutation.
             aftermath::algebra::permutation m_order_by_id;    // Identity permutation.
             aftermath::algebra::permutation m_order_by_hp;    // Permutation when defending agains units with \c do_attack_weakest_target.
             // ~~ Battle modifiers ~~
-            double m_frenzy_bonus = 0.0;            // Increases (multiplicative) the attack damage of this army for every combat round past the first.
-            double m_direct_damage_reduction = 0.0; // Reduce (multiplicative) damage dealt by enemy.
-            double m_tower_damage_reduction = 0.0;  // Reduce (multiplicative) damage dealt by enemy to units with \c special_abilities::tower_bonus.
-            double m_boss_health_reduction = 0.0;   // Reduce (multiplicative) the \c hit_points of enemy bosses.
+            double m_frenzy_bonus = 0.0; // Increases (multiplicative) the attack damage of this army for every combat round past the first.
+            enum_array<battle_skill, std::size_t> m_skills = { }; // Skills affecting various aspects of the battle.
+            // ~~ Traits ~~
+            // If at least one unit in the army has it, it kicks in.
             bool m_do_dazzle = false;               // Enemy accuracy is reduced to 0%.
-            bool m_do_intercept = false;            // Enemy ability \c do_attack_weakest_target is ignored.
+            bool m_do_intercept = false;            // Enemy units deal 5% less damage and their ability \c do_attack_weakest_target is ignored.
             bool m_do_explosive_ammunition = false; // Ranged units get \c do_attack_weakest_target and 100\% \c splash_chance.
-            cat_array<double> m_accuracy_bonus;         // Increases (additive) the \c accuracy by category.
-            cat_array<double> m_splash_bonus;           // Increases (additive) the \c splash_chance by category.
-            cat_array<std::size_t> m_low_damage_bonus;  // Increases (additive) the \c low_damage by category.
-            cat_array<std::size_t> m_high_damage_bonus; // Increases (additive) the \c high_damage by category.
 
         public:
             /** An empty army. */
@@ -82,6 +79,11 @@ namespace ropufu
             /** Groups (ordered by \c id). */
             std::vector<unit_group>& groups() noexcept { return this->m_groups; }
 
+            bool empty() const noexcept { return this->m_groups.empty(); }
+
+            bool has(unit_faction faction) const noexcept;
+            bool has(unit_category category) const noexcept;
+
             /** Discard the latest \c snapshot and record the current state of the army. */
             void snapshot()
             {
@@ -96,28 +98,6 @@ namespace ropufu
             /** Camp hit points for destruction purposes. */
             void set_camp_hit_points(std::size_t value) noexcept { this->m_camp_hit_points = value; }
 
-            /** Increases (multiplicative) the attack damage of this army for every combat round past the first. */
-            double frenzy_bonus() const noexcept { return this->m_frenzy_bonus; }
-            /** @brief Increases (multiplicative) the attack damage of this army for every combat round past the first.
-             *  @exception std::out_of_range \p value is not in the interval [0, 1].
-             */
-            void set_frenzy_bonus(double value)
-            {
-                if (value < 0.0 || value > 1.0) throw std::out_of_range("<value> must be in the range from 0 to 1.");
-                this->m_frenzy_bonus = value;
-            }
-
-            /** Reduce (multiplicative) damage dealt by enemy. */
-            double direct_damage_reduction() const noexcept { return this->m_direct_damage_reduction; }
-            /** @brief Reduce (multiplicative) damage dealt by enemy.
-             *  @exception std::out_of_range \p value is not in the interval [0, 1].
-             */
-            void set_direct_damage_reduction(double value)
-            {
-                if (value < 0.0 || value > 1.0) throw std::out_of_range("<value> must be in the range from 0 to 1.");
-                this->m_direct_damage_reduction = value; 
-            }
-
             /** Reduce (multiplicative) damage dealt by enemy to units with \c special_abilities::tower_bonus. */
             double tower_damage_reduction() const noexcept { return this->m_tower_damage_reduction; }
             /** @brief Reduce (multiplicative) damage dealt by enemy to units with \c special_abilities::tower_bonus.
@@ -129,60 +109,30 @@ namespace ropufu
                 this->m_tower_damage_reduction = value; 
             }
 
-            /** Reduce (multiplicative) the <hit_points> of enemy bosses. */
-            double boss_health_reduction() const noexcept { return this->m_boss_health_reduction; }
-            /** @brief Reduce (multiplicative) the <hit_points> of enemy bosses.
+            /** Increases (multiplicative) the attack damage of this army for every combat round past the first. */
+            double frenzy_bonus() const noexcept { return this->m_frenzy_bonus; }
+            /** @brief Increases (multiplicative) the attack damage of this army for every combat round past the first.
              *  @exception std::out_of_range \p value is not in the interval [0, 1].
              */
-            void set_boss_health_reduction(double value)
+            void set_frenzy_bonus(double value)
             {
-                if (value < 0.0 || value > 1.0) throw std::out_of_range("<value> must be in the range from 0 to 1.");
-                this->m_boss_health_reduction = value; 
+                if (value < 0.0) throw std::out_of_range("<value> must be non-negative.");
+                this->m_frenzy_bonus = value;
             }
+
+            /** Skills affecting various aspects of the battle. */
+            const enum_array<battle_skill, std::size_t>& skills() const noexcept { return this->m_skills; }
+            /** The level of the specified battle skill. */
+            std::size_t level(battle_skill skill) const noexcept { return this->m_skills[skill]; }
+            /** Skills affecting various aspects of the battle. */
+            void set_level(battle_skill skill, std::size_t value) noexcept { this->m_skills[skill] = value; }
 
             /** Indicates that the enemy accuracy is reduced to 0. */
             bool do_dazzle() const noexcept { return this->m_do_dazzle; }
-            /** Indicates that the enemy ability \c do_attack_weakest_target is ignored. */
+            /** Indicates that enemy units deal 5% less damage and their ability \c do_attack_weakest_target is ignored. */
             bool do_intercept() const noexcept { return this->m_do_intercept; }
             /** Indicates that ranged units get \c do_attack_weakest_target. */
             bool do_explosive_ammunition() const noexcept { return this->m_do_explosive_ammunition; }
-
-            /** Set the special battle modifiers. */
-            void set_special_modifiers(bool dazzle, bool intercept, bool explosive_ammunition) noexcept
-            {
-                this->m_do_dazzle = dazzle;
-                this->m_do_intercept = intercept;
-                this->m_do_explosive_ammunition = explosive_ammunition;
-            }
-
-            /** Increases (additive) the \c accuracy by category. */
-            const cat_array<double>& accuracy_bonus() const noexcept { return this->m_accuracy_bonus; }
-            /** Increases (additive) the \c splash_chance by category. */
-            const cat_array<double>& splash_bonus() const noexcept { return this->m_splash_bonus; }
-            /** Increases (additive) the \c low_damage by category. */
-            const cat_array<std::size_t>& low_damage_bonus() const noexcept { return this->m_low_damage_bonus; }
-            /** Increases (additive) the \c high_damage by category. */
-            const cat_array<std::size_t>& high_damage_bonus() const noexcept { return this->m_high_damage_bonus; }
-
-            /** Increases (additive) the \c accuracy for a specific category. */
-            double accuracy_bonus_for(unit_category category) const noexcept { return this->m_accuracy_bonus[category]; }
-            /** Increases (additive) the \c accuracy for a specific category. */
-            void set_accuracy_bonus_for(unit_category category, double value) noexcept { this->m_accuracy_bonus[category] = value; }
-
-            /** Increases (additive) the \c splash_chance for a specific category. */
-            double splash_bonus_for(unit_category category) const noexcept { return this->m_splash_bonus[category]; }
-            /** Increases (additive) the \c splash_chance for a specific category. */
-            void set_splash_bonus_for(unit_category category, double value) noexcept { this->m_splash_bonus[category] = value; }
-
-            /** Increases (additive) the \c low_damage for a specific category. */
-            std::size_t low_damage_bonus_for(unit_category category) const noexcept { return this->m_low_damage_bonus[category]; }
-            /** Increases (additive) the \c low_damage for a specific category. */
-            void set_low_damage_bonus_for(unit_category category, std::size_t value) noexcept { this->m_low_damage_bonus[category] = value; }
-
-            /** Increases (additive) the \c high_damage for a specific category. */
-            std::size_t high_damage_bonus_for(unit_category category) const noexcept { return this->m_high_damage_bonus[category]; }
-            /** Increases (additive) the \c high_damage for a specific category. */
-            void set_high_damage_bonus_for(unit_category category, std::size_t value) noexcept { this->m_high_damage_bonus[category] = value; }
 
             /** Unit types in each group (ordered by \c id). */
             std::vector<unit_type> types() const noexcept;
@@ -247,17 +197,12 @@ namespace ropufu
                 
                 return
                     this->m_camp_hit_points == other.m_camp_hit_points &&
+                    this->m_skills == other.m_skills &&
                     this->m_frenzy_bonus == other.m_frenzy_bonus &&
-                    this->m_direct_damage_reduction == other.m_direct_damage_reduction &&
                     this->m_tower_damage_reduction == other.m_tower_damage_reduction &&
-                    this->m_boss_health_reduction == other.m_boss_health_reduction &&
                     this->m_do_dazzle == other.m_do_dazzle &&
                     this->m_do_intercept == other.m_do_intercept &&
-                    this->m_do_explosive_ammunition == other.m_do_explosive_ammunition &&
-                    this->m_accuracy_bonus == other.m_accuracy_bonus &&
-                    this->m_splash_bonus == other.m_splash_bonus &&
-                    this->m_low_damage_bonus == other.m_low_damage_bonus &&
-                    this->m_high_damage_bonus == other.m_high_damage_bonus;
+                    this->m_do_explosive_ammunition == other.m_do_explosive_ammunition;
             }
 
             /** Checks two armies for inequality. */
@@ -292,8 +237,7 @@ namespace ropufu
 
         army::army(const std::vector<unit_group>& groups, std::size_t camp_hit_points)
             : m_groups(0), m_metagroup_masks(0), m_camp_hit_points(camp_hit_points),
-            m_order_by_id(groups.size()), m_order_by_hp(groups.size()),
-            m_accuracy_bonus(), m_splash_bonus(), m_low_damage_bonus(), m_high_damage_bonus()
+            m_order_by_id(groups.size()), m_order_by_hp(groups.size())
         {
             // ~~ Validation ~~
             if (groups.size() > army_capacity) throw std::out_of_range("<mask_type> not large enought to store this army.");
@@ -321,12 +265,6 @@ namespace ropufu
             this->m_order_original = order_by_id.invert();
             this->m_order_by_hp.order_by(
                 this->m_groups, [](const unit_group& x) { return x.type(); }, unit_type::compare_by_hit_points);
-
-            // Initialize category arrays.
-            this->m_accuracy_bonus.fill(0);
-            this->m_splash_bonus.fill(0);
-            this->m_low_damage_bonus.fill(0);
-            this->m_high_damage_bonus.fill(0);
 
             // Count non-singleton metagroups, and build traits.
             std::unordered_map<std::int_fast32_t, std::size_t> metagroup_ids; // List of used metagroup ids and corresponding counts.
@@ -385,6 +323,18 @@ namespace ropufu
             for (const unit_group& g : this->m_groups) value += g.count();
             return value;
         }
+
+        bool army::has(unit_faction faction) const noexcept
+        {
+            for (const unit_group& g : this->m_groups) if (g.type().is(faction)) return true;
+            return false;
+        }
+
+        bool army::has(unit_category category) const noexcept
+        {
+            for (const unit_group& g : this->m_groups) if (g.type().is(category)) return true;
+            return false;
+        }
     }
 }
 
@@ -407,20 +357,13 @@ namespace std
             result_type h =
                 size_hash(x.camp_hit_points()) ^
                 double_hash(x.frenzy_bonus()) ^
-                double_hash(x.direct_damage_reduction()) ^
                 double_hash(x.tower_damage_reduction()) ^
-                double_hash(x.boss_health_reduction()) ^
                 bool_hash(x.do_dazzle()) ^
                 bool_hash(x.do_intercept()) ^
                 bool_hash(x.do_explosive_ammunition());
 
             for (const auto& g : x.groups()) h ^= group_hash(g);
             for (const auto& m : x.metagroup_masks()) h ^= mask_hash(m);
-
-            for (double y : x.accuracy_bonus()) h ^= double_hash(y);
-            for (double y : x.splash_bonus())   h ^= double_hash(y);
-            for (std::size_t y : x.low_damage_bonus()) h ^= size_hash(y);
-            for (std::size_t y : x.high_damage_bonus()) h ^= size_hash(y);
 
             return h;
         }

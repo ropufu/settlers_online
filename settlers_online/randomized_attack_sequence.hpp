@@ -42,7 +42,7 @@ namespace ropufu
              */
             bool peek_do_high_damage(const unit_type& unit) noexcept
             {
-                double x = unit.accuracy();
+                double x = unit.damage().accuracy();
                 if (x == 0) return false;
                 if (x == 1) return true;
                 return this->m_pool.bernoulli_sampler(x)(this->m_engine) == 1;
@@ -54,7 +54,7 @@ namespace ropufu
              */
             std::size_t peek_count_high_damage(const unit_type& unit, std::size_t count_units) noexcept
             {
-                double x = unit.accuracy();
+                double x = unit.damage().accuracy();
                 if (x == 0) return 0;
                 if (x == 1) return count_units;
                 return this->m_pool.binomial_lookup_sampler(x)(count_units, this->m_engine);
@@ -65,7 +65,7 @@ namespace ropufu
              */
             bool peek_do_splash(const unit_type& unit) noexcept
             {
-                double x = unit.splash_chance();
+                double x = unit.damage().splash_chance();
                 if (x == 0) return false;
                 if (x == 1) return true;
                 this->m_did_last_splash = (this->m_pool.bernoulli_sampler(x)(this->m_engine) == 1);
@@ -77,7 +77,7 @@ namespace ropufu
              */
             bool did_last_splash(const unit_type& unit) noexcept
             {
-                double x = unit.splash_chance();
+                double x = unit.damage().splash_chance();
                 if (x == 0) return false;
                 if (x == 1) return true;
                 return this->m_did_last_splash;

@@ -4,10 +4,12 @@
 
 #include "battle_phase.hpp"
 #include "battle_trait.hpp"
-#include "enum_array.hpp"
 #include "special_ability.hpp"
 #include "unit_category.hpp"
 #include "unit_faction.hpp"
+
+#include "enum_array.hpp"
+#include "damage.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -34,8 +36,8 @@ namespace ropufu
             std::size_t m_id = 0; // Used for attack order.
             std::vector<std::string> m_names = { };      // Names.
             flags_t<battle_phase> m_attack_phases = { }; // Determines phases (sub-rounds) when the unit attacks within each round.
-            flags_t<battle_trait> m_traits = { };        // Special traits that affect the entire battle.
             flags_t<special_ability> m_abilities = { };  // Special abilities.
+            flags_t<battle_trait> m_traits = { };        // Special traits that affect the entire battle.
             
             unit_faction m_faction = unit_faction::non_player_adventure; // Unit faction.
             unit_category m_category = unit_category::unknown; // Unit category.
@@ -43,28 +45,20 @@ namespace ropufu
             std::size_t m_capacity = 0;    // The number of units this one can lead (typically used for "generals").
 
             std::size_t m_hit_points = 0;  // Health.
-            std::size_t m_low_damage = 0;  // Low damage.
-            std::size_t m_high_damage = 0; // High damage.
-            double m_accuracy = 0;         // Probability of high damage.
-            double m_splash_chance = 0;    // Probability of dealing splash damage.
+            detail::damage m_damage = { }; // Damage.
 
         public:
             /** Default constructor intended for initializing arrays etc. */
             unit_type() noexcept { }
 
-            /** @brief Detailed constructor.
-             *  @exception std::logic_error \p low_damage exceeds \p high_damage.
-             *  @exception std::out_of_range \p accuracy is not in the interval [0, 1].
-             *  @exception std::out_of_range \p splash_chance is not in the interval [0, 1].
-             */
+            /** Detailed constructor. */
             unit_type(std::size_t id, const std::string& name, battle_phase initiative,
                 unit_faction faction, unit_category category, std::size_t experience, std::size_t capacity,
-                std::size_t hit_points, std::size_t low_damage, std::size_t high_damage, double accuracy, double splash_chance)
+                std::size_t hit_points, detail::damage damage)
                 : m_id(id), m_names({ name }), m_attack_phases({ initiative }),
                 m_faction(faction), m_category(category), m_experience(experience), m_capacity(capacity),
-                m_hit_points(hit_points)
+                m_hit_points(hit_points), m_damage(damage)
             {
-                this->set_damage(low_damage, high_damage, accuracy, splash_chance);
             }
 
             /** Number to determine attack order. */
@@ -80,22 +74,22 @@ namespace ropufu
             /** Number to determine which phase (sub-round) the unit attacks. */
             const flags_t<battle_phase>& attack_phases() const noexcept { return this->m_attack_phases; }
             /** Number to determine which phase (sub-round) the unit attacks. */
-            void set_phase(battle_phase phase, bool value) noexcept { this->m_attack_phases[phase] = value; }
-
-            /** Special traits that affect the entire battle. */
-            const flags_t<battle_trait>& traits() const noexcept { return this->m_traits; }
-            /** Special traits that affect the entire battle. */
-            void set_trait(battle_trait trait, bool value) noexcept { this->m_traits[trait] = value; }
+            void set_attack_phase(battle_phase phase, bool value) noexcept { this->m_attack_phases[phase] = value; }
 
             /** Special ability that affects this unit's performance in battle. */
             const flags_t<special_ability>& abilities() const noexcept { return this->m_abilities; }
             /** Special ability that affects this unit's performance in battle. */
             void set_ability(special_ability ability, bool value) noexcept { this->m_abilities[ability] = value; }
+
+            /** Special traits that affect the entire battle. */
+            const flags_t<battle_trait>& traits() const noexcept { return this->m_traits; }
+            /** Special traits that affect the entire battle. */
+            void set_trait(battle_trait trait, bool value) noexcept { this->m_traits[trait] = value; }
             
-            /** Checks whether this unit type has the specified battle trait. */
-            bool has(battle_trait trait) const noexcept { return this->m_traits.has(trait); }
             /** Checks whether this unit type has the specified special ability. */
             bool has(special_ability ability) const noexcept { return this->m_abilities.has(ability); }
+            /** Checks whether this unit type has the specified battle trait. */
+            bool has(battle_trait trait) const noexcept { return this->m_traits.has(trait); }
 
             /** Unit faction (enemy / player-controlled). */
             unit_faction faction() const noexcept { return this->m_faction; }
@@ -106,6 +100,11 @@ namespace ropufu
             unit_category category() const noexcept { return this->m_category; }
             /** Category (classification) of the unit. */
             void set_category(unit_category value) noexcept { this->m_category = value; }
+            
+            /** Checks whether this unit type has the specified special ability. */
+            bool is(unit_faction faction) const noexcept { return this->m_faction == faction; }
+            /** Checks whether this unit type has the specified battle trait. */
+            bool is(unit_category category) const noexcept { return this->m_category == category; }
 
             /** Experience gained by attacker when this unit is defeated. */
             std::size_t experience() const noexcept { return this->m_experience; }
@@ -122,62 +121,10 @@ namespace ropufu
             /** Number of hit points (health) of unit type. */
             void set_hit_points(std::size_t value) noexcept { this->m_hit_points = value; }
 
-            /** Low damage. */
-            std::size_t low_damage() const noexcept { return this->m_low_damage; }
-            /** High damage. */
-            std::size_t high_damage() const noexcept { return this->m_high_damage; }
-            /** Probability of dealing high damage rather than low damage. */
-            double accuracy() const noexcept { return this->m_accuracy; }
-            /** Probability of dealing splash damage. */
-            double splash_chance() const noexcept { return this->m_splash_chance; }
-
-            /** @brief Offensive capabilities of the unit.
-             *  @param low_damage Low damage.
-             *  @param high_damage High damage.
-             *  @exception std::logic_error \p low_damage exceeds \p high_damage.
-             */
-            void set_damage(std::size_t low_damage, std::size_t high_damage)
-            {
-                if (high_damage < low_damage) throw std::logic_error("<low_damage> cannot exceed <high_damage>.");
-
-                this->m_low_damage = low_damage;
-                this->m_high_damage = high_damage;
-            }
-
-            /** @brief Offensive capabilities of the unit.
-             *  @param low_damage Low damage.
-             *  @param high_damage High damage.
-             *  @exception std::logic_error \p low_damage exceeds \p high_damage.
-             *  @exception std::out_of_range \p accuracy is not in the interval [0, 1].
-             */
-            void set_damage(std::size_t low_damage, std::size_t high_damage, double accuracy)
-            {
-                if (high_damage < low_damage) throw std::logic_error("<low_damage> cannot exceed <high_damage>.");
-                if (accuracy < 0.0 || accuracy > 1.0) throw std::out_of_range("<accuracy> must be in the range from 0 to 1.");
-
-                this->m_low_damage = low_damage;
-                this->m_high_damage = high_damage;
-                this->m_accuracy = accuracy;
-            }
-
-            /** @brief Offensive capabilities of the unit.
-             *  @param low_damage Low damage.
-             *  @param high_damage High damage.
-             *  @exception std::logic_error \p low_damage exceeds \p high_damage.
-             *  @exception std::out_of_range \p accuracy is not in the interval [0, 1].
-             *  @exception std::out_of_range \p splash_chance is not in the interval [0, 1].
-             */
-            void set_damage(std::size_t low_damage, std::size_t high_damage, double accuracy, double splash_chance)
-            {
-                if (high_damage < low_damage) throw std::logic_error("<low_damage> cannot exceed <high_damage>.");
-                if (accuracy < 0.0 || accuracy > 1.0) throw std::out_of_range("<accuracy> must be in the range from 0 to 1.");
-                if (splash_chance < 0.0 || splash_chance > 1.0) throw std::out_of_range("<splash_chance> must be in the range from 0 to 1.");
-
-                this->m_low_damage = low_damage;
-                this->m_high_damage = high_damage;
-                this->m_accuracy = accuracy;
-                this->m_splash_chance = splash_chance;
-            }
+            /** Offensive capabilities of the unit. */
+            const detail::damage& damage() const noexcept { return this->m_damage; }
+            /** Offensive capabilities of the unit. */
+            void set_damage(const detail::damage& value) noexcept { this->m_damage = value; }
 
             /** Determines whether the two objects are in order by id. */
             static bool compare_by_id(const type& x, const type& y) noexcept
@@ -204,17 +151,14 @@ namespace ropufu
                     this->m_id == other.m_id &&
                     //this->m_names == other.m_names &&
                     this->m_attack_phases == other.m_attack_phases &&
-                    this->m_traits == other.m_traits &&
                     this->m_abilities == other.m_abilities &&
+                    this->m_traits == other.m_traits &&
                     this->m_faction == other.m_faction &&
                     this->m_category == other.m_category &&
                     this->m_experience == other.m_experience &&
                     this->m_capacity == other.m_capacity &&
                     this->m_hit_points == other.m_hit_points &&
-                    this->m_low_damage == other.m_low_damage &&
-                    this->m_high_damage == other.m_high_damage &&
-                    this->m_accuracy == other.m_accuracy &&
-                    this->m_splash_chance == other.m_splash_chance;
+                    this->m_damage == other.m_damage;
             }
 
             /** Checks two types for inequality. */
@@ -235,10 +179,11 @@ namespace ropufu
             std::vector<std::string> initiative;
             std::vector<std::string> abilities;
             std::vector<std::string> traits;
+            std::vector<std::string> skills;
 
             for (battle_phase phase : x.attack_phases()) initiative.push_back(std::to_string(phase));
-            for (battle_trait trait : x.traits()) traits.push_back(std::to_string(trait));
             for (special_ability ability : x.abilities()) abilities.push_back(std::to_string(ability));
+            for (battle_trait trait : x.traits()) traits.push_back(std::to_string(trait));
 
             j = nlohmann::json{
                 {"id", x.id()},
@@ -247,10 +192,10 @@ namespace ropufu
                 {"class", std::to_string(x.category())},
                 {"capacity", x.capacity()},
                 {"hit points", x.hit_points()},
-                {"low damage", x.low_damage()},
-                {"high damage", x.high_damage()},
-                {"accuracy", x.accuracy()},
-                {"splash chance", x.splash_chance()},
+                {"low damage", x.damage().low()},
+                {"high damage", x.damage().high()},
+                {"accuracy", x.damage().accuracy()},
+                {"splash chance", x.damage().splash_chance()},
                 {"experience when killed", x.experience()}
             };
 
@@ -291,7 +236,7 @@ namespace ropufu
             for (const std::string& value : phase_names)
             {
                 battle_phase phase;
-                if (try_parse(value, phase)) x.set_phase(phase, true);
+                if (try_parse(value, phase)) x.set_attack_phase(phase, true);
             }
 
             // ~~ Special Abilities ~~
@@ -318,13 +263,13 @@ namespace ropufu
             double accuracy = j.at("accuracy");
             double splash_chance = 0;
             if (j.count("splash chance") != 0) splash_chance = j["splash chance"];
-            x.set_damage(low_damage, high_damage, accuracy, splash_chance);
+            x.set_damage(detail::damage(low_damage, high_damage, accuracy, splash_chance));
 
             // ~~ More ~~
             x.set_id(j.at("id").get<std::size_t>());
             if (j.count("capacity") != 0) x.set_capacity(j["capacity"].get<std::size_t>());
             x.set_hit_points(j.at("hit points").get<std::size_t>());
-        }
+        } // from_json(...)
     }
 }
 
@@ -339,17 +284,17 @@ namespace std
         result_type operator ()(const argument_type& x) const
         {
             std::hash<std::size_t> size_hash = { };
-            std::hash<double> double_hash = { };
             std::hash<ropufu::settlers_online::battle_phase> phase_hash = { };
-            std::hash<ropufu::settlers_online::battle_trait> trait_hash = { };
             std::hash<ropufu::settlers_online::special_ability> ability_hash = { };
+            std::hash<ropufu::settlers_online::battle_trait> trait_hash = { };
             std::hash<ropufu::settlers_online::unit_faction> fac_hash = { };
             std::hash<ropufu::settlers_online::unit_category> cat_hash = { };
+            std::hash<ropufu::settlers_online::detail::damage> damage_hash = { };
 
             result_type result = 0;
             for (ropufu::settlers_online::battle_phase phase : x.attack_phases()) result ^= phase_hash(phase);
-            for (ropufu::settlers_online::battle_trait trait : x.traits()) result ^= trait_hash(trait);
             for (ropufu::settlers_online::special_ability ability : x.abilities()) result ^= ability_hash(ability);
+            for (ropufu::settlers_online::battle_trait trait : x.traits()) result ^= trait_hash(trait);
 
             return
                 size_hash(x.id()) ^
@@ -359,10 +304,7 @@ namespace std
                 size_hash(x.experience()) ^
                 size_hash(x.capacity()) ^
                 size_hash(x.hit_points()) ^
-                size_hash(x.low_damage()) ^
-                size_hash(x.high_damage()) ^
-                double_hash(x.accuracy()) ^
-                double_hash(x.splash_chance());
+                damage_hash(x.damage());
         }
     };
 }

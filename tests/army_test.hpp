@@ -48,15 +48,15 @@ namespace ropufu
                 if (a3 != a1) return false; // Permutations should not affect armies.
                 if (a1 == ax) return false; // Different metagroup mask.
 
-                // Check for original ordering matching.
-                for (std::size_t i = 0; i < groups_b.size(); i++) if (groups_b[i] != a2.in_original(i)) return false;
+                // Check for original  orderingmatching.
+                for (std::size_t i = 0; i < groups_b.size(); i++) if (groups_b[i] != a2[a2.order_original()[i]]) return false;
 
                 // Make sure it is different for different armies.
                 bool is_matched = true;
-                for (std::size_t i = 0; i < groups_a.size(); i++) if (groups_a[i] != a2.in_original(i)) is_matched = false;
+                for (std::size_t i = 0; i < groups_a.size(); i++) if (groups_a[i] != a2[a2.order_original()[i]]) is_matched = false;
                 if (is_matched) return false;
                 is_matched = true;
-                for (std::size_t i = 0; i < groups_b.size(); i++) if (groups_b[i] != a1.in_original(i)) is_matched = false;
+                for (std::size_t i = 0; i < groups_b.size(); i++) if (groups_b[i] != a1[a1.order_original()[i]]) is_matched = false;
                 if (is_matched) return false;
 
                 return true;

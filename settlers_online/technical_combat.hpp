@@ -51,8 +51,8 @@ namespace ropufu
                 // Proceed to next attaking unit.
                 std::size_t attacking_units_remaining = attacking_group.count_at_snapshot() - attacking_unit_index;
 
-                std::size_t effective_min_damage = damage_cast(attacker_t.low_damage(), damage_factor); // Potential effective minumum damage dealt by one attacking unit.
-                std::size_t effective_max_damage = damage_cast(attacker_t.high_damage(), damage_factor); // Potential effective mamimum damage dealt by one attacking unit.
+                std::size_t effective_min_damage = damage_cast(attacker_t.damage().low(), damage_factor); // Potential effective minumum damage dealt by one attacking unit.
+                std::size_t effective_max_damage = damage_cast(attacker_t.damage().high(), damage_factor); // Potential effective mamimum damage dealt by one attacking unit.
                 // Loop through attacking units.
                 while (attacking_units_remaining > 0)
                 {
@@ -72,7 +72,7 @@ namespace ropufu
                     attacking_units_remaining -= count_attackers;
 
                     std::size_t effective_damage = effective_max_damage * count_high_damage + effective_min_damage * (count_attackers - count_high_damage); // Effective damage dealt by the attacker.
-                    std::size_t pure_damage = attacker_t.high_damage() * count_high_damage + attacker_t.low_damage() * (count_attackers - count_high_damage); // Pure damage dealt by the attacker.
+                    std::size_t pure_damage = attacker_t.damage().high() * count_high_damage + attacker_t.damage().low() * (count_attackers - count_high_damage); // Pure damage dealt by the attacker.
                     std::size_t damage_required = inverse_damage_cast(hit_points, damage_factor); // Pure damage required to kill the defending unit.
 
                     // In general, it is not(!) enough to check (effective_damage > hit_points).

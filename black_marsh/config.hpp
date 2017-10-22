@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 
 #include <fstream> // std::ifstream, std::ofstream
+#include <exception> // std::exception
 #include <iostream> // std::ostream
 #include <string> // std::string
 
@@ -22,6 +23,7 @@ namespace ropufu
                 using type = config;
 
             private:
+                bool m_is_good = false;
                 bool m_has_changed = false;
                 std::string m_filename = "";
                 nlohmann::json m_json = { };
@@ -40,15 +42,26 @@ namespace ropufu
                     return os;
                 }
 
+                bool good() const noexcept { return this->m_is_good; }
+
                 /** Read the configuration from a file. */
                 bool read(std::string filename = "./black_marsh.config") noexcept
                 {
                     std::ifstream i(filename); // Try to open the file for reading.
                     if (!i.good()) return false; // Stop on failure.
 
-                    this->m_filename = filename; // Remember the filename.
-                    i >> this->m_json;
-                    return true;
+                    try
+                    {
+                        this->m_filename = filename; // Remember the filename.
+                        i >> this->m_json;
+                        this->m_is_good = true;
+                        return true;
+                    }
+                    catch (const std::exception& /*e*/)
+                    {
+                        this->m_is_good = false;
+                        return false;
+                    }
                 }
                 
                 /** Write the configuration to a file. */

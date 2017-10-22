@@ -10,6 +10,7 @@
 #include "battle_phase.hpp"
 #include "battle_trait.hpp"
 #include "combat_result.hpp"
+#include "damage.hpp"
 #include "enum_array.hpp"
 #include "special_ability.hpp"
 #include "technical_combat.hpp"
@@ -47,11 +48,11 @@ namespace ropufu
                 const unit_type& t = g.type();
                 
                 // Damage factors and suchlike optimization.
-                bool is_never_splash = t.splash_chance() == 0;
-                bool is_always_splash = t.splash_chance() == 1;
+                bool is_never_splash = t.damage().splash_chance() == 0;
+                bool is_always_splash = t.damage().splash_chance() == 1;
                 bool do_ignore_tower_bonus = t.has(special_ability::ignore_tower_bonus);
-                double damage_factor_normal = (1 - other.direct_damage_reduction());
-                double damage_factor_in_tower = (1 - other.direct_damage_reduction()) * (1 - other.tower_damage_reduction());
+                double damage_factor_normal = 1;
+                double damage_factor_in_tower = (1 - other.tower_damage_reduction());
 
                 this->m_damage_factors.reserve(other.count_groups());
                 this->m_is_one_to_one.reserve(other.count_groups());
@@ -63,7 +64,7 @@ namespace ropufu
                     double damage_factor = do_tower_bonus ? damage_factor_in_tower : damage_factor_normal;
                     
                     // Optimize when attacking units with low hit points: each non-splash hit will always kill exactly 1 defending unit.
-                    std::size_t effective_min_damage = damage_cast(t.low_damage(), damage_factor);
+                    std::size_t effective_min_damage = damage_cast(t.damage().low(), damage_factor);
                     // Even though defender has not been conditioned, hit point reduction occurs only for bosses that typically don't come in large groups.
                     bool is_one_to_one = is_never_splash && (effective_min_damage >= defender.type().hit_points());
 
@@ -96,6 +97,7 @@ namespace ropufu
 
         struct conditioned_army
         {
+            using type = conditioned_army;
             template <typename t_data_type>
             using phase_array = enum_array<battle_phase, t_data_type>;
 
@@ -104,6 +106,88 @@ namespace ropufu
             std::vector<std::size_t> m_counts = { }; // Unit counts before the battle began.
             phase_array<std::vector<std::size_t>> m_group_indices = { }; // Indices of units to attack in a given phase.
             std::vector<attack_group_cache> m_caches = { }; // Additional parameters determining how each group will attack the enemy.
+
+            /** @brief Apply the firendly army's skill to a unit.
+             *  @param level The number of books invested in this skill.
+             */
+            static void apply_friendly_skill(unit_type& unit, battle_skill skill, std::size_t level) noexcept
+            {
+                if (level == 0) return;
+                // Level    0   1   2   3   4   ...
+                // Factor   0   0   5   15  30  ...
+                std::size_t square_factor = (level * (level - 1) * 5) / 2;
+                // Level      0  1   2   3    4    ...
+                // Thirds, %  0  33  66  100  133  ...
+                double thirds = fraction_floor(100 * level, static_cast<std::size_t>(3)) / 100.0;
+
+                detail::damage damage_bonus(true); // Quietly coerce all values.
+                switch (skill)
+                {
+                    case battle_skill::juggernaut: // Increases the general's (faction: general) attack damage by 20/40/60. These attacks have a 33/66/100% chance of dealing splash damage.
+                        if (!unit.is(unit_faction::general)) return;
+                        damage_bonus.reset(20 * level, 20 * level, 0, thirds);
+                        break;
+                    case battle_skill::garrison_annex: // Increases the unit capacity (faction: general) by 5/10/15.
+                        if (!unit.is(unit_faction::general)) return;
+                        unit.set_capacity(unit.capacity() + 5 * level);
+                        break;
+                    case battle_skill::lightning_slash: // The general (faction: general) attacks twice per round. That second attack's initiative is \c last_strike.
+                        if (!unit.is(unit_faction::general)) return;
+                        unit.set_attack_phase(battle_phase::last_strike, true);
+                        break;
+                    case battle_skill::unstoppable_charge: // Increases the maximum attack damage of your swift units (faction: cavalry) by 1/2/3 and their attacks have a 33/66/100% chance of dealing splash damage.
+                        if (!unit.is(unit_category::cavalry)) return;
+                        damage_bonus.reset(0, level, 0, thirds);
+                        break;
+                    case battle_skill::weekly_maintenance: // Increases the attack damage of your heavy units (faction: artillery) by 10/20/30.
+                        if (!unit.is(unit_category::artillery)) return;
+                        damage_bonus.reset(10 * level, 10 * level);
+                        break;
+                    case battle_skill::master_planner: // Adds 10% to this army's accuracy.
+                        damage_bonus.reset(0, 0, 0.1, 0);
+                        break;
+                    case battle_skill::rapid_fire: // Increases the maximum attack damage of your Bowmen by 5/10/15.
+                        if (!unit.has(special_ability::rapid_fire)) return;
+                        damage_bonus.reset(0, 5 * level);
+                        break;
+                    case battle_skill::sniper_training: // Increases your Longbowmen's and regular Marksmen's minimum attack damage by 45/85/130% and the maximum by 5/10/15%.
+                        if (!unit.has(special_ability::sniper_training)) return;
+                        damage_bonus.reset(
+                            fraction_floor(level >= 3 ?
+                                (unit.damage().high() * (100 + 5 * level)) :
+                                (unit.damage().low() * (45 * level - square_factor)), static_cast<std::size_t>(100)),
+                            fraction_floor(unit.damage().high() * (5 * level), static_cast<std::size_t>(100)));
+                        break;
+                    case battle_skill::cleave: // Increases the attack damage of Elite Soldiers by 4/8/12 and their attacks have a 33/66/100% chance of dealing splash damage.
+                        if (!unit.has(special_ability::cleave)) return;
+                        damage_bonus.reset(4 * level, 4 * level, 0, thirds);
+                        break;
+                } // switch(...)
+                
+                // Add bonus, quietly coercing.
+                damage_bonus += unit.damage();
+                // Stop quiet coercion.
+                damage_bonus.set_is_quiet(false);
+                // Apply new damage.
+                unit.set_damage(damage_bonus);
+            }
+
+            /** @brief Apply the enemy army's skill to a unit.
+             *  @param level The number of books invested in this skill.
+             */
+            static void apply_enemy_skill(unit_type& unit, battle_skill skill, std::size_t level) noexcept
+            {
+                switch (skill)
+                {
+                    case battle_skill::fast_learner: // Increases the XP gained from enemy units defeated by this army by 10/20/30%.
+                        unit.set_experience(fraction_floor(unit.experience() * (100 + 10 * level), static_cast<std::size_t>(100)));
+                        break;
+                    case battle_skill::overrun: // Decreases the HP of enemy bosses by 8/16/25%.
+                        if (!unit.has(special_ability::overrun)) return;
+                        unit.set_hit_points(fraction_ceiling(unit.hit_points() * (100 - (level >= 3 ? 25 : (8 * level))), static_cast<std::size_t>(100)));
+                        break;
+                }
+            }
 
         public:
             /** @brief Constructs a version of the army \p a conditioned for a fight against \p other.
@@ -136,59 +220,56 @@ namespace ropufu
         conditioned_army::conditioned_army(const army& a, const army& other) noexcept
             : m_army(a), m_counts(a.counts_by_type()), m_group_indices(), m_caches()
         {
-            // Build phase grouping.
-            for (std::size_t i = 0; i < a.count_groups(); i++)
-            {
-                for (battle_phase phase : a[i].type().attack_phases()) this->m_group_indices[phase].push_back(i);
-            }
-
             // Condition groups prior to the battle.
             for (unit_group& g : this->m_army.groups())
             {
+                // Take the type to modify.
                 unit_type t = g.type();
-                unit_category cat = t.category();
 
-                std::size_t hit_points = t.hit_points();
-                std::size_t low_damage = t.low_damage() + this->m_army.low_damage_bonus_for(cat);
-                std::size_t high_damage = t.high_damage() + this->m_army.high_damage_bonus_for(cat);
-                double accuracy = t.accuracy() + this->m_army.accuracy_bonus_for(cat);
-                double splash_chance = t.splash_chance() + this->m_army.splash_bonus_for(cat);
+                // First go through skills.
+                for (const auto& pair : this->m_army.skills())
+                {
+                    type::apply_friendly_skill(t, pair.first, pair.second);
+                    // Increases the attack damage of this army by 10/20/30% for every combat round past the first.
+                    if (pair.first == battle_skill::battle_frenzy) this->m_army.set_frenzy_bonus(0.1 * pair.second);
+                }
+                for (const auto& pair : other.skills()) type::apply_enemy_skill(t, pair.first, pair.second);
 
-                // Trait: explosive ammunition.
-                if (this->m_army.do_explosive_ammunition() && (cat == unit_category::ranged)) 
+                // Take the damage to modify.
+                detail::damage damage = t.damage();
+                // Allow quiet coercion.
+                damage.set_is_quiet(true);
+                // ~~ Traits ~~
+                // Friendly trait: explosive ammunition.
+                if (this->m_army.do_explosive_ammunition() && (t.is(unit_category::ranged))) 
                 {
                     t.set_ability(special_ability::attack_weakest_target, true);
-                    splash_chance = 1.0;
+                    damage.set_splash_chance(1);
                 }
-                // Trait: intercept.
+                // Enemy trait: intercept.
                 if (other.do_intercept())
                 {
                     t.set_ability(special_ability::attack_weakest_target, false);
                     // <intercept_damage_percent> is defined in <battle_trait.hpp>.
-                    low_damage = fraction_ceiling(intercept_damage_percent * low_damage, static_cast<std::size_t>(100));
-                    high_damage = fraction_ceiling(intercept_damage_percent * high_damage, static_cast<std::size_t>(100));
+                    damage.reset(
+                        fraction_ceiling(intercept_damage_percent * damage.low(), static_cast<std::size_t>(100)),
+                        fraction_ceiling(intercept_damage_percent * damage.high(), static_cast<std::size_t>(100)));
                 }
-                // Trait: dazzle.
-                if (other.do_dazzle()) accuracy = 0.0;
+                // Enemy trait: dazzle.
+                if (other.do_dazzle()) damage.set_accuracy(0);
 
-                // Special ability: reduce hit points of bosses.
-                if (t.has(special_ability::boss)) hit_points = hit_points_cast(hit_points, 1.0 - other.boss_health_reduction());
-
-                // Make sure all probabilities are within bounds.
-                if (accuracy > 1.0) accuracy = 1.0;
-                if (splash_chance > 1.0) splash_chance = 1.0;
-                if (low_damage > high_damage)
-                {
-                    high_damage = low_damage;
-                    aftermath::quiet_error::instance().push(
-                        aftermath::not_an_error::logic_error,
-                        aftermath::severity_level::minor,
-                        "Conditioned low damage exceeds high damage. Bumped high damage up to match.", __FUNCTION__, __LINE__);
-                }
-
-                t.set_damage(low_damage, high_damage, accuracy, splash_chance);
-                t.set_hit_points(hit_points);
+                // Stop quiet coercion.
+                damage.set_is_quiet(false);
+                // Apply new damage.
+                t.set_damage(damage);
+                // Apply new type.
                 g.set_type(t);
+            }
+
+            // Now that the army has been conditioned, build grouping.
+            for (std::size_t i = 0; i < a.count_groups(); i++)
+            {
+                for (battle_phase phase : a[i].type().attack_phases()) this->m_group_indices[phase].push_back(i);
             }
 
             // Now that the army has been conditioned, build caches.
@@ -221,8 +302,8 @@ namespace ropufu
                     sequencer.next_unit(count_attackers);
 
                     std::size_t total_reduced_damage = 
-                        damage_cast(attacker_t.low_damage(), damage_factor) * (count_attackers - count_high_damage) +
-                        damage_cast(attacker_t.high_damage(), damage_factor) * count_high_damage;
+                        damage_cast(attacker_t.damage().low(), damage_factor) * (count_attackers - count_high_damage) +
+                        damage_cast(attacker_t.damage().high(), damage_factor) * count_high_damage;
 
                     if (do_log)
                     {

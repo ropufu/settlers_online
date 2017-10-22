@@ -133,7 +133,7 @@ namespace ropufu
                         bool do_high_damage = sequencer.peek_do_high_damage(t);
                         sequencer.next_unit();
 
-                        std::size_t damage = do_high_damage ? t.high_damage() : t.low_damage();
+                        std::size_t damage = do_high_damage ? t.damage().high() : t.damage().low();
                         if (t.category() == unit_category::artillery) damage *= 2;
 
                         if (camp_hit_points < damage) camp_hit_points = 0;

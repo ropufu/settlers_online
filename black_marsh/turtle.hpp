@@ -42,6 +42,12 @@ namespace ropufu
                 
                 using empirical_measure = aftermath::probability::empirical_measure<std::size_t, std::size_t, double>;
 
+                static bool is_config_valid()
+                {
+                    config& c = config::instance();
+                    return c.good();
+                }
+
                 template <typename t_action_type>
                 static double elapsed_seconds(t_action_type action)
                 {

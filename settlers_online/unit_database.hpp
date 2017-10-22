@@ -146,6 +146,8 @@ namespace ropufu
                 this->m_misspelled_lookup.clear();
             }
 
+            const std::map<key_type, unit_type>& data() const noexcept { return this->m_database; }
+
             const unit_type& at(const key_type& key) const noexcept 
             {
                 return this->m_database.at(key);

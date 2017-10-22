@@ -21,7 +21,10 @@ namespace ropufu
             not_weak = 2,              // This unit will be not be affected by attacker's \c do_attack_weakest_target, if any.
             tower_bonus = 3,           // This unit gets damage reduction in towers.
             ignore_tower_bonus = 4,    // When attacking, inflicted damage will not be affected by defenders' possible \c tower_bonus.
-            boss = 5                   // Categorized as boss for some battle calculations.
+            rapid_fire = 5,            // Indicates that this unis is affected by friendly skill \c battle_skill::rapid_fire.
+            sniper_training = 6,       // Indicates that this unis is affected by friendly skill \c battle_skill::sniper_training.
+            cleave = 7,                // Indicates that this unis is affected by friendly skill \c battle_skill::cleave.
+            overrun = 8                // Indicates that this unis is affected by enemy skill \c battle_skill::overrun.
         };
 
         /** Mark \c special_ability as suitable for \c enum_array storage. */
@@ -29,7 +32,7 @@ namespace ropufu
         struct enum_capacity<special_ability>
         {
             /** The maximum value of \c special_ability plus one. */
-            static constexpr std::size_t value = 6;
+            static constexpr std::size_t value = 9;
         };
 
         bool try_parse(const std::string& str, special_ability& value)
@@ -39,7 +42,11 @@ namespace ropufu
             if (str == "not weak") { value = special_ability::not_weak; return true; }
             if (str == "tower bonus") { value = special_ability::tower_bonus; return true; }
             if (str == "ignore tower bonus") { value = special_ability::ignore_tower_bonus; return true; }
-            if (str == "boss") { value = special_ability::boss; return true; }
+            if (str == "rapid fire") { value = special_ability::rapid_fire; return true; }
+            if (str == "sniper training") { value = special_ability::sniper_training; return true; }
+            if (str == "cleave") { value = special_ability::cleave; return true; }
+            if (str == "overrun") { value = special_ability::overrun; return true; }
+            if (str == "boss") { value = special_ability::overrun; return true; }
             return false;
         }
     }
@@ -56,7 +63,10 @@ namespace std
         case ropufu::settlers_online::special_ability::not_weak: return "not weak";
         case ropufu::settlers_online::special_ability::tower_bonus: return "tower bonus";
         case ropufu::settlers_online::special_ability::ignore_tower_bonus: return "ignore tower bonus";
-        case ropufu::settlers_online::special_ability::boss: return "boss";
+        case ropufu::settlers_online::special_ability::rapid_fire: return "rapid fire";
+        case ropufu::settlers_online::special_ability::sniper_training: return "sniper training";
+        case ropufu::settlers_online::special_ability::cleave: return "cleave";
+        case ropufu::settlers_online::special_ability::overrun: return "overrun";
         default: return std::to_string(static_cast<std::size_t>(value));
         }
     };
