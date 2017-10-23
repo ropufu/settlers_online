@@ -7,6 +7,7 @@
 #include "attack_sequence.hpp"
 #include "battle_trait.hpp"
 #include "battle_skill.hpp"
+#include "camp.hpp"
 #include "combat_result.hpp"
 #include "damage.hpp"
 #include "enum_array.hpp"
@@ -43,20 +44,15 @@ namespace ropufu
         private:
             std::vector<unit_group> m_groups; // Unit groups, sorted by \c id.
             std::vector<mask_type> m_metagroup_masks; // For each non-singleton metagroup store its mask (default-sorted).
-            std::size_t m_camp_hit_points; // Determines the defensive capabilities of the army.
-            double m_tower_damage_reduction = 0.0;  // Reduce (multiplicative) damage dealt by enemy to units with \c special_abilities::tower_bonus.
+            detail::camp m_camp; // Determines the defensive capabilities of the army.
             // ~~ Permutations of <m_groups> ~~
             aftermath::algebra::permutation m_order_original; // Original permutation.
             aftermath::algebra::permutation m_order_by_id;    // Identity permutation.
             aftermath::algebra::permutation m_order_by_hp;    // Permutation when defending agains units with \c do_attack_weakest_target.
-            // ~~ Battle modifiers ~~
+            // ~~ Battle modifiers and traits ~~
             double m_frenzy_bonus = 0.0; // Increases (multiplicative) the attack damage of this army for every combat round past the first.
             enum_array<battle_skill, std::size_t> m_skills = { }; // Skills affecting various aspects of the battle.
-            // ~~ Traits ~~
-            // If at least one unit in the army has it, it kicks in.
-            bool m_do_dazzle = false;               // Enemy accuracy is reduced to 0%.
-            bool m_do_intercept = false;            // Enemy units deal 5% less damage and their ability \c do_attack_weakest_target is ignored.
-            bool m_do_explosive_ammunition = false; // Ranged units get \c do_attack_weakest_target and 100\% \c splash_chance.
+            flags_t<battle_trait> m_traits = { }; // If at least one unit in the army has this trait, it kicks in.
 
         public:
             /** An empty army. */
@@ -93,21 +89,10 @@ namespace ropufu
             /** Metagroup masks (ordered). */
             const std::vector<mask_type>& metagroup_masks() const noexcept { return this->m_metagroup_masks; }
 
-            /** Camp hit points for destruction purposes. */
-            std::size_t camp_hit_points() const noexcept { return this->m_camp_hit_points; }
-            /** Camp hit points for destruction purposes. */
-            void set_camp_hit_points(std::size_t value) noexcept { this->m_camp_hit_points = value; }
-
-            /** Reduce (multiplicative) damage dealt by enemy to units with \c special_abilities::tower_bonus. */
-            double tower_damage_reduction() const noexcept { return this->m_tower_damage_reduction; }
-            /** @brief Reduce (multiplicative) damage dealt by enemy to units with \c special_abilities::tower_bonus.
-             *  @exception std::out_of_range \p value is not in the interval [0, 1].
-             */
-            void set_tower_damage_reduction(double value)
-            {
-                if (value < 0.0 || value > 1.0) throw std::out_of_range("<value> must be in the range from 0 to 1.");
-                this->m_tower_damage_reduction = value; 
-            }
+            /** Determines the defensive capabilities of the army. */
+            detail::camp camp() const noexcept { return this->m_camp; }
+            /** Determines the defensive capabilities of the army. */
+            void set_camp(std::size_t value) noexcept { this->m_camp = value; }
 
             /** Increases (multiplicative) the attack damage of this army for every combat round past the first. */
             double frenzy_bonus() const noexcept { return this->m_frenzy_bonus; }
@@ -127,12 +112,12 @@ namespace ropufu
             /** Skills affecting various aspects of the battle. */
             void set_level(battle_skill skill, std::size_t value) noexcept { this->m_skills[skill] = value; }
 
-            /** Indicates that the enemy accuracy is reduced to 0. */
-            bool do_dazzle() const noexcept { return this->m_do_dazzle; }
-            /** Indicates that enemy units deal 5% less damage and their ability \c do_attack_weakest_target is ignored. */
-            bool do_intercept() const noexcept { return this->m_do_intercept; }
-            /** Indicates that ranged units get \c do_attack_weakest_target. */
-            bool do_explosive_ammunition() const noexcept { return this->m_do_explosive_ammunition; }
+            /** Special traits that affect the entire battle. */
+            const flags_t<battle_trait>& traits() const noexcept { return this->m_traits; }
+            /** Special traits that affect the entire battle. */
+            void set_trait(battle_trait trait, bool value) noexcept { this->m_traits[trait] = value; }
+            /** Checks whether this army has the specified battle trait. */
+            bool has(battle_trait trait) const noexcept { return this->m_traits.has(trait); }
 
             /** Unit types in each group (ordered by \c id). */
             std::vector<unit_type> types() const noexcept;
@@ -186,23 +171,20 @@ namespace ropufu
             bool operator ==(const army& other) const noexcept
             {
                 std::size_t count_groups = this->m_groups.size();
-                std::size_t count_metagroups = this->m_metagroup_masks.size();
-
                 if (count_groups != other.m_groups.size()) return false;
-                if (count_metagroups != other.m_metagroup_masks.size()) return false;
-
                 // The groups are already properly sorted; no need to bother with ordering.
                 for (std::size_t i = 0; i < count_groups; i++) if (this->m_groups[i] != other.m_groups[i]) return false;
-                for (std::size_t i = 0; i < count_metagroups; i++) if (this->m_metagroup_masks[i] != other.m_metagroup_masks[i]) return false;
+                
+                // Ignore metagroups.
+                // std::size_t count_metagroups = this->m_metagroup_masks.size();
+                // if (count_metagroups != other.m_metagroup_masks.size()) return false;
+                // for (std::size_t i = 0; i < count_metagroups; i++) if (this->m_metagroup_masks[i] != other.m_metagroup_masks[i]) return false;
                 
                 return
-                    this->m_camp_hit_points == other.m_camp_hit_points &&
-                    this->m_skills == other.m_skills &&
+                    this->m_camp == other.m_camp &&
                     this->m_frenzy_bonus == other.m_frenzy_bonus &&
-                    this->m_tower_damage_reduction == other.m_tower_damage_reduction &&
-                    this->m_do_dazzle == other.m_do_dazzle &&
-                    this->m_do_intercept == other.m_do_intercept &&
-                    this->m_do_explosive_ammunition == other.m_do_explosive_ammunition;
+                    this->m_skills == other.m_skills &&
+                    this->m_traits == other.m_traits;
             }
 
             /** Checks two armies for inequality. */
@@ -236,7 +218,7 @@ namespace ropufu
         }
 
         army::army(const std::vector<unit_group>& groups, std::size_t camp_hit_points)
-            : m_groups(0), m_metagroup_masks(0), m_camp_hit_points(camp_hit_points),
+            : m_groups(0), m_metagroup_masks(0), m_camp(camp_hit_points),
             m_order_by_id(groups.size()), m_order_by_hp(groups.size())
         {
             // ~~ Validation ~~
@@ -271,9 +253,7 @@ namespace ropufu
             std::size_t count_metagroups = 0; // Count metagroups that occur at least twice.
             for (const unit_group& g : this->m_groups)
             {
-                if (g.type().has(battle_trait::dazzle)) this->m_do_dazzle = true;
-                if (g.type().has(battle_trait::intercept)) this->m_do_intercept = true;
-                if (g.type().has(battle_trait::explosive_ammunition)) this->m_do_explosive_ammunition = true;
+                this->m_traits |= g.type().traits(); // If a unit has a trait, the army has it.
 
                 auto metagroup_it = metagroup_ids.find(g.metagroup_id()); // Find the current metagroup id in the list.
                 if (metagroup_it == metagroup_ids.end()) metagroup_ids.emplace(g.metagroup_id(), 1); // Add to the list if it's not there.
@@ -350,22 +330,20 @@ namespace std
         {
             std::hash<ropufu::settlers_online::unit_group> group_hash = {};
             std::hash<ropufu::settlers_online::mask_type> mask_hash = {};
+            std::hash<ropufu::settlers_online::detail::camp> camp_hash = {};
+            std::hash<ropufu::settlers_online::battle_skill> skill_hash = { };
+            std::hash<ropufu::settlers_online::battle_trait> trait_hash = { };
             std::hash<std::size_t> size_hash = {};
-            std::hash<double> double_hash = {};
-            std::hash<bool> bool_hash = {};
+            
+            result_type result = 0;
+            for (const ropufu::settlers_online::unit_group& g : x.groups()) result ^= group_hash(g);
+            for (const ropufu::settlers_online::mask_type& m : x.metagroup_masks()) result ^= mask_hash(m);
+            for (const auto& skill : x.skills()) result ^= (skill_hash(skill.first) ^ size_hash(skill.second));
+            for (ropufu::settlers_online::battle_trait trait : x.traits()) result ^= trait_hash(trait);
 
-            result_type h =
-                size_hash(x.camp_hit_points()) ^
-                double_hash(x.frenzy_bonus()) ^
-                double_hash(x.tower_damage_reduction()) ^
-                bool_hash(x.do_dazzle()) ^
-                bool_hash(x.do_intercept()) ^
-                bool_hash(x.do_explosive_ammunition());
-
-            for (const auto& g : x.groups()) h ^= group_hash(g);
-            for (const auto& m : x.metagroup_masks()) h ^= mask_hash(m);
-
-            return h;
+            return
+                camp_hash(x.camp()) ^
+                result;
         }
     };
 }

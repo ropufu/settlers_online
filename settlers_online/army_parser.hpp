@@ -95,7 +95,13 @@ namespace ropufu
 
             std::size_t size() const noexcept { return this->m_army_blueprint.size(); }
 
-            bool try_build_fast(const unit_database& db, army& a) noexcept
+            bool try_build(const unit_database& db, army& a) noexcept
+            {
+                return this->try_build(db, a, [] (const unit_type& /**u*/) { return true; });
+            }
+
+            template <typename t_predicate_type>
+            bool try_build(const unit_database& db, army& a, const t_predicate_type& filter) noexcept
             {
                 if (!this->m_is_valid) return false;
 
@@ -104,9 +110,9 @@ namespace ropufu
                 for (const auto& pair : this->m_army_blueprint)
                 {
                     unit_type u;
-                    if (!db.try_find(pair.second, u)) return false;
-                    if (pair.first == 0) continue; // Skip empty groups.
+                    if (!db.try_find(pair.second, u, filter)) return false;
 
+                    if (pair.first == 0) continue; // Skip empty groups.
                     groups.emplace_back(u, pair.first);
                 }
                 a = groups;

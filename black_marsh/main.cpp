@@ -2,14 +2,16 @@
 #include <aftermath/not_an_error.hpp>
 
 #include "turtle.hpp"
+#include "../settlers_online/army.hpp"
 #include "../settlers_online/char_string.hpp"
 #include "../settlers_online/unit_faction.hpp"
+#include "../settlers_online/unit_type.hpp"
 
 #include <chrono> // std::chrono::steady_clock, std::chrono::duration_cast
 #include <cstddef> // std::size_t
 #include <cstdint> // std::int32_t
 #include <iostream> // std::cout, std::endl, std::cin
-#include <string> // std::string, std::to_string, std::getline, std::stoi
+#include <string> // std::string, std::to_string, std::getline, std::stol, std::stod
 
 // ~~ Singleton types ~~
 using unit_faction = ropufu::settlers_online::unit_faction;
@@ -56,31 +58,105 @@ enum struct command_name
     units, // Lists all units.
     left, // Left army.
     right, // Right army.
+    skills, // Generic term for army sub-clause.
+    camp, // Generic term for army sub-clause.
+    hit_points, // Generic term for camp sub-clause.
+    damage_reduction, // Generic term for camp sub-clause.
+    left_camp,
+    right_camp,
+    left_camp_hit_points,
+    right_camp_hit_points,
+    left_camp_reduction,
+    right_camp_reduction,
+    left_skills,
+    right_skills,
     n, // Number of sumulations.
     log, // Run simulation in log mode.
     run // Run simulation in regular mode.
 };
 
-command_name parse_command(const std::string& command, std::string& argument)
+void split_in_two(const std::string& expression, std::string& command, std::string& argument)
 {
-    std::string key = char_string::deep_trim_copy(command);
+    command = char_string::deep_trim_copy(expression);
     argument = "";
 
-    std::size_t index_of_space = key.find(" ");
+    std::size_t index_of_space = command.find(" ");
     if (index_of_space != std::string::npos) 
     {
-        argument = key.substr(index_of_space + 1);
-        key = key.substr(0, index_of_space);
+        argument = command.substr(index_of_space + 1);
+        command = command.substr(0, index_of_space);
     }
+}
 
-    if (key == "quit" || key == "q" || key == "exit") return command_name::quit;
-    if (key == "help" || key == "h" || key == "?") return command_name::help;
-    if (key == "units" || key == "unit" || key == "u") return command_name::units;
-    if (key == "left" || key == "l") return command_name::left;
-    if (key == "right" || key == "r") return command_name::right;
-    if (key == "n") return command_name::n;
-    if (key == "log") return command_name::log;
-    if (key == "run") return command_name::run;
+command_name parse_camp_clause(const std::string& expression, std::string& argument)
+{
+    std::string command = "";
+    split_in_two(expression, command, argument);
+
+    if (command == "hitpoints" || command == "hp") return command_name::hit_points;
+    if (command == "reduction" || command == "r") return command_name::damage_reduction;
+
+    return command_name::not_recognized;
+}
+
+command_name parse_army_clause(const std::string& expression, std::string& argument)
+{
+    std::string command = "";
+    split_in_two(expression, command, argument);
+
+    if (command == "camp" || command == "cmp" || command == "c") return command_name::camp;
+    if (command == "skills" || command == "skill" || command == "s") return command_name::skills;
+
+    return command_name::not_recognized;
+}
+
+command_name parse_command(const std::string& expression, std::string& argument)
+{
+    std::string command = "";
+    split_in_two(expression, command, argument);
+
+    if (command == "quit" || command == "q" || command == "exit") return command_name::quit;
+    if (command == "help" || command == "h" || command == "?") return command_name::help;
+    if (command == "units" || command == "unit" || command == "u") return command_name::units;
+    if (command == "left" || command == "l")
+    {
+        std::string subclause = "";
+        switch (parse_army_clause(argument, subclause))
+        {
+            case command_name::camp:
+                switch (parse_camp_clause(subclause, argument))
+                {
+                    case command_name::hit_points: return command_name::left_camp_hit_points;
+                    case command_name::damage_reduction: return command_name::left_camp_reduction;
+                    default: return command_name::left_camp;
+                }
+            case command_name::skills:
+                argument = subclause;
+                return command_name::left_skills;
+            default: return command_name::left;
+        }
+    }
+    if (command == "right" || command == "r")
+    {
+        std::string subclause = "";
+        switch (parse_army_clause(argument, subclause))
+        {
+            case command_name::camp:
+                switch (parse_camp_clause(subclause, argument))
+                {
+                    case command_name::hit_points: return command_name::right_camp_hit_points;
+                    case command_name::damage_reduction: return command_name::right_camp_reduction;
+                    default: return command_name::right_camp;
+                }
+            case command_name::skills:
+                argument = subclause;
+                return command_name::right_skills;
+            default: return command_name::right;
+        }
+    }
+    if (command == "n") return command_name::n;
+    if (command == "log") return command_name::log;
+    if (command == "run") return command_name::run;
 
     return command_name::not_recognized;
 }
@@ -111,6 +187,18 @@ void help(const std::string& argument)
     n              | Gets or sets the number of simulations.
     log            | Displays one battle report.
     run            | Executes the simulations.
+==============================================================
+Following the left / right command, one could use:
+    Command Name   | Description
+==============================================================
+... camp, c        | Get or set camp.
+... skills, s      | Get or set skills.
+==============================================================
+Following the left / right vcamp command, one could use:
+    Command Name   | Description
+==============================================================
+... hitpoints, hp  | Get or set camp.
+... reduction, r   | Get or set skills.
 ==============================================================
 Commands with get or set option will take an optional argument to set the
 value of corresponding parameter.
@@ -157,7 +245,7 @@ std::string read_line()
 {
     std::string line;
     std::getline(std::cin, line);
-    return line;
+    return char_string::deep_trim_copy(line);
 }
 
 std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
@@ -214,11 +302,60 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
             case command_name::left:
                 if (!argument.empty()) lucy.parse_left(argument);
                 std::cout << "Left army: " << lucy.left() << std::endl;
-                if (!(lucy.left().empty() || lucy.left().has(unit_faction::general))) std::cout << "Warning! Left army does not have any generals. Type \"units general\" for suggestions." << std::endl;
                 break;
             case command_name::right:
                 if (!argument.empty()) lucy.parse_right(argument);
                 std::cout << "Right army: " << lucy.right() << std::endl;
+                break;
+            case command_name::left_camp:
+                std::cout << "Left campt: " << lucy.left_camp() << std::endl;
+                break;
+            case command_name::right_camp:
+                std::cout << "Right camp: " << lucy.right_camp() << std::endl;
+                break;
+            case command_name::left_camp_reduction:
+                if (!argument.empty())
+                {
+                    auto camp = lucy.left_camp();
+                    camp.set_damage_reduction(std::stod(argument));
+                    lucy.set_left_camp(camp);
+                }
+                std::cout << "Left camp damage recution: " << lucy.left_camp().damage_reduction() << std::endl;
+                break;
+            case command_name::right_camp_reduction:
+                if (!argument.empty())
+                {
+                    auto camp = lucy.right_camp();
+                    camp.set_damage_reduction(std::stod(argument));
+                    lucy.set_right_camp(camp);
+                }
+                std::cout << "Right camp damage recution: " << lucy.right_camp().damage_reduction() << std::endl;
+                break;
+            case command_name::left_camp_hit_points:
+                if (!argument.empty())
+                {
+                    auto camp = lucy.left_camp();
+                    camp.set_hit_points(static_cast<std::size_t>(std::stol(argument)));
+                    lucy.set_left_camp(camp);
+                }
+                std::cout << "Left camp hit points: " << lucy.left_camp().hit_points() << std::endl;
+                break;
+            case command_name::right_camp_hit_points:
+                if (!argument.empty())
+                {
+                    auto camp = lucy.right_camp();
+                    camp.set_hit_points(static_cast<std::size_t>(std::stol(argument)));
+                    lucy.set_right_camp(camp);
+                }
+                std::cout << "Right camp hit points: " << lucy.right_camp().hit_points() << std::endl;
+                break;
+            case command_name::left_skills:
+                if (!argument.empty()) lucy.parse_left_skills(argument);
+                std::cout << "Left skills: " << lucy.left_skills() << std::endl;
+                break;
+            case command_name::right_skills:
+                if (!argument.empty()) lucy.parse_right_skills(argument);
+                std::cout << "Right skills: " << lucy.right_skills() << std::endl;
                 break;
             case command_name::n:
                 if (!argument.empty()) lucy.set_simulation_count(static_cast<std::size_t>(std::stol(argument)));

@@ -4,6 +4,8 @@
 
 #include <aftermath/not_an_error.hpp>
 
+#include <nlohmann/json.hpp>
+
 #include <cstddef> // std::size_t
 #include <functional> // std::hash
 #include <string> // std::string
@@ -74,11 +76,8 @@ namespace ropufu
                  *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if \p splash_chance is outside the interval [0, 1].
                  */
                 damage(std::size_t low, std::size_t high, double accuracy, double splash_chance) noexcept
+                    : m_low(low), m_high(high), m_accuracy(accuracy), m_splash_chance(splash_chance)
                 {
-                    this->m_low = low;
-                    this->m_high = high;
-                    this->m_accuracy = accuracy;
-                    this->m_splash_chance = splash_chance;
                     this->coerce();
                 } // damage(...)
 
@@ -127,7 +126,7 @@ namespace ropufu
                 double accuracy() const noexcept { return this->m_accuracy; }
                 /** Probability of dealing high damage. */
                 void set_accuracy(double value) noexcept { this->m_accuracy = value; this->coerce(); }
-                /**Probability of dealing splash damage. */
+                /** Probability of dealing splash damage. */
                 double splash_chance() const noexcept { return this->m_splash_chance; }
                 /** Probability of dealing splash damage. */
                 void set_splash_chance(double value) noexcept { this->m_splash_chance = value; this->coerce(); }
@@ -162,8 +161,8 @@ namespace ropufu
                 /** Elementwise addition. */
                 type& operator -=(const type& other) noexcept
                 {
-                    this->m_low -= other.m_low;
-                    this->m_high -= other.m_high;
+                    this->m_low = (this->m_low < other.m_low) ? 0 : (this->m_low - other.m_low);
+                    this->m_high = (this->m_high < other.m_high) ? 0 : (this->m_high - other.m_high);
                     this->m_accuracy -= other.m_accuracy;
                     this->m_splash_chance -= other.m_splash_chance;
                     this->coerce();
@@ -174,6 +173,25 @@ namespace ropufu
                 friend type operator +(type left, const type& right) noexcept { left += right; return left; }
                 friend type operator -(type left, const type& right) noexcept { left -= right; return left; }
             }; // struct damage
+
+            void to_json(nlohmann::json& j, const damage& x)
+            {
+                j = nlohmann::json{
+                    {"low", x.low()},
+                    {"high", x.high()},
+                    {"accuracy", x.accuracy()},
+                    {"splash chance", x.splash_chance()}
+                };
+            }
+        
+            void from_json(const nlohmann::json& j, damage& x)
+            {
+                if (j.count("low") != 0) x.set_low(j["low"].get<std::size_t>());
+                if (j.count("high") != 0) x.set_high(j["high"].get<std::size_t>());
+                if (j.count("accuracy") != 0) x.set_accuracy(j["accuracy"].get<double>());
+                if (j.count("splash_chance") != 0) x.set_splash_chance(j["splash_chance"].get<double>());
+
+            } // from_json(...)
         } // namespace detail
     } // namespace settlers_online
 } // namespace ropufu

@@ -123,7 +123,7 @@ namespace ropufu
                 if (attacker.empty()) return 0;
 
                 std::size_t count_rounds = 0;
-                std::size_t camp_hit_points = defender.camp_hit_points();
+                std::size_t camp_hit_points = defender.camp().hit_points();
                 while (camp_hit_points > 0)
                 {
                     for (const unit_group& g : attacker)

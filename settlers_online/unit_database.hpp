@@ -56,14 +56,19 @@ namespace ropufu
                 }
             }
 
-            std::size_t try_find(const skeleton_type& query, key_type& key) const noexcept
+            template <typename t_predicate_type>
+            std::size_t try_find(const skeleton_type& query, key_type& key, const t_predicate_type& filter) const noexcept
             {
                 auto search = this->m_inverse_skeleton.find(query);
                 if (search != this->m_inverse_skeleton.end())
                 {
                     const std::set<key_type>& matches = search->second;
-                    key = *(matches.begin());
-                    return matches.size();
+                    std::size_t count = 0;
+                    for (const key_type& maybe : matches)
+                    {
+                        if (filter(maybe)) { key = maybe; count++; }
+                    }
+                    return count;
                 }
                 return 0;
             }
@@ -153,13 +158,14 @@ namespace ropufu
                 return this->m_database.at(key);
             }
 
-            bool try_find(const key_type& query, unit_type& unit) const noexcept 
+            template <typename t_predicate_type>
+            bool try_find(const key_type& query, unit_type& unit, const t_predicate_type& filter) const noexcept 
             {
                 auto search = this->m_database.find(query);
                 if (search != this->m_database.end())
                 {
                     unit = search->second;
-                    return true;
+                    if (filter(unit)) return true;
                 }
 
                 // Primary search failed. Secondary search: all lowercase!
@@ -167,7 +173,7 @@ namespace ropufu
                 key_type lowercase = unit_database::relax_to_lowercase(query);
                 key_type misspelled = unit_database::relax_spelling(lowercase);
                 std::size_t count_matches;
-                count_matches = this->m_lowercase_lookup.try_find(lowercase, key);
+                count_matches = this->m_lowercase_lookup.try_find(lowercase, key, [&] (const key_type& maybe) { return filter(this->m_database.at(maybe)); });
                 if (count_matches >= 1)
                 {
                     unit = this->m_database.at(key);
@@ -175,7 +181,7 @@ namespace ropufu
                     aftermath::quiet_error::instance().push(aftermath::not_an_error::runtime_error, aftermath::severity_level::minor, "Multiple units match the specified query.", lowercase, count_matches);
                     return false;
                 }
-                count_matches = this->m_misspelled_lookup.try_find(misspelled, key);
+                count_matches = this->m_misspelled_lookup.try_find(misspelled, key, [&] (const key_type& maybe) { return filter(this->m_database.at(maybe)); });
                 if (count_matches >= 1)
                 {
                     unit = this->m_database.at(key);
@@ -184,6 +190,17 @@ namespace ropufu
                     return false;
                 }
                 return false;
+            }
+
+            key_type build_key(const unit_type& unit) const noexcept
+            {
+                key_type key = unit.names().front();
+                for (const std::string& name :  unit.names())
+                {
+                    // Take the shortest name as the key.
+                    if (name.length() < key.length()) key = name;
+                }
+                return key;
             }
 
             /** Load units from .json files in a specified folder. */
@@ -207,12 +224,7 @@ namespace ropufu
                                 std::vector<std::string>& names = u.names();
                                 for (std::string& name : names) name = char_string::deep_trim_copy(name);
 
-                                std::string key = names.front();
-                                for (const std::string& name : names)
-                                {
-                                    // Take the shortest name as the key.
-                                    if (name.length() < key.length()) key = name;
-                                }
+                                key_type key = this->build_key(u);
                                 
                                 if (this->m_database.count(key) != 0)
                                 {

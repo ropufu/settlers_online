@@ -52,7 +52,7 @@ namespace ropufu
                 bool is_always_splash = t.damage().splash_chance() == 1;
                 bool do_ignore_tower_bonus = t.has(special_ability::ignore_tower_bonus);
                 double damage_factor_normal = 1;
-                double damage_factor_in_tower = (1 - other.tower_damage_reduction());
+                double damage_factor_in_tower = (1 - other.camp().damage_reduction());
 
                 this->m_damage_factors.reserve(other.count_groups());
                 this->m_is_one_to_one.reserve(other.count_groups());
@@ -241,13 +241,13 @@ namespace ropufu
                 damage.set_is_quiet(true);
                 // ~~ Traits ~~
                 // Friendly trait: explosive ammunition.
-                if (this->m_army.do_explosive_ammunition() && (t.is(unit_category::ranged))) 
+                if (this->m_army.has(battle_trait::explosive_ammunition) && t.is(unit_category::ranged))
                 {
                     t.set_ability(special_ability::attack_weakest_target, true);
                     damage.set_splash_chance(1);
                 }
                 // Enemy trait: intercept.
-                if (other.do_intercept())
+                if (other.has(battle_trait::intercept))
                 {
                     t.set_ability(special_ability::attack_weakest_target, false);
                     // <intercept_damage_percent> is defined in <battle_trait.hpp>.
@@ -256,7 +256,7 @@ namespace ropufu
                         fraction_ceiling(intercept_damage_percent * damage.high(), static_cast<std::size_t>(100)));
                 }
                 // Enemy trait: dazzle.
-                if (other.do_dazzle()) damage.set_accuracy(0);
+                if (other.has(battle_trait::dazzle)) damage.set_accuracy(0);
 
                 // Stop quiet coercion.
                 damage.set_is_quiet(false);

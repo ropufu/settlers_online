@@ -90,9 +90,20 @@ namespace ropufu
                 const nlohmann::json& json() const noexcept { return this->m_json;  }
 
                 /** Expose specific settings. */
-                const nlohmann::json& operator [](const std::string& parameter_name) const noexcept { return this->m_json[parameter_name]; }
+                const nlohmann::json& operator [](const std::string& parameter_name) const { return this->m_json[parameter_name]; }
                 /** Expose specific settings. */
-                nlohmann::json& operator [](const std::string& parameter_name) noexcept { return this->m_json[parameter_name]; }
+                nlohmann::json& operator [](const std::string& parameter_name) { return this->m_json[parameter_name]; }
+
+                template <typename t_result_type>
+                bool maybe(const std::string& name, t_result_type& result) const noexcept
+                {
+                    if (this->m_json.count(name) != 0)
+                    {
+                        result = this->m_json[name].get<t_result_type>();
+                        return true;
+                    }
+                    return false;
+                }
 
                 /** The only instance of this type. */
                 static type& instance()

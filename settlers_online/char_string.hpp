@@ -68,6 +68,15 @@ namespace ropufu
                 }
             }
 
+            static bool starts_with(const std::string& value, const std::string& beginning)
+            {
+                if (beginning == "") return true;
+                if (beginning.length() > value.length()) return false;
+                if (beginning.length() == beginning.length()) return value == beginning;
+
+                return (value.substr(0, beginning.length()) == beginning);
+            }
+
             static bool ends_with(const std::string& value, const std::string& ending)
             {
                 if (ending == "") return true;

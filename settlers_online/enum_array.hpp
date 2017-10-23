@@ -178,6 +178,32 @@ namespace ropufu
             bool operator ==(const type& other) const noexcept { return this->m_flags == other.m_flags; }
             /** Checks two types for inequality. */
             bool operator !=(const type& other) const noexcept { return !(this->operator ==(other)); }
+
+            /** Elementwise "or". */
+            type& operator |=(const type& other) noexcept
+            {
+                for (std::size_t i = 0; i < capacity; i++) this->m_flags[i] |= other.m_flags[i];
+                return *this;
+            } // operator |=(...)
+
+            /** Elementwise "and". */
+            type& operator &=(const type& other) noexcept
+            {
+                for (std::size_t i = 0; i < capacity; i++) this->m_flags[i] &= other.m_flags[i];
+                return *this;
+            } // operator &=(...)
+
+            /** Elementwise "exclusive or". */
+            type& operator ^=(const type& other) noexcept
+            {
+                for (std::size_t i = 0; i < capacity; i++) this->m_flags[i] ^= other.m_flags[i];
+                return *this;
+            } // operator ^=(...)
+
+            /** Something clever taken from http://en.cppreference.com/w/cpp/language/operators */
+            friend type operator |(type left, const type& right) noexcept { left |= right; return left; }
+            friend type operator &(type left, const type& right) noexcept { left &= right; return left; }
+            friend type operator ^(type left, const type& right) noexcept { left ^= right; return left; }
         };
 
         template <typename t_enum_type, typename t_data_type>
