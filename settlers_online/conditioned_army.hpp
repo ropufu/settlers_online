@@ -45,7 +45,7 @@ namespace ropufu
             attack_group_cache(const unit_group& g, const army& other) noexcept
                 : m_attack_order(), m_damage_factors(), m_is_one_to_one()
             {
-                const unit_type& t = g.type();
+                const unit_type& t = g.unit();
                 
                 // Damage factors and suchlike optimization.
                 bool is_never_splash = t.damage().splash_chance() == 0;
@@ -59,14 +59,14 @@ namespace ropufu
                 std::set<double> distinct_factors { };
                 for (const unit_group& defender : other.groups())
                 {
-                    bool do_tower_bonus = defender.type().has(special_ability::tower_bonus);
+                    bool do_tower_bonus = defender.unit().has(special_ability::tower_bonus);
                     if (do_ignore_tower_bonus) do_tower_bonus = false;
                     double damage_factor = do_tower_bonus ? damage_factor_in_tower : damage_factor_normal;
                     
                     // Optimize when attacking units with low hit points: each non-splash hit will always kill exactly 1 defending unit.
                     std::size_t effective_min_damage = damage_cast(t.damage().low(), damage_factor);
                     // Even though defender has not been conditioned, hit point reduction occurs only for bosses that typically don't come in large groups.
-                    bool is_one_to_one = is_never_splash && (effective_min_damage >= defender.type().hit_points());
+                    bool is_one_to_one = is_never_splash && (effective_min_damage >= defender.unit().hit_points());
 
                     distinct_factors.insert(damage_factor);
                     this->m_damage_factors.push_back(damage_factor);
@@ -162,6 +162,7 @@ namespace ropufu
                         if (!unit.has(special_ability::cleave)) return;
                         damage_bonus.reset(4 * level, 4 * level, 0, thirds);
                         break;
+                    default: break;
                 } // switch(...)
                 
                 // Add bonus, quietly coercing.
@@ -186,6 +187,7 @@ namespace ropufu
                         if (!unit.has(special_ability::overrun)) return;
                         unit.set_hit_points(fraction_ceiling(unit.hit_points() * (100 - (level >= 3 ? 25 : (8 * level))), static_cast<std::size_t>(100)));
                         break;
+                    default: break;
                 }
             }
 
@@ -221,10 +223,11 @@ namespace ropufu
             : m_army(a), m_counts(a.counts_by_type()), m_group_indices(), m_caches()
         {
             // Condition groups prior to the battle.
-            for (unit_group& g : this->m_army.groups())
+            for (std::size_t i = 0; i < this->m_army.count_groups(); i++)
             {
+                unit_group& g = this->m_army[i];
                 // Take the type to modify.
-                unit_type t = g.type();
+                unit_type t = g.unit();
 
                 // First go through skills.
                 for (const auto& pair : this->m_army.skills())
@@ -263,13 +266,13 @@ namespace ropufu
                 // Apply new damage.
                 t.set_damage(damage);
                 // Apply new type.
-                g.set_type(t);
+                g.set_unit(t);
             }
 
             // Now that the army has been conditioned, build grouping.
-            for (std::size_t i = 0; i < a.count_groups(); i++)
+            for (std::size_t i = 0; i < this->m_army.count_groups(); i++)
             {
-                for (battle_phase phase : a[i].type().attack_phases()) this->m_group_indices[phase].push_back(i);
+                for (battle_phase phase : this->m_army[i].unit().attack_phases()) this->m_group_indices[phase].push_back(i);
             }
 
             // Now that the army has been conditioned, build caches.
@@ -287,7 +290,7 @@ namespace ropufu
                 const unit_group& attacking_group = this->m_army[i];
                 const attack_group_cache& cache = this->m_caches[i];
 
-                const unit_type& attacker_t = attacking_group.type();
+                const unit_type& attacker_t = attacking_group.unit();
                 std::size_t count_attackers = attacking_group.count_at_snapshot();
                 if (count_attackers == 0) continue; // Skip empty groups.
 
@@ -326,7 +329,7 @@ namespace ropufu
 
                 std::size_t attacking_unit_index = 0;
                 std::size_t pure_overshoot_damage = 0; // Pure damage spilled between consequent groups.
-                std::vector<unit_group>& defender_groups = other.underlying().groups();
+                //std::vector<unit_group>& defender_groups = other.underlying().groups();
                 for (std::size_t j : cache.order())
                 {
                     // Get cached properties.
@@ -337,7 +340,7 @@ namespace ropufu
                     damage_factor *= frenzy_factor;
 
                     // Current defender.
-                    unit_group& defending_group = defender_groups[j];
+                    unit_group& defending_group = other.m_army[j];
 
                     // First take care of the overshoot damage.
                     pure_overshoot_damage = detail::splash(pure_overshoot_damage, damage_factor, defending_group, do_log); // technical_combat.hpp.

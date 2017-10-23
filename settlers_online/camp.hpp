@@ -3,12 +3,12 @@
 #define ROPUFU_SETTLERS_ONLINE_CAMP_HPP_INCLUDED
 
 #include <aftermath/not_an_error.hpp>
-
 #include <nlohmann/json.hpp>
 
 #include <cstddef> // std::size_t
 #include <functional> // std::hash
 #include <ostream> // std::ostream
+#include <stdexcept> // std::domain_error
 #include <string> // std::string
 
 namespace ropufu
@@ -130,22 +130,22 @@ namespace ropufu
                 friend type operator +(type left, const type& right) noexcept { left += right; return left; }
                 friend type operator -(type left, const type& right) noexcept { left -= right; return left; }
 
-                friend std::ostream& operator <<(std::ostream& os, const type& self)
+                friend std::ostream& operator <<(std::ostream& os, const type& self) noexcept
                 {
                     nlohmann::json j = self;
                     return os << j;
-                }
+                } // operator <<(...)
             }; // struct camp
             
-            void to_json(nlohmann::json& j, const camp& x)
+            void to_json(nlohmann::json& j, const camp& x) noexcept
             {
                 j = nlohmann::json{
                     {"hit points", x.hit_points()},
                     {"damage reduction", x.damage_reduction()}
                 };
-            }
+            } // to_json(...)
         
-            void from_json(const nlohmann::json& j, camp& x)
+            void from_json(const nlohmann::json& j, camp& x) noexcept
             {
                 if (j.is_string())
                 {
@@ -160,9 +160,19 @@ namespace ropufu
                     return;
                 }
 
-                if (j.count("hit points") != 0) x.set_hit_points(j["hit points"].get<std::size_t>());
-                if (j.count("damage reduction") != 0) x.set_damage_reduction(j["damage reduction"].get<double>());
-
+                try
+                {
+                    if (j.count("hit points") != 0) x.set_hit_points(j["hit points"].get<std::size_t>());
+                    if (j.count("damage reduction") != 0) x.set_damage_reduction(j["damage reduction"].get<double>());
+                }
+                catch (std::domain_error)
+                {
+                    aftermath::quiet_error::instance().push(
+                        aftermath::not_an_error::domain_error,
+                        aftermath::severity_level::major,
+                        "JSON camp representation malformed. Using default instead.", __FUNCTION__, __LINE__);
+                    x = { };
+                }
             } // from_json(...)
         } // namespace detail
     } // namespace settlers_online
@@ -184,7 +194,7 @@ namespace std
             return
                 size_hash(x.hit_points()) ^
                 double_hash(x.damage_reduction());
-        }
+        } // operator ()(...)
     }; // struct hash
 } // namespace std
 

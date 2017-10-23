@@ -3,11 +3,12 @@
 #define ROPUFU_SETTLERS_ONLINE_DAMAGE_HPP_INCLUDED
 
 #include <aftermath/not_an_error.hpp>
-
 #include <nlohmann/json.hpp>
 
 #include <cstddef> // std::size_t
 #include <functional> // std::hash
+#include <ostream> // std::ostream
+#include <stdexcept> // std::domain_error
 #include <string> // std::string
 
 namespace ropufu
@@ -172,9 +173,15 @@ namespace ropufu
                 /** Something clever taken from http://en.cppreference.com/w/cpp/language/operators */
                 friend type operator +(type left, const type& right) noexcept { left += right; return left; }
                 friend type operator -(type left, const type& right) noexcept { left -= right; return left; }
+
+                friend std::ostream& operator <<(std::ostream& os, const type& self) noexcept
+                {
+                    nlohmann::json j = self;
+                    return os << j;
+                } // operator <<(...)
             }; // struct damage
 
-            void to_json(nlohmann::json& j, const damage& x)
+            void to_json(nlohmann::json& j, const damage& x) noexcept
             {
                 j = nlohmann::json{
                     {"low", x.low()},
@@ -182,15 +189,25 @@ namespace ropufu
                     {"accuracy", x.accuracy()},
                     {"splash chance", x.splash_chance()}
                 };
-            }
+            } // to_json(...)
         
-            void from_json(const nlohmann::json& j, damage& x)
+            void from_json(const nlohmann::json& j, damage& x) noexcept
             {
-                if (j.count("low") != 0) x.set_low(j["low"].get<std::size_t>());
-                if (j.count("high") != 0) x.set_high(j["high"].get<std::size_t>());
-                if (j.count("accuracy") != 0) x.set_accuracy(j["accuracy"].get<double>());
-                if (j.count("splash_chance") != 0) x.set_splash_chance(j["splash_chance"].get<double>());
-
+                try
+                {
+                    if (j.count("low") != 0) x.set_low(j["low"].get<std::size_t>());
+                    if (j.count("high") != 0) x.set_high(j["high"].get<std::size_t>());
+                    if (j.count("accuracy") != 0) x.set_accuracy(j["accuracy"].get<double>());
+                    if (j.count("splash_chance") != 0) x.set_splash_chance(j["splash_chance"].get<double>());
+                }
+                catch (std::domain_error)
+                {
+                    aftermath::quiet_error::instance().push(
+                        aftermath::not_an_error::domain_error,
+                        aftermath::severity_level::major,
+                        "JSON damage representation malformed. Using default instead.", __FUNCTION__, __LINE__);
+                    x = { };
+                }
             } // from_json(...)
         } // namespace detail
     } // namespace settlers_online
@@ -214,7 +231,7 @@ namespace std
                 size_hash(x.high()) ^
                 double_hash(x.accuracy()) ^
                 double_hash(x.splash_chance());
-        }
+        } // operator ()(...)
     }; // struct hash
 } // namespace std
 

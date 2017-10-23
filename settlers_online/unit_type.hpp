@@ -2,21 +2,24 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_UNIT_TYPE_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_UNIT_TYPE_HPP_INCLUDED
 
+#include <aftermath/not_an_error.hpp>
+#include <nlohmann/json.hpp>
+
+// ~~ Enumerations ~~
 #include "battle_phase.hpp"
 #include "battle_trait.hpp"
 #include "special_ability.hpp"
 #include "unit_category.hpp"
 #include "unit_faction.hpp"
-
-#include "enum_array.hpp"
+// ~~ Basic structures ~~
 #include "damage.hpp"
-
-#include <nlohmann/json.hpp>
+// ~~ Misc ~~
+#include "enum_array.hpp"
 
 #include <cstddef> // std::size_t
 #include <functional> // std::hash
 #include <ostream> // std::ostream
-#include <stdexcept> // std::logic_error, out_of_range
+#include <stdexcept> // std::domain_error
 #include <string> // std::string, std::to_string
 #include <vector> // std::vector
 
@@ -34,7 +37,7 @@ namespace ropufu
             // Default is (smallest id -- ... -- highest id).
             // Alternative is (smallest hit points -- ... -- highest hit points) (not weak, smallest id -- ... -- not weak, highest id).
             std::size_t m_id = 0; // Used for attack order.
-            std::vector<std::string> m_names = { };      // Names.
+            std::vector<std::string> m_names = { "" };   // Names.
             flags_t<battle_phase> m_attack_phases = { }; // Determines phases (sub-rounds) when the unit attacks within each round.
             flags_t<special_ability> m_abilities = { };  // Special abilities.
             flags_t<battle_trait> m_traits = { };        // Special traits that affect the entire battle.
@@ -54,12 +57,12 @@ namespace ropufu
             /** Detailed constructor. */
             unit_type(std::size_t id, const std::string& name, battle_phase initiative,
                 unit_faction faction, unit_category category, std::size_t experience, std::size_t capacity,
-                std::size_t hit_points, detail::damage damage)
+                std::size_t hit_points, detail::damage damage) noexcept
                 : m_id(id), m_names({ name }), m_attack_phases({ initiative }),
                 m_faction(faction), m_category(category), m_experience(experience), m_capacity(capacity),
                 m_hit_points(hit_points), m_damage(damage)
             {
-            }
+            } // unit_type(...)
 
             /** Number to determine attack order. */
             std::size_t id() const noexcept { return this->m_id; }
@@ -69,7 +72,11 @@ namespace ropufu
             /** Name of the unit type. */
             const std::vector<std::string>& names() const noexcept { return this->m_names; }
             /** Name of the unit type. */
-            std::vector<std::string>& names() noexcept { return this->m_names; }
+            void set_names(const std::vector<std::string>& value) noexcept
+            {
+                this->m_names = value;
+                if (this->m_names.empty()) this->m_names.emplace_back("");
+            }
 
             /** Number to determine which phase (sub-round) the unit attacks. */
             const flags_t<battle_phase>& attack_phases() const noexcept { return this->m_attack_phases; }
@@ -130,7 +137,7 @@ namespace ropufu
             static bool compare_by_id(const type& x, const type& y) noexcept
             {
                 return x.m_id < y.m_id;
-            }
+            } // compare_by_id(...)
 
             /** Determines whether the two objects are in order (by weakness, hit points, id). */
             static bool compare_by_hit_points(const type& x, const type& y) noexcept
@@ -142,7 +149,7 @@ namespace ropufu
                 // Otherwise do hit points comparison.
                 if (x.m_hit_points == y.m_hit_points) return type::compare_by_id(x, y); // If hit points are the same, fall back to \c id comparison.
                 return x.m_hit_points < y.m_hit_points;
-            }
+            } // compare_by_hit_points(...)
 
             /** Checks two types for equality; ignores names. */
             bool operator ==(const type& other) const noexcept
@@ -159,27 +166,26 @@ namespace ropufu
                     this->m_capacity == other.m_capacity &&
                     this->m_hit_points == other.m_hit_points &&
                     this->m_damage == other.m_damage;
-            }
+            } // operator ==(...)
 
             /** Checks two types for inequality. */
             bool operator !=(const type& other) const noexcept
             {
                 return !(this->operator ==(other));
-            }
+            } // operator !=(...)
 
-            friend std::ostream& operator <<(std::ostream& os, const type& self)
+            friend std::ostream& operator <<(std::ostream& os, const type& self) noexcept
             {
                 nlohmann::json j = self;
                 return os << j;
-            }
-        };
+            } // operator <<(...)
+        }; // struct unit_type
 
-        void to_json(nlohmann::json& j, const unit_type& x)
+        void to_json(nlohmann::json& j, const unit_type& x) noexcept
         {
-            std::vector<std::string> initiative;
-            std::vector<std::string> abilities;
-            std::vector<std::string> traits;
-            std::vector<std::string> skills;
+            std::vector<std::string> initiative { };
+            std::vector<std::string> abilities { };
+            std::vector<std::string> traits { };
 
             for (battle_phase phase : x.attack_phases()) initiative.push_back(std::to_string(phase));
             for (special_ability ability : x.abilities()) abilities.push_back(std::to_string(ability));
@@ -187,7 +193,7 @@ namespace ropufu
 
             j = nlohmann::json{
                 {"id", x.id()},
-                {"names", x.names()},
+                {"name", x.names()},
                 {"faction", std::to_string(x.faction())},
                 {"class", std::to_string(x.category())},
                 {"capacity", x.capacity()},
@@ -199,79 +205,142 @@ namespace ropufu
                 {"experience when killed", x.experience()}
             };
 
-            if (initiative.size() == 1) j["initiative"] = initiative[0];
-            else j["initiative"] = initiative;
+            if (initiative.size() != 1) j["initiative"] = initiative;
+            else
+            {
+                std::string single = initiative[0];
+                j["initiative"] = single;
+            }
             if (!abilities.empty()) j["special abilities"] = abilities;
             if (!traits.empty()) j["traits"] = traits;
-        }
+        } // to_json(...)
     
-        void from_json(const nlohmann::json& j, unit_type& x)
+        void from_json(const nlohmann::json& j, unit_type& x) noexcept
         {
-            // ~~ Names ~~
-            std::vector<std::string> names = { };
-            if (j.at("name").is_array()) names = j["name"].get<std::vector<std::string>>();
-            else names = { j["name"].get<std::string>() };
-            x.names() = names;
-
-            // ~~ Faction~~
-            unit_faction fac = unit_faction::non_player_adventure;
-            if (j.count("faction") != 0) try_parse(j["faction"].get<std::string>(), fac);
-            x.set_faction(fac);
-
-            // ~~ Category~~
-            unit_category cat = unit_category::unknown;
-            if (j.count("class") != 0) try_parse(j["class"].get<std::string>(), cat);
-            x.set_category(cat);
-
-            // ~~ Experience ~~
-            std::size_t experience = 0;
-            if (j.count("experience when killed") != 0) experience = j["experience when killed"];
-            else if (j.count("experience") != 0) experience = j["experience"];
-            x.set_experience(experience);
-
-            // ~~ Attack Phases ~~
-            std::vector<std::string> phase_names = { };
-            if (j.at("initiative").is_array()) phase_names = j["initiative"].get<std::vector<std::string>>();
-            else phase_names = { j["initiative"].get<std::string>() };
-            for (const std::string& value : phase_names)
+            std::string missing_property { };
+            // Required properties.
+            if (j.count("id") == 0) missing_property = "Missing required property: id.";
+            if (j.count("hit points") == 0) missing_property = "Missing required property: hit points.";
+            if (j.count("low damage") == 0) missing_property = "Missing required property: low damage.";
+            if (j.count("high damage") == 0) missing_property = "Missing required property: high damage.";
+            if (j.count("accuracy") == 0) missing_property = "Missing required property: accuracy.";
+            if (j.count("name") == 0) missing_property = "Missing required property: name.";
+            if (j.count("initiative") == 0) missing_property = "Missing required property: initiative.";
+            if (!missing_property.empty())
             {
-                battle_phase phase;
-                if (try_parse(value, phase)) x.set_attack_phase(phase, true);
+                aftermath::quiet_error::instance().push(
+                    aftermath::not_an_error::runtime_error,
+                    aftermath::severity_level::major,
+                    missing_property, __FUNCTION__, __LINE__);
+                x = { };
+                return;
             }
 
-            // ~~ Special Abilities ~~
-            std::vector<std::string> ability_names = { };
-            if (j.count("special abilities") != 0) ability_names = j["special abilities"].get<std::vector<std::string>>();
-            for (const std::string& value : ability_names)
+            try
             {
-                special_ability ability;
-                if (try_parse(value, ability)) x.set_ability(ability, true);
-            }
+                // ~~ Id: required ~~
+                std::size_t id = j["id"];
+                x.set_id(id);
+                // ~~ Hit Points: required ~~
+                std::size_t hit_points = j["hit points"];
+                x.set_hit_points(hit_points);
+                // ~~ Low Damage: required ~~
+                std::size_t low_damage = j["low damage"];
+                // ~~ High Damage: required ~~
+                std::size_t high_damage = j["high damage"];
+                // ~~ Accuracy: required ~~
+                double accuracy = j["accuracy"];
+                // ~~ Splash Chance: optional ~~
+                double splash_chance = 0;
+                if (j.count("splash chance") != 0) splash_chance = j["splash chance"];
+                x.set_damage(detail::damage(low_damage, high_damage, accuracy, splash_chance));
+                // ~~ Capacity: optional ~~
+                std::size_t capacity = 0;
+                if (j.count("capacity") != 0) capacity = j["capacity"];
+                x.set_capacity(capacity);
 
-            // ~~ Traits ~~
-            std::vector<std::string> trait_names = { };
-            if (j.count("traits") != 0) trait_names = j["traits"].get<std::vector<std::string>>();
-            for (const std::string& value : trait_names)
+                // ~~ Names: required ~~
+                std::vector<std::string> names { };
+                if (j["name"].is_array()) names = j["name"].get<std::vector<std::string>>();
+                else names = { j["name"].get<std::string>() };
+                x.set_names(names);
+
+                // ~~ Faction: optional ~~
+                unit_faction fac = unit_faction::non_player_adventure;
+                if (j.count("faction") != 0) try_parse(j["faction"].get<std::string>(), fac);
+                x.set_faction(fac);
+
+                // ~~ Category: optional ~~
+                unit_category cat = unit_category::unknown;
+                if (j.count("class") != 0) try_parse(j["class"].get<std::string>(), cat);
+                x.set_category(cat);
+
+                // ~~ Experience: optional ~~
+                std::size_t experience = 0;
+                if (j.count("experience when killed") != 0) experience = j["experience when killed"];
+                else if (j.count("experience") != 0) experience = j["experience"];
+                x.set_experience(experience);
+
+                // ~~ Attack Phases: required ~~
+                std::vector<std::string> phase_names { };
+                if (j["initiative"].is_array()) phase_names = j["initiative"].get<std::vector<std::string>>();
+                else phase_names = { j["initiative"].get<std::string>() };
+                for (const std::string& value : phase_names)
+                {
+                    battle_phase y;
+                    if (try_parse(value, y)) x.set_attack_phase(y, true);
+                    else
+                    {
+                        aftermath::quiet_error::instance().push(
+                            aftermath::not_an_error::runtime_error,
+                            aftermath::severity_level::negligible,
+                            "Skipping unrecognized battle phase.", __FUNCTION__, __LINE__);
+                    }
+                }
+
+                // ~~ Special Abilities: optional ~~
+                std::vector<std::string> ability_names { };
+                if (j.count("special abilities") != 0) ability_names = j["special abilities"].get<std::vector<std::string>>();
+                for (const std::string& value : ability_names)
+                {
+                    special_ability y;
+                    if (try_parse(value, y)) x.set_ability(y, true);
+                    else
+                    {
+                        aftermath::quiet_error::instance().push(
+                            aftermath::not_an_error::runtime_error,
+                            aftermath::severity_level::negligible,
+                            "Skipping unrecognized special ability.", __FUNCTION__, __LINE__);
+                    }
+                }
+
+                // ~~ Traits: optional ~~
+                std::vector<std::string> trait_names { };
+                if (j.count("traits") != 0) trait_names = j["traits"].get<std::vector<std::string>>();
+                for (const std::string& value : trait_names)
+                {
+                    battle_trait y;
+                    if (try_parse(value, y)) x.set_trait(y, true);
+                    else
+                    {
+                        aftermath::quiet_error::instance().push(
+                            aftermath::not_an_error::runtime_error,
+                            aftermath::severity_level::negligible,
+                            "Skipping unrecognized battle trait.", __FUNCTION__, __LINE__);
+                    }
+                }
+            }
+            catch (std::domain_error)
             {
-                battle_trait trait;
-                if (try_parse(value, trait)) x.set_trait(trait, true);
+                aftermath::quiet_error::instance().push(
+                    aftermath::not_an_error::domain_error,
+                    aftermath::severity_level::major,
+                    "JSON unit representation malformed. Using default instead.", __FUNCTION__, __LINE__);
+                x = { };
             }
-
-            // ~~ Damage ~~
-            std::size_t low_damage = j.at("low damage");
-            std::size_t high_damage = j.at("high damage");
-            double accuracy = j.at("accuracy");
-            double splash_chance = 0;
-            if (j.count("splash chance") != 0) splash_chance = j["splash chance"];
-            x.set_damage(detail::damage(low_damage, high_damage, accuracy, splash_chance));
-
-            // ~~ More ~~
-            x.set_id(j.at("id").get<std::size_t>());
-            if (j.count("capacity") != 0) x.set_capacity(j["capacity"].get<std::size_t>());
-            x.set_hit_points(j.at("hit points").get<std::size_t>());
         } // from_json(...)
-    }
-}
+    } // namespace settlers_online
+} // namespace ropufu
 
 namespace std
 {
@@ -305,8 +374,8 @@ namespace std
                 size_hash(x.capacity()) ^
                 size_hash(x.hit_points()) ^
                 damage_hash(x.damage());
-        }
-    };
-}
+        } // operator ()(...)
+    }; // struct hash
+} // namespace std
 
 #endif // ROPUFU_SETTLERS_ONLINE_UNIT_TYPE_HPP_INCLUDED

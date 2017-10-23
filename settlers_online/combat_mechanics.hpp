@@ -128,7 +128,7 @@ namespace ropufu
                 {
                     for (const unit_group& g : attacker)
                     {
-                        const unit_type& t = g.type();
+                        const unit_type& t = g.unit();
 
                         bool do_high_damage = sequencer.peek_do_high_damage(t);
                         sequencer.next_unit();

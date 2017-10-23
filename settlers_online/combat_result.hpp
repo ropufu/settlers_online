@@ -13,10 +13,6 @@ namespace ropufu
 {
     namespace settlers_online
     {
-        static constexpr std::size_t byte_size_in_bits = 8;
-        // The maximum number of <unit_group_bluepring> stored in an army.
-        static constexpr std::size_t army_capacity = byte_size_in_bits * sizeof(mask_type);
-
         struct combat_result
         {
         private:

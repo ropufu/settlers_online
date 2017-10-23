@@ -2,18 +2,14 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_UNIT_GROUP_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_UNIT_GROUP_HPP_INCLUDED
 
-#include <aftermath/algebra.hpp>
-
+// ~~ Misc ~~
 #include "typedef.hpp"
 #include "unit_type.hpp"
 
-#include <cstddef>
-#include <cstdint>
-#include <functional>
-#include <memory>
-#include <ostream>
-#include <stdexcept>
-#include <utility>
+#include <cstddef> // std::size_t
+#include <cstdint> // std::int_fast32_t
+#include <functional> // std::hash
+#include <ostream> // std::ostream
 
 namespace ropufu
 {
@@ -22,10 +18,10 @@ namespace ropufu
         /** Descriptor for groups of units. */
         struct unit_group
         {
-            friend struct combat_mechanics;
+            using type = unit_group;
 
         private:
-            unit_type m_type = {};
+            unit_type m_type = { };
             std::size_t m_count = 0;             // Count of living units in the group.
             std::size_t m_count_at_snapshot = 0; // Count of living units in the group at the moment of latest \c snapshot.
             std::size_t m_damage_taken = 0;             // Damage taken by the top unit.
@@ -40,12 +36,12 @@ namespace ropufu
             unit_group(const unit_type& type, std::size_t count, std::int_fast32_t metagroup_id = 0) noexcept
                 : m_type(type), m_count(count), m_count_at_snapshot(count), m_metagroup_id(metagroup_id)
             {
-            }
+            } // unit_group(...)
 
             /** Common unit type for the group. */
-            const unit_type& type() const noexcept { return this->m_type; }
+            const unit_type& unit() const noexcept { return this->m_type; }
             /** Common unit type for the group. */
-            void set_type(const unit_type& value) noexcept { this->m_type = value; }
+            void set_unit(const unit_type& value) noexcept { this->m_type = value; }
 
             /** Indicates if the group is empty. */
             bool empty() const noexcept { return this->m_count == 0; }
@@ -72,27 +68,30 @@ namespace ropufu
             bool is_dirty() const noexcept
             {
                 return !((this->m_count == this->m_count_at_snapshot) && (this->m_damage_taken == this->m_damage_taken_at_snapshot));
-            }
+            } // is_dirty(...)
 
             /** Undo the changes since the latest \c snapshot. */
             void reset() noexcept
             {
                 this->m_count = this->m_count_at_snapshot;
                 this->m_damage_taken = this->m_damage_taken_at_snapshot;
-            }
+            } // reset(...)
 
             /** Discard the latest \c snapshot and record the current state of the group. */
             void snapshot() noexcept
             {
                 this->m_count_at_snapshot = this->m_count;
                 this->m_damage_taken_at_snapshot = this->m_damage_taken;
-            }
+            } // snapshot(...)
 
             /** The total amount of hit points in the group. */
             std::size_t total_hit_points() const noexcept
             {
+                /** @todo */
+                // debug_assert(this->m_count > 0 || this->m_damage_taken == 0);
+                // debug_assert(this->m_count * this->m_type.hit_points() >= this->m_damage_taken);
                 return (this->m_count * this->m_type.hit_points()) - this->m_damage_taken;
-            }
+            } // total_hit_points(...)
 
             /** @brief Hit points of the top unit.
              *  @remark Returns 0 if the group is empty.
@@ -100,15 +99,17 @@ namespace ropufu
             std::size_t top_hit_points() const noexcept
             {
                 if (this->m_count == 0) return 0;
+                /** @todo */
+                // debug_assert(this->m_type.hit_points() >= this->m_damage_taken);
                 return this->m_type.hit_points() - this->m_damage_taken;
-            }
+            } // top_hit_points(...)
 
             /** Total amount of hit points in the group. */
             void set_total_hit_points(std::size_t value) noexcept
             {
                 this->m_count = fraction_ceiling(value, this->m_type.hit_points());
                 this->m_damage_taken = (this->m_count * this->m_type.hit_points()) - value;
-            }
+            } // set_total_hit_points(...)
 
             /** @brief Indicates if the top unit is damaged.
              *  @remark Returns false if the group is empty.
@@ -116,7 +117,7 @@ namespace ropufu
             bool is_top_damaged() const noexcept
             {
                 return this->m_damage_taken != 0;
-            }
+            } // is_top_damaged(...)
 
             /** @brief Heals the top unit.
              *  @remark Does nothing if the group is empty.
@@ -124,7 +125,7 @@ namespace ropufu
             void heal_top() noexcept
             {
                 this->m_damage_taken = 0;
-            }
+            } // heal_top(...)
 
             /** @brief Damages the top unit without splash.
              *  @remark Excess damage will be ignored.
@@ -142,7 +143,7 @@ namespace ropufu
                     return true;
                 }
                 return false;
-            }
+            } // try_kill_top(...)
 
             /** @brief Kill the top unit in the group.
              *  @remark Does nothing if the group is empty.
@@ -153,14 +154,14 @@ namespace ropufu
 
                 this->m_damage_taken = 0;
                 this->m_count--;
-            }
+            } // kill_top(...)
 
             /** Kill all units in the group. */
             void kill_all() noexcept
             {
                 this->m_damage_taken = 0;
                 this->m_count = 0;
-            }
+            } // kill_all(...)
 
             /** @brief Kills \p count units (top unit being the first to die).
              *  @remark Equivalent to \c kill_all if \p count exceeds the number of units.
@@ -172,57 +173,57 @@ namespace ropufu
 
                 this->m_damage_taken = 0;
                 this->m_count -= count;
-            }
+            } // kill(...)
             
             /** @brief Checks two groups for equality.
              *  @remark Ignores \c snapshots.
              */
-            bool operator ==(const unit_group& other) const noexcept
+            bool operator ==(const type& other) const noexcept
             {
                 return 
                     this->m_type == other.m_type &&
                     this->m_count == other.m_count &&
                     this->m_damage_taken == other.m_damage_taken &&
                     this->m_metagroup_id == other.m_metagroup_id;
-            }
+            } // operator ==(...)
             
             /** @brief Checks two groups for inequality.
              *  @remark Ignores \c snapshots.
              */
-            bool operator !=(const unit_group& other) const noexcept
+            bool operator !=(const type& other) const noexcept
             {
                 return !(this->operator ==(other));
             }
 
-            friend std::ostream& operator <<(std::ostream& os, const unit_group& that)
+            friend std::ostream& operator <<(std::ostream& os, const type& that) noexcept
             {
                 os << that.m_count << " " << that.m_type.names().front();
                 return os;
             }
-        };
-    }
-}
+        }; // struct unit_group
+    } // namespace settlers_online
+} // namespace ropufu
 
 namespace std
 {
     template <>
     struct hash<ropufu::settlers_online::unit_group>
     {
-        typedef ropufu::settlers_online::unit_group argument_type;
-        typedef std::size_t result_type;
+        using argument_type = ropufu::settlers_online::unit_group;
+        using result_type = std::size_t;
 
-        result_type operator()(const argument_type& x) const
+        result_type operator ()(const argument_type& x) const noexcept
         {
             std::hash<std::int_fast32_t> int_fast32_hash = {};
             std::hash<std::size_t> size_hash = {};
 
             return
-                std::hash<ropufu::settlers_online::unit_type>()(x.type()) ^
+                std::hash<ropufu::settlers_online::unit_type>()(x.unit()) ^
                 size_hash(x.count()) ^
                 size_hash(x.damage_taken()) ^
                 int_fast32_hash(x.metagroup_id());
-        }
-    };
-}
+        } // operator ()(...)
+    }; // struct hash
+} // namespace std
 
 #endif // ROPUFU_SETTLERS_ONLINE_UNIT_GROUP_HPP_INCLUDED

@@ -191,7 +191,7 @@ namespace ropufu
 
                     // Check for multiple factions.
                     std::set<unit_faction> left_factions { };
-                    for (const auto& g : this->m_left.groups()) left_factions.insert(g.type().faction());
+                    for (const auto& g : this->m_left.groups()) left_factions.insert(g.unit().faction());
                     left_factions.erase(unit_faction::general); // Generals do not count.
 
                     std::size_t count_options = 0;
@@ -211,7 +211,7 @@ namespace ropufu
                                 for (const unit_group& g : a.groups())
                                 {
                                     if (!is_first) std::cout << " ";
-                                    std::cout << g.count() << db.build_key(g.type());
+                                    std::cout << g.count() << db.build_key(g.unit());
                                     is_first = false;
                                 }
                                 std::cout << "?" << std::endl;
@@ -286,7 +286,7 @@ namespace ropufu
                     std::cout << "Rounds:" << std::endl << rounds << std::endl;
                     for (std::size_t k = 0; k < this->m_left.count_groups(); k++)
                     {
-                        std::cout << "Losses in " << this->m_left[k].type().names().front() << ":" << std::endl;
+                        std::cout << "Losses in " << this->m_left[k].unit().names().front() << ":" << std::endl;
                         std::cout << left_losses[k] << std::endl;
                     }
                 

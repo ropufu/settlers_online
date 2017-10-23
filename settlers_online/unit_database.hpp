@@ -221,8 +221,9 @@ namespace ropufu
                             for (const nlohmann::json& unit : map["units"])
                             {
                                 unit_type u = unit;
-                                std::vector<std::string>& names = u.names();
+                                std::vector<std::string> names = u.names();
                                 for (std::string& name : names) name = char_string::deep_trim_copy(name);
+                                u.set_names(names);
 
                                 key_type key = this->build_key(u);
                                 

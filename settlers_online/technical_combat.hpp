@@ -34,8 +34,8 @@ namespace ropufu
                 const unit_group& attacking_group, std::size_t attacking_unit_index, double damage_factor,
                 attack_sequence<t_sequence_type>& sequencer, bool do_log) noexcept
             {
-                const unit_type& attacker_t = attacking_group.type();
-                const unit_type& defender_t = defending_group.type();
+                const unit_type& attacker_t = attacking_group.unit();
+                const unit_type& defender_t = defending_group.unit();
 
                 std::size_t defending_units_remaining = defending_group.count();
                 if (defending_units_remaining == 0) return attacking_unit_index; // Check if the defending group is empty.
@@ -157,17 +157,17 @@ namespace ropufu
                     // Calculate the remaining splash damage.
                     pure_damage -= damage_required;
                 }
-                if (do_log) std::cout << '\t' << "Overshoot killing " << (defending_units_remaining - defending_group.count()) << " " << defending_group.type().names().front() << std::endl;
+                if (do_log) std::cout << '\t' << "Overshoot killing " << (defending_units_remaining - defending_group.count()) << " " << defending_group.unit().names().front() << std::endl;
                 return pure_damage;
             }
 
             /** Inflicts the reduced damage, \p reduced_damage, onto \p defender, assuming the attaker always deals splash damage and there is no effective tower bonus. */
             static void uniform_splash(std::size_t reduced_damage, army& defender, const aftermath::algebra::permutation& defender_ordering, bool do_log)
             {
-                std::vector<unit_group>& defender_groups = defender.groups();
+                //std::vector<unit_group>& defender_groups = defender.groups();
                 for (std::size_t j : defender_ordering)
                 {
-                    unit_group& defending_group = defender_groups[j];
+                    unit_group& defending_group = defender[j];//defender_groups[j];
                     std::size_t defending_units_remaining = defending_group.count();
                     std::size_t total_hit_points = defending_group.total_hit_points();
                     if (total_hit_points == 0) continue;
@@ -175,7 +175,7 @@ namespace ropufu
                     if (do_log)
                     {
                         std::cout << '\t' << "...against " <<
-                            defending_units_remaining << " " << defending_group.type().names().front() <<
+                            defending_units_remaining << " " << defending_group.unit().names().front() <<
                             " [" << total_hit_points << " hit points]";
                     }
 

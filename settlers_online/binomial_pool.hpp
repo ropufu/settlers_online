@@ -50,7 +50,7 @@ namespace ropufu
                     std::size_t count = g.count(); // Number of units in the group.
                     if (count == 0) continue; // Skip empty groups.
 
-                    const unit_type& t = g.type(); // Unit type in the group.
+                    const unit_type& t = g.unit(); // Unit type in the group.
                     double accuracy = t.damage().accuracy(); // Accuracy of the units.
                     double splash_chance = t.damage().splash_chance(); // Splash chance of the units.
 
