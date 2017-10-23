@@ -106,8 +106,8 @@ namespace ropufu
             /** Total amount of hit points in the group. */
             void set_total_hit_points(std::size_t value) noexcept
             {
-                this->m_count = value / this->m_type.hit_points();
-                this->m_damage_taken = value % this->m_type.hit_points();
+                this->m_count = fraction_ceiling(value, this->m_type.hit_points());
+                this->m_damage_taken = (this->m_count * this->m_type.hit_points()) - value;
             }
 
             /** @brief Indicates if the top unit is damaged.
