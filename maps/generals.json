@@ -2,7 +2,33 @@
     "units": [
         {
             "id": 9001,
+            "name": [ "Tavern General", "((t))" ],
+            "faction": "general",
+            "class": "unknown",
+            "initiative": "normal",
+            "capacity": 200,
+            "hit points": 1,
+            "low damage": 120,
+            "high damage": 120,
+            "accuracy": 1,
+            "special abilities": [ "not weak" ]
+        },
+        {
+            "id": 9002,
             "name": [ "General", "((g))" ],
+            "faction": "general",
+            "class": "unknown",
+            "initiative": "normal",
+            "capacity": 200,
+            "hit points": 1,
+            "low damage": 120,
+            "high damage": 120,
+            "accuracy": 1,
+            "special abilities": [ "not weak" ]
+        },
+        {
+            "id": 9003,
+            "name": [ "Major", "Major General", "((m))" ],
             "faction": "general",
             "class": "unknown",
             "initiative": "normal",
@@ -14,7 +40,7 @@
             "special abilities": [ "not weak" ]
         },
         {
-            "id": 9002,
+            "id": 9004,
             "name": [ "Master of Martial Arts", "((cxv))" ],
             "faction": "general",
             "class": "unknown",

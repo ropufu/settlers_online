@@ -7,6 +7,7 @@
 #include <fstream> // std::ifstream, std::ofstream
 #include <exception> // std::exception
 #include <iostream> // std::ostream
+#include <map> // std::map
 #include <string> // std::string
 
 namespace ropufu
@@ -93,6 +94,8 @@ namespace ropufu
                 const nlohmann::json& operator [](const std::string& parameter_name) const { return this->m_json[parameter_name]; }
                 /** Expose specific settings. */
                 nlohmann::json& operator [](const std::string& parameter_name) { return this->m_json[parameter_name]; }
+
+                bool has(const std::string& name) const noexcept { return this->m_json.count(name) != 0; }
 
                 template <typename t_result_type>
                 bool maybe(const std::string& name, t_result_type& result) const noexcept

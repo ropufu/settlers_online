@@ -115,6 +115,8 @@ namespace ropufu
             std::size_t level(battle_skill skill) const noexcept { return this->m_skills[skill]; }
             /** Skills affecting various aspects of the battle. */
             void set_level(battle_skill skill, std::size_t value) noexcept { this->m_skills[skill] = value; }
+            /** Reset the skills. */
+            void reset_skills() noexcept { this->m_skills = enum_array<battle_skill, std::size_t>(); }
 
             /** Special traits that affect the entire battle. */
             const flags_t<battle_trait>& traits() const noexcept { return this->m_traits; }

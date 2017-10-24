@@ -339,12 +339,12 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
                 std::cout << "Right camp hit points: " << lucy.right_camp().hit_points() << std::endl;
                 break;
             case command_name::left_skills:
-                if (!argument.empty()) lucy.parse_left_skills(argument);
-                std::cout << "Left skills: " << lucy.left_skills() << std::endl;
+                std::cout << "Left skills:" << std::endl;
+                lucy.print_left_skills();
                 break;
             case command_name::right_skills:
-                if (!argument.empty()) lucy.parse_right_skills(argument);
-                std::cout << "Right skills: " << lucy.right_skills() << std::endl;
+                std::cout << "Right skills:" << std::endl;
+                lucy.print_right_skills();
                 break;
             case command_name::n:
                 if (!argument.empty()) lucy.set_simulation_count(static_cast<std::size_t>(std::stol(argument)));

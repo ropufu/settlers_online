@@ -4,14 +4,17 @@
 
 #include <aftermath/not_an_error.hpp>
 #include <aftermath/probability.hpp>
+#include <nlohmann/json.hpp>
 
 #include "config.hpp"
 
 #include "../settlers_online/unit_database.hpp"
 #include "../settlers_online/army_parser.hpp"
 #include "../settlers_online/army.hpp"
+#include "../settlers_online/battle_skill.hpp"
 #include "../settlers_online/binomial_pool.hpp"
 #include "../settlers_online/camp.hpp"
+#include "../settlers_online/char_string.hpp"
 #include "../settlers_online/combat_mechanics.hpp"
 #include "../settlers_online/combat_result.hpp"
 #include "../settlers_online/conditioned_army.hpp"
@@ -24,8 +27,9 @@
 #include <chrono> // std::chrono::steady_clock, std::chrono::duration_cast
 #include <cstddef> // std::size_t
 #include <cstdint> // std::int32_t
-#include <exception> // std::exception
+#include <stdexcept> // std::domain_error
 #include <iostream> // std::cout, std::endl
+#include <map> // std::map
 #include <set> // std::set
 #include <string> // std::string, std::to_string
 #include <vector> // std::vector
@@ -46,6 +50,7 @@ namespace ropufu
                 using sequencer_type_high = trivial_attack_sequence<true>;
                 
                 using empirical_measure = aftermath::probability::empirical_measure<std::size_t, std::size_t, double>;
+                using skills_type = enum_array<battle_skill, std::size_t>;
 
                 static bool is_config_valid() noexcept
                 {
@@ -85,6 +90,85 @@ namespace ropufu
                     return true;
                 } // try_parse(...)
 
+                static bool try_parse_skills(const nlohmann::json& what, std::map<std::string, skills_type>& where) noexcept
+                {
+                    if (!what.is_array()) return false;
+                    
+                    for (const nlohmann::json& j : what)
+                    {
+                        if (j.count("general") == 0 || j.count("skills") == 0) continue;
+                        if (!j["general"].is_string()) continue;
+
+                        std::string key = j["general"];
+                        if (!j["skills"].is_array()) continue;
+
+                        skills_type skills { };
+                        for (const nlohmann::json& s : j["skills"])
+                        {
+                            if (s.count("name") == 0 || s.count("level") == 0) continue;
+                            if (!s["name"].is_string()) continue;
+                            if (!s["level"].is_number_unsigned()) continue;
+
+                            std::string name = s["name"];
+                            std::size_t level = s["level"];
+
+                            name = char_string::deep_trim_copy(name);
+                            char_string::to_lower(name);
+                            battle_skill skill = battle_skill::none;
+                            if (settlers_online::try_parse(name, skill)) skills[skill] = level;
+                            else std::cout << "Skill not recognized: " << name << "." << std::endl;
+                        }
+                        where.emplace(key, skills);
+                    }
+                    return true;
+                } // parse_skills(...)
+                
+                static void print_skills(const std::map<std::string, skills_type>& skills) noexcept
+                {
+                    std::string prefix = "  |---- ";
+                    bool is_empty = true;
+                    for (const auto& pair : skills)
+                    {
+                        is_empty = false;
+                        std::cout << '\t' << pair.first << std::endl;
+                        bool is_first = true;
+                        for (const auto& skill_pair : pair.second)
+                        {
+                            if (skill_pair.second == 0) continue;
+                            std::cout << '\t' << prefix << std::to_string(skill_pair.first) << " (" << skill_pair.second << ")" << std::endl;
+                            is_first = false;
+                        }
+                        if (is_first) std::cout << '\t' << prefix << "none" << std::endl;
+                        std::cout << std::endl;
+                    }
+                    if (is_empty) std::cout << "None" << std::endl;
+                } // print_skills(...)
+                
+                static bool try_apply_skills(army& a, const std::map<std::string, skills_type>& skills) noexcept
+                {
+                    std::string prefix = "  |---- ";
+                    for (const auto& pair : skills)
+                    {
+                        bool is_match = false;
+                        for (const unit_group& g : a.groups()) for (const std::string& name : g.unit().names()) if (name == pair.first) is_match = true;
+                        if (!is_match) continue;
+                        
+                        std::cout << "Applying skills:" << std::endl;
+                        bool is_first = true;
+                        for (const auto& skill_pair : pair.second)
+                        {
+                            if (skill_pair.second == 0) continue;
+                            std::cout << '\t' << prefix << std::to_string(skill_pair.first) << " (" << skill_pair.second << ")" << std::endl;
+                            a.set_level(skill_pair.first, skill_pair.second);
+                            is_first = false;
+                        }
+                        if (is_first) std::cout << '\t' << prefix << "none" << std::endl;
+                        std::cout << std::endl;
+                        return true;
+                    }
+                    return false;
+                } // try_apply_skills(...)
+
                 static void unwind_errors(bool do_skip_log, bool is_quiet = false) noexcept
                 {
                     aftermath::quiet_error& err = aftermath::quiet_error::instance();
@@ -113,6 +197,9 @@ namespace ropufu
                 army m_right = { };
                 detail::camp m_left_camp = { };
                 detail::camp m_right_camp = detail::camp(250, 0);
+                std::map<std::string, skills_type> m_left_skills = { };
+                std::map<std::string, skills_type> m_right_skills = { };
+
                 std::size_t m_count_combat_sims = 10'000;
                 std::size_t m_count_destruct_sims_per_combat = 50;
 
@@ -146,6 +233,9 @@ namespace ropufu
                     c.maybe("left camp", left_camp);
                     c.maybe("right camp", right_camp);
 
+                    if (c.has("left skills")) type::try_parse_skills(c["left skills"], this->m_left_skills);
+                    if (c.has("right skills")) type::try_parse_skills(c["right skills"], this->m_right_skills);
+
                     this->m_count_combat_sims = n1;
                     this->m_count_destruct_sims_per_combat = n2;
                     this->m_left_camp = left_camp;
@@ -158,11 +248,8 @@ namespace ropufu
                     type::unwind_errors(false);
                 } // reload(...)
 
-                std::string left_skills() const noexcept { return "Not implemented yet, sowwy m(_ _)m"; }
-                std::string right_skills() const noexcept { return "Not implemented yet, sowwy m(_ _)m"; }
-
-                void parse_left_skills(const std::string& /**str*/) noexcept { std::cout << "Not implemented yet, sowwy m(_ _)m" << std::endl; }
-                void parse_right_skills(const std::string& /**str*/) noexcept { std::cout << "Not implemented yet, sowwy m(_ _)m" << std::endl; }
+                void print_left_skills() const noexcept { type::print_skills(this->m_left_skills); }
+                void print_right_skills() const noexcept { type::print_skills(this->m_right_skills); }
 
                 const army& left() const noexcept { return this->m_left; }
                 const army& right() const noexcept { return this->m_right; }
@@ -240,6 +327,15 @@ namespace ropufu
                         std::cout << "Armies (left and right) have to be set prior to execution." << std::endl;
                         return;
                     }
+
+                    this->m_left.set_camp(this->m_left_camp);
+                    this->m_right.set_camp(this->m_right_camp);
+                    
+                    this->m_left.reset_skills();
+                    this->m_right.reset_skills();
+
+                    type::try_apply_skills(this->m_left, this->m_left_skills);
+                    type::try_apply_skills(this->m_right, this->m_right_skills);
                 
                     // ~~ Combat phase ~~
                     ropufu::settlers_online::combat_mechanics combat(this->m_left, this->m_right);

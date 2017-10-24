@@ -43,16 +43,16 @@ namespace ropufu
         {
             if (str == "none") { value = battle_skill::none; return true; }
             if (str == "juggernaut") { value = battle_skill::juggernaut; return true; }
-            if (str == "garrison_annex") { value = battle_skill::garrison_annex; return true; }
-            if (str == "lightning_slash") { value = battle_skill::lightning_slash; return true; }
-            if (str == "unstoppable_charge") { value = battle_skill::unstoppable_charge; return true; }
-            if (str == "weekly_maintenance") { value = battle_skill::weekly_maintenance; return true; }
-            if (str == "master_planner") { value = battle_skill::master_planner; return true; }
-            if (str == "battle_frenzy") { value = battle_skill::battle_frenzy; return true; }
-            if (str == "rapid_fire") { value = battle_skill::rapid_fire; return true; }
-            if (str == "sniper_training") { value = battle_skill::sniper_training; return true; }
+            if (str == "garrison annex") { value = battle_skill::garrison_annex; return true; }
+            if (str == "lightning slash") { value = battle_skill::lightning_slash; return true; }
+            if (str == "unstoppable charge") { value = battle_skill::unstoppable_charge; return true; }
+            if (str == "weekly maintenance") { value = battle_skill::weekly_maintenance; return true; }
+            if (str == "master planner") { value = battle_skill::master_planner; return true; }
+            if (str == "battle frenzy") { value = battle_skill::battle_frenzy; return true; }
+            if (str == "rapid fire") { value = battle_skill::rapid_fire; return true; }
+            if (str == "sniper training") { value = battle_skill::sniper_training; return true; }
             if (str == "cleave") { value = battle_skill::cleave; return true; }
-            if (str == "fast_learner") { value = battle_skill::fast_learner; return true; }
+            if (str == "fast learner") { value = battle_skill::fast_learner; return true; }
             if (str == "overrun") { value = battle_skill::overrun; return true; }
             return false;
         } // try_parse(...)
