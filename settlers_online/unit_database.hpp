@@ -3,6 +3,8 @@
 #define ROPUFU_SETTLERS_ONLINE_UNIT_DATABASE_HPP_INCLUDED
 
 #include <aftermath/not_an_error.hpp>
+#include <experimental/filesystem>
+#include <nlohmann/json.hpp>
 
 #include "char_string.hpp"
 #include "unit_type.hpp"
@@ -14,9 +16,6 @@
 #include <string> // std::string
 #include <vector> // std::vector
 
-#include <experimental/filesystem>
-#include <nlohmann/json.hpp>
-
 namespace ropufu
 {
     namespace settlers_online
@@ -24,6 +23,7 @@ namespace ropufu
         template <typename t_key_type, typename t_skeleton_type = t_key_type>
         struct lookup
         {
+            using type = lookup<t_key_type, t_skeleton_type>;
             using key_type = t_key_type;
             using skeleton_type = t_skeleton_type;
 
@@ -36,7 +36,7 @@ namespace ropufu
             {
                 this->m_skeleton.clear();
                 this->m_inverse_skeleton.clear();
-            }
+            } // clear(...)
 
             void update(const key_type& key, const std::set<skeleton_type>& values) noexcept
             {
@@ -54,7 +54,7 @@ namespace ropufu
                         this->m_inverse_skeleton.emplace(weak, matches);
                     }
                 }
-            }
+            } // update(...)
 
             template <typename t_predicate_type>
             std::size_t try_find(const skeleton_type& query, key_type& key, const t_predicate_type& filter) const noexcept
@@ -71,8 +71,8 @@ namespace ropufu
                     return count;
                 }
                 return 0;
-            }
-        };
+            } // try_find(...)
+        }; // struct lookup
 
         /** @brief Class for accessing known units.
          *  @remark Singleton structure taken from https://stackoverflow.com/questions/11711920
@@ -82,7 +82,19 @@ namespace ropufu
             using type = unit_database;
             using key_type = std::string;
 
+            static key_type build_key(const unit_type& unit) noexcept
+            {
+                key_type key = unit.names().front();
+                for (const std::string& name :  unit.names())
+                {
+                    // Take the shortest name as the key.
+                    if (name.length() < key.length()) key = name;
+                }
+                return key;
+            } // build_key(...)
+
         private:
+            unit_type m_invalid = { };
             std::map<key_type, unit_type> m_database = { }; // Primary key: shortest name.
             std::set<std::size_t> m_ids = { }; // Keep track of id's to prevent group collision in \army.
             lookup<key_type, key_type> m_lowercase_lookup = { }; // Lookup for lowercase names.
@@ -94,7 +106,7 @@ namespace ropufu
                 key_type relaxed = query;
                 char_string::to_lower(relaxed);
                 return relaxed;
-            }
+            } // relax_to_lowercase(...)
 
             /** Relaxed lookup stage 2. Assuming stage 1 has already been applied. */
             static key_type relax_spelling(const key_type& query) noexcept
@@ -118,13 +130,13 @@ namespace ropufu
                 }
                 
                 return relaxed;
-            }
+            } // relax_spelling(...)
 
             /** Assuming the unit names have already been subject to \c deep_trim_copy. */
             void update_lookup(const key_type& key, const unit_type& unit) noexcept
             {
-                std::set<key_type> relaxed_names = { };
-                std::set<key_type> misspelled_names = { };
+                std::set<key_type> relaxed_names { };
+                std::set<key_type> misspelled_names { };
                 for (const std::string& name : unit.names())
                 {
                     key_type stage1 = unit_database::relax_to_lowercase(name);
@@ -135,7 +147,7 @@ namespace ropufu
 
                 this->m_lowercase_lookup.update(key, relaxed_names);
                 this->m_misspelled_lookup.update(key, misspelled_names);
-            }
+            } // update_lookup(...)
 
         protected:
             unit_database() noexcept { }
@@ -149,14 +161,24 @@ namespace ropufu
                 this->m_ids.clear();
                 this->m_lowercase_lookup.clear();
                 this->m_misspelled_lookup.clear();
-            }
+            } // clear(...)
 
             const std::map<key_type, unit_type>& data() const noexcept { return this->m_database; }
 
+            /** @brief Access elements by key.
+             *  @exception not_an_error::out_of_range This error is pushed to \c quiet_error if specified \p key is not in the database.
+             */
             const unit_type& at(const key_type& key) const noexcept 
             {
-                return this->m_database.at(key);
-            }
+                auto search = this->m_database.find(key);
+                if (search != this->m_database.end()) return search->second;
+
+                aftermath::quiet_error::instance().push(
+                    aftermath::not_an_error::out_of_range,
+                    aftermath::severity_level::fatal,
+                    "<key> is not present in the database.", __FUNCTION__, __LINE__);
+                return this->m_invalid;
+            } // at(...)
 
             template <typename t_predicate_type>
             bool try_find(const key_type& query, unit_type& unit, const t_predicate_type& filter) const noexcept 
@@ -190,18 +212,7 @@ namespace ropufu
                     return false;
                 }
                 return false;
-            }
-
-            key_type build_key(const unit_type& unit) const noexcept
-            {
-                key_type key = unit.names().front();
-                for (const std::string& name :  unit.names())
-                {
-                    // Take the shortest name as the key.
-                    if (name.length() < key.length()) key = name;
-                }
-                return key;
-            }
+            } // try_find(...)
 
             /** Load units from .json files in a specified folder. */
             std::size_t load_from_folder(const std::string& folder_path)
@@ -225,7 +236,7 @@ namespace ropufu
                                 for (std::string& name : names) name = char_string::deep_trim_copy(name);
                                 u.set_names(names);
 
-                                key_type key = this->build_key(u);
+                                key_type key = type::build_key(u);
                                 
                                 if (this->m_database.count(key) != 0)
                                 {
@@ -262,30 +273,33 @@ namespace ropufu
                     }
                     catch (...)
                     {
-                        aftermath::quiet_error::instance().push("Something went wrong.");
+                        aftermath::quiet_error::instance().push(
+                            aftermath::not_an_error::runtime_error,
+                            aftermath::severity_level::fatal,
+                            "Something went very wrong.", __FUNCTION__, __LINE__);
                         continue;
                     }
                 }
                 return count;
-            }
+            } // load_from_folder(...)
 
             /** The only instance of this type. */
-            static type& instance()
+            static type& instance() noexcept
             {
                 // Since it's a static variable, if the class has already been created, it won't be created again.
                 // Note: it is thread-safe in C++11.
                 static type s_instance;
                 // Return a reference to our instance.
                 return s_instance;
-            }
+            } // instance(...)
 
             // ~~ Delete copy and move constructors and assign operators ~~
             unit_database(const type&) = delete;    // Copy constructor.
             unit_database(type&&)      = delete;    // Move constructor.
             type& operator =(const type&) = delete; // Copy assign.
             type& operator =(type&&)      = delete; // Move assign.
-        };
-    }
-}
+        }; // struct unit_database
+    } // namespace settlers_online
+} // namespace ropufu
 
 #endif // ROPUFU_SETTLERS_ONLINE_UNIT_DATABASE_HPP_INCLUDED

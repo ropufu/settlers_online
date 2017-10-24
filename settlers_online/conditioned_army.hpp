@@ -5,17 +5,20 @@
 #include <aftermath/algebra.hpp> // aftermath::algebra::permutation
 #include <aftermath/not_an_error.hpp>
 
-#include "army.hpp"
-#include "attack_sequence.hpp"
+// ~~ Enumerations ~~
 #include "battle_phase.hpp"
 #include "battle_trait.hpp"
-#include "combat_result.hpp"
-#include "damage.hpp"
-#include "enum_array.hpp"
 #include "special_ability.hpp"
+#include "unit_category.hpp"
+// ~~ Basic structures ~~
+#include "damage.hpp"
+// ~~ Misc ~~
+#include "army.hpp"
+#include "attack_sequence.hpp"
+#include "combat_result.hpp"
+#include "enum_array.hpp"
 #include "technical_combat.hpp"
 #include "typedef.hpp"
-#include "unit_category.hpp"
 #include "unit_group.hpp"
 #include "unit_type.hpp"
 
@@ -81,7 +84,7 @@ namespace ropufu
                 // Figure out which ordering to use.
                 bool do_attack_weakest_target = t.has(special_ability::attack_weakest_target);
                 this->m_attack_order = do_attack_weakest_target ? other.order_by_hp() : other.order_by_id();
-            }
+            } // attack_group_cache(...)
 
             const aftermath::algebra::permutation& order() const noexcept { return this->m_attack_order; }
 
@@ -92,8 +95,8 @@ namespace ropufu
             {
                 damage_factor = this->m_damage_factors[index];
                 is_one_to_one = this->m_is_one_to_one[index];
-            }
-        };
+            } // against_enemy_group(...)
+        }; // struct attack_group_cache
 
         struct conditioned_army
         {
@@ -171,7 +174,7 @@ namespace ropufu
                 damage_bonus.set_is_quiet(false);
                 // Apply new damage.
                 unit.set_damage(damage_bonus);
-            }
+            } // apply_friendly_skill(...)
 
             /** @brief Apply the enemy army's skill to a unit.
              *  @param level The number of books invested in this skill.
@@ -189,7 +192,7 @@ namespace ropufu
                         break;
                     default: break;
                 }
-            }
+            } // apply_enemy_skill(...)
 
         public:
             /** @brief Constructs a version of the army \p a conditioned for a fight against \p other.
@@ -209,12 +212,12 @@ namespace ropufu
                 std::vector<std::size_t> losses = this->m_counts;
                 aftermath::algebra::elementwise::subtract_assign(losses, this->m_army.counts_by_type());
                 return losses;
-            }
+            } // calculate_losses(...)
 
             /** Initiates and attack by this army on its opponent \c other. */
             template <typename t_sequence_type>
-            void initiate_phase(battle_phase phase, conditioned_army& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, bool do_log) const;
-        };
+            void initiate_phase(battle_phase phase, conditioned_army& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, bool do_log) const noexcept;
+        }; // struct conditioned_army
 
         /** @brief Constructs a version of the army \p a conditioned for a fight against \p other.
          *  @param other The unconditioned(!) army to prepare to fight against.
@@ -279,11 +282,11 @@ namespace ropufu
             this->m_caches.reserve(this->m_army.count_groups());
             for (const unit_group& g : this->m_army.groups()) this->m_caches.emplace_back(g, other);
             this->m_caches.shrink_to_fit();
-        }
+        } // conditioned_army::conditioned_army(...)
 
         /** Initiates and attack by this army on its opponent \c other. */
         template <typename t_sequence_type>
-        void conditioned_army::initiate_phase(battle_phase phase, conditioned_army& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, bool do_log) const
+        void conditioned_army::initiate_phase(battle_phase phase, conditioned_army& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, bool do_log) const noexcept
         {
             for (std::size_t i : this->m_group_indices[phase])
             {
@@ -316,7 +319,7 @@ namespace ropufu
                             " (" << (count_attackers - count_high_damage) << " low, " << count_high_damage << " high)" <<
                             " splash damage..." << std::endl;
                     }
-                    detail::uniform_splash(total_reduced_damage, other.underlying(), cache.order(), do_log); // technical_combat.hpp.
+                    detail::uniform_splash(total_reduced_damage, other.m_army, cache.order(), do_log); // technical_combat.hpp.
                     continue; // Proceed to the next attacking group.
                 }
 
@@ -329,7 +332,6 @@ namespace ropufu
 
                 std::size_t attacking_unit_index = 0;
                 std::size_t pure_overshoot_damage = 0; // Pure damage spilled between consequent groups.
-                //std::vector<unit_group>& defender_groups = other.underlying().groups();
                 for (std::size_t j : cache.order())
                 {
                     // Get cached properties.
@@ -353,11 +355,18 @@ namespace ropufu
                     else attacking_unit_index = detail::hit(pure_overshoot_damage, defending_group, attacking_group, attacking_unit_index, damage_factor, sequencer, do_log); // technical_combat.hpp.
 
                     if (attacking_unit_index == attacking_group.count_at_snapshot()) break;
-                    if (attacking_unit_index > attacking_group.count_at_snapshot()) throw std::logic_error("<attacking_unit_index> overflow.");
+                    if (attacking_unit_index > attacking_group.count_at_snapshot()) 
+                    {
+                        aftermath::quiet_error::instance().push(
+                            aftermath::not_an_error::logic_error,
+                            aftermath::severity_level::fatal,
+                            "<attacking_unit_index> overflow.", __FUNCTION__, __LINE__);
+                        break;
+                    }
                 }
             }
-        }
-    }
-}
+        } // conditioned_army::initiate_phase(...)
+    } // namespace settlers_online
+} // namespace ropufu
 
 #endif // ROPUFU_SETTLERS_ONLINE_CONDITIONED_ARMY_HPP_INCLUDED

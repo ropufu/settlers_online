@@ -2,6 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_BINOMIAL_POOL_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_BINOMIAL_POOL_HPP_INCLUDED
 
+#include <aftermath/not_an_error.hpp>
 #include <aftermath/probability.hpp>
 #include <aftermath/random.hpp>
 
@@ -12,8 +13,6 @@
 #include <cstddef> // std::size_t
 #include <map> // std::map
 #include <random> // std::default_random_engine
-
-//#include <iostream>
 
 namespace ropufu
 {
@@ -33,6 +32,9 @@ namespace ropufu
             using binomial_lookup_sampler_type = aftermath::random::default_sampler_binomial_lookup_t<t_engine_type>;
 
         private:
+            bernoulli_sampler_type m_invalid_bernoulli = { };
+            binomial_lookup_sampler_type m_invalid_binomial = { };
+
             std::map<double, bernoulli_sampler_type> m_bernoulli_cache = { };
             std::map<double, binomial_lookup_sampler_type> m_binomial_lookup_cache = { };
 
@@ -42,7 +44,7 @@ namespace ropufu
 
         public:
             /** Updates the sampler cache from a provided instance of \p army. */
-            void cache(const army& army)
+            void cache(const army& army) noexcept
             {
                 // Iterate through army groups.
                 for (const unit_group& g : army.groups())
@@ -62,15 +64,15 @@ namespace ropufu
 
                     // Binomial sampler for damage.
                     binomial_distribution_type binomial_for_damage(count, accuracy);
-                    auto existing_sampler_it = this->m_binomial_lookup_cache.find(accuracy); // See if the sampler already exists.
-                    if (existing_sampler_it == this->m_binomial_lookup_cache.end()) // Sampler not found.
+                    auto existing_sampler_search = this->m_binomial_lookup_cache.find(accuracy); // See if the sampler already exists.
+                    if (existing_sampler_search == this->m_binomial_lookup_cache.end()) // Sampler not found.
                     {
                         //std::cout << "Building binomial lookup " << accuracy << " from " << bernoulli_for_damage.number_of_trials() << " to " << binomial_for_damage.number_of_trials() << std::endl;
                         this->m_binomial_lookup_cache.emplace(accuracy, binomial_lookup_sampler_type(bernoulli_for_damage, binomial_for_damage)); // Does nothing if the sampler already exists.
                     }
                     else
                     {
-                        binomial_lookup_sampler_type& existing_sampler = existing_sampler_it->second; // Existing sampler.
+                        binomial_lookup_sampler_type& existing_sampler = existing_sampler_search->second; // Existing sampler.
                         // Update existing sampler if the number of units in the current group is greater.
                         if (existing_sampler.number_of_trials_max() < count)
                         {
@@ -79,45 +81,77 @@ namespace ropufu
                         }
                     }
                 }
-            }
+            } // cache(...)
 
             /** @brief Bernoulli sampler based on the provided \p probability_of_success. 
-             *  @exception std::out_of_range \p probability_of_success is not in the interval [0, 1].
-             *  @exception std::out_of_range Provided \p probability_of_success is not in the cache.
+             *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if \p probability_of_success is not in the interval [0, 1].
+             *  @exception not_an_error::out_of_range This error is pushed to \c quiet_error if \p probability_of_success is not in the cache.
              */
-            const bernoulli_sampler_type& bernoulli_sampler(double probability_of_success) const
+            const bernoulli_sampler_type& bernoulli_sampler(double probability_of_success) const noexcept
             {
-                if (probability_of_success < 0.0 || probability_of_success > 1.0) throw std::out_of_range("<probability_of_success> must be in the range from 0 to 1");
-                return this->m_bernoulli_cache.at(probability_of_success);
-            }
+                if (probability_of_success < 0 || probability_of_success > 1)
+                {
+                    if (probability_of_success < 0) probability_of_success = 0;
+                    if (probability_of_success > 1) probability_of_success = 1;
+                    aftermath::quiet_error::instance().push(
+                        aftermath::not_an_error::logic_error,
+                        aftermath::severity_level::fatal,
+                        "<probability_of_success> coerced to lie within the interval [0, 1].", __FUNCTION__, __LINE__);
+                }
 
-            /** @brief Binomial lookup sampler based on the provided \p probability_of_success. 
-             *  @exception std::out_of_range \p probability_of_success is not in the interval [0, 1].
-             *  @exception std::out_of_range Provided \p probability_of_success is not in the cache.
+                auto search = this->m_bernoulli_cache.find(probability_of_success);
+                if (search != this->m_bernoulli_cache.end()) return search->second;
+
+                aftermath::quiet_error::instance().push(
+                    aftermath::not_an_error::out_of_range,
+                    aftermath::severity_level::fatal,
+                    "<probability_of_success> is not present in the cache.", __FUNCTION__, __LINE__);
+                return this->m_invalid_bernoulli;
+            } // bernoulli_sampler(...)
+
+            /** @brief Binomial lookup sampler based on the provided \p probability_of_success.
+             *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if \p probability_of_success is not in the interval [0, 1].
+             *  @exception not_an_error::out_of_range This error is pushed to \c quiet_error if \p probability_of_success is not in the cache.
              */
-            const binomial_lookup_sampler_type& binomial_lookup_sampler(double probability_of_success) const
+            const binomial_lookup_sampler_type& binomial_lookup_sampler(double probability_of_success) const noexcept
             {
-                if (probability_of_success < 0.0 || probability_of_success > 1.0) throw std::out_of_range("<probability_of_success> must be in the range from 0 to 1");
-                return this->m_binomial_lookup_cache.at(probability_of_success);
-            }
+                if (probability_of_success < 0 || probability_of_success > 1)
+                {
+                    if (probability_of_success < 0) probability_of_success = 0;
+                    if (probability_of_success > 1) probability_of_success = 1;
+                    aftermath::quiet_error::instance().push(
+                        aftermath::not_an_error::logic_error,
+                        aftermath::severity_level::fatal,
+                        "<probability_of_success> coerced to lie within the interval [0, 1].", __FUNCTION__, __LINE__);
+                }
+
+                auto search = this->m_binomial_lookup_cache.find(probability_of_success);
+                if (search != this->m_binomial_lookup_cache.end()) return search->second;
+
+                aftermath::quiet_error::instance().push(
+                    aftermath::not_an_error::out_of_range,
+                    aftermath::severity_level::fatal,
+                    "<probability_of_success> is not present in the cache.", __FUNCTION__, __LINE__);
+                return this->m_invalid_binomial;
+            } // binomial_lookup_sampler(...)
             
             /** The only instance of this type. */
-            static type& instance()
+            static type& instance() noexcept
             {
                 // Since it's a static variable, if the class has already been created, it won't be created again.
                 // Note: it is thread-safe in C++11.
                 static type s_instance;
                 // Return a reference to our instance.
                 return s_instance;
-            }
+            } // instance(...)
 
             // ~~ Delete copy and move constructors and assign operators ~~
             binomial_pool(const type&) = delete;    // Copy constructor.
             binomial_pool(type&&)      = delete;    // Move constructor.
             type& operator =(const type&) = delete; // Copy assign.
             type& operator =(type&&)      = delete; // Move assign.
-        };
-    }
-}
+        }; // struct binomial_pool
+    } // namespace settlers_online
+} // namespace ropufu
 
 #endif // ROPUFU_SETTLERS_ONLINE_BINOMIAL_POOL_HPP_INCLUDED

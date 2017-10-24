@@ -47,16 +47,16 @@ namespace ropufu
                 
                 using empirical_measure = aftermath::probability::empirical_measure<std::size_t, std::size_t, double>;
 
-                static bool is_config_valid()
+                static bool is_config_valid() noexcept
                 {
                     config& c = config::instance();
                     if (!c.good()) return false;
 
                     return true;
-                }
+                } // is_config_valid(...)
 
                 template <typename t_action_type>
-                static double elapsed_seconds(t_action_type action)
+                static double elapsed_seconds(t_action_type action) noexcept
                 {
                     std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
                     action();
@@ -67,7 +67,7 @@ namespace ropufu
                 } // elapsed_seconds(...)
                 
                 template <typename t_predicate_type>
-                static bool try_parse(const std::string& str, army& value, const t_predicate_type& predicate, bool is_quiet = false)
+                static bool try_parse(const std::string& str, army& value, const t_predicate_type& predicate, bool is_quiet = false) noexcept
                 {
                     const unit_database& db = unit_database::instance();
 
@@ -83,9 +83,9 @@ namespace ropufu
                         return false;
                     }
                     return true;
-                }
+                } // try_parse(...)
 
-                static void unwind_errors(bool do_skip_log, bool is_quiet = false)
+                static void unwind_errors(bool do_skip_log, bool is_quiet = false) noexcept
                 {
                     aftermath::quiet_error& err = aftermath::quiet_error::instance();
                 
@@ -106,7 +106,7 @@ namespace ropufu
                             " on line " << desc.caller_line_number() <<
                             " of <" << desc.caller_function_name() << ">: " << desc.description() << std::endl;
                     }
-                }
+                } // unwind_errors(...)
 
             private:
                 army m_left = { };
@@ -120,7 +120,7 @@ namespace ropufu
                 turtle() noexcept
                 {
                     this->reload();
-                }
+                } // turtle(...)
 
                 void reload() noexcept
                 {
@@ -156,7 +156,7 @@ namespace ropufu
                     this->m_left = { };
                     this->m_right = { };
                     type::unwind_errors(false);
-                }
+                } // reload(...)
 
                 std::string left_skills() const noexcept { return "Not implemented yet, sowwy m(_ _)m"; }
                 std::string right_skills() const noexcept { return "Not implemented yet, sowwy m(_ _)m"; }
@@ -179,7 +179,7 @@ namespace ropufu
                     this->m_count_combat_sims = value;
                     config::instance()["simulations"] = value;
                     config::instance().write();
-                }
+                } // set_simulation_count(...)
 
                 void parse_left(const std::string& army_string, bool is_strict = false) noexcept
                 {
@@ -197,7 +197,6 @@ namespace ropufu
                     std::size_t count_options = 0;
                     if (left_factions.size() > 1)
                     {
-                        unit_database& db = unit_database::instance();
                         std::cout << "Warning! There is more than one faction in your army." << std::endl;
                         army a { };
                         for (unit_faction f : left_factions)
@@ -211,7 +210,7 @@ namespace ropufu
                                 for (const unit_group& g : a.groups())
                                 {
                                     if (!is_first) std::cout << " ";
-                                    std::cout << g.count() << db.build_key(g.unit());
+                                    std::cout << g.count() << unit_database::build_key(g.unit());
                                     is_first = false;
                                 }
                                 std::cout << "?" << std::endl;
@@ -225,15 +224,15 @@ namespace ropufu
                             this->m_left = a;
                         }
                     }
-                }
+                } // parse_left(...)
 
                 void parse_right(const std::string& army_string) noexcept
                 {
                     type::try_parse(army_string, this->m_right, [] (const unit_type& /**u*/) { return true; });
                     type::unwind_errors(false);
-                }
+                } // parse_right(...)
 
-                void run(bool is_log = false)
+                void run(bool is_log = false) noexcept
                 {
                     unwind_errors(false);
                     if (this->m_left.count_groups() == 0 || this->m_right.count_groups() == 0)
@@ -254,8 +253,8 @@ namespace ropufu
                     unwind_errors(true);
                 
                     // ~~ Choose sequencers ~~
-                    sequencer_type left_seq = { };
-                    sequencer_type right_seq = { };
+                    sequencer_type left_seq { };
+                    sequencer_type right_seq { };
                 
                     std::cout << this->m_left << " vs. " << this->m_right << std::endl;
                     if (is_log)
@@ -269,9 +268,9 @@ namespace ropufu
                     std::vector<empirical_measure> left_losses(this->m_left.count_groups());
                     for (std::size_t i = 0; i < this->m_count_combat_sims; ++i)
                     {
-                        ropufu::settlers_online::combat_result result = combat.execute(left_seq, right_seq);
+                        std::size_t combat_rounds = combat.execute(left_seq, right_seq);
+                        //const ropufu::settlers_online::combat_result& result = combat.outcome();
 
-                        std::size_t combat_rounds = result.number_of_rounds();
                         std::vector<std::size_t> x = combat.left().calculate_losses();
                         for (std::size_t k = 0; k < x.size(); k++) left_losses[k].observe(x[k]);
                 

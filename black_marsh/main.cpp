@@ -19,17 +19,6 @@ using unit_database = ropufu::settlers_online::unit_database;
 using char_string = ropufu::settlers_online::char_string;
 using quiet_error = ropufu::aftermath::quiet_error;
 
-template <typename t_action_type>
-void benchmark(t_action_type action, const std::string& name)
-{
-    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-    action();
-    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-
-    double elapsed_seconds = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1'000.0;
-    std::cout << "Elapsed time: " << elapsed_seconds << "s." << std::endl;
-}
-
 void welcome() noexcept
 {
     std::cout << R"?(
@@ -48,7 +37,7 @@ If you need help at any time, please type "help" without quotation marks.
 If for some reason you want to quit, type "exit" or "quit" or "q".
 
 )?";
-}
+} // welcome(...)
 
 enum struct command_name
 {
@@ -73,9 +62,9 @@ enum struct command_name
     n, // Number of sumulations.
     log, // Run simulation in log mode.
     run // Run simulation in regular mode.
-};
+}; // struct command_name
 
-void split_in_two(const std::string& expression, std::string& command, std::string& argument)
+void split_in_two(const std::string& expression, std::string& command, std::string& argument) noexcept
 {
     command = char_string::deep_trim_copy(expression);
     argument = "";
@@ -86,9 +75,9 @@ void split_in_two(const std::string& expression, std::string& command, std::stri
         argument = command.substr(index_of_space + 1);
         command = command.substr(0, index_of_space);
     }
-}
+} // split_in_two(...)
 
-command_name parse_camp_clause(const std::string& expression, std::string& argument)
+command_name parse_camp_clause(const std::string& expression, std::string& argument) noexcept
 {
     std::string command = "";
     split_in_two(expression, command, argument);
@@ -97,9 +86,9 @@ command_name parse_camp_clause(const std::string& expression, std::string& argum
     if (command == "reduction" || command == "r") return command_name::damage_reduction;
 
     return command_name::not_recognized;
-}
+} // parse_camp_clause(...)
 
-command_name parse_army_clause(const std::string& expression, std::string& argument)
+command_name parse_army_clause(const std::string& expression, std::string& argument) noexcept
 {
     std::string command = "";
     split_in_two(expression, command, argument);
@@ -108,9 +97,9 @@ command_name parse_army_clause(const std::string& expression, std::string& argum
     if (command == "skills" || command == "skill" || command == "s") return command_name::skills;
 
     return command_name::not_recognized;
-}
+} // parse_army_clause(...)
 
-command_name parse_command(const std::string& expression, std::string& argument)
+command_name parse_command(const std::string& expression, std::string& argument) noexcept
 {
     std::string command = "";
     split_in_two(expression, command, argument);
@@ -159,9 +148,9 @@ command_name parse_command(const std::string& expression, std::string& argument)
     if (command == "run") return command_name::run;
 
     return command_name::not_recognized;
-}
+} // parse_command(...)
 
-void help(const std::string& argument)
+void help(const std::string& argument) noexcept
 {
     std::string dummy { };
     command_name command = parse_command(argument, dummy);
@@ -211,9 +200,9 @@ will automatically execute "log" for /l, or "run" for 'r', and then quit.
 )?";
             break;
     }
-}
+} // help(...)
 
-void display_units(const std::string& faction_name)
+void display_units(const std::string& faction_name) noexcept
 {
     unit_faction faction = unit_faction::general;
     bool do_take_all = !ropufu::settlers_online::try_parse(faction_name, faction);
@@ -233,20 +222,20 @@ void display_units(const std::string& faction_name)
             std::cout << std::endl;
         }
     }
-}
+} // display_units(...)
 
-std::int32_t quit()
+std::int32_t quit() noexcept
 {
     std::cout << "Buh-bye ^^//~~" << std::endl;
     return 0;
-}
+} // quit(...)
 
-std::string read_line()
+std::string read_line() noexcept
 {
     std::string line;
     std::getline(std::cin, line);
     return char_string::deep_trim_copy(line);
-}
+} // read_line(...)
 
 std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
 {
@@ -373,4 +362,4 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
         }
     }
     return 0;
-}
+} // main(...)

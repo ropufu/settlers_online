@@ -5,19 +5,12 @@
 #include <aftermath/algebra.hpp> // aftermath::algebra::permutation
 #include <aftermath/not_an_error.hpp>
 
-#include "army.hpp"
 #include "attack_sequence.hpp"
-#include "battle_phase.hpp"
-#include "battle_trait.hpp"
-#include "combat_result.hpp"
-#include "enum_array.hpp"
-#include "special_ability.hpp"
-#include "typedef.hpp"
-#include "unit_category.hpp"
+#include "unit_group.hpp"
+#include "unit_type.hpp"
 
 #include <cstddef> // std::size_t
 #include <iostream> // std::cout
-#include <stdexcept> // std::logic_error
 #include <vector> // std::vector
 
 namespace ropufu
@@ -67,6 +60,7 @@ namespace ropufu
                     std::size_t count_attackers = fraction_ceiling(hit_points, effective_max_damage); // Least number of units required to kill the current defending unit.
                     if (count_attackers > attacking_units_remaining) count_attackers = attacking_units_remaining; // Cap to prevent \c attacking_unit_index overflow.
                     std::size_t count_high_damage = sequencer.peek_count_high_damage(attacker_t, count_attackers); // Number of units dealing maximum damage.
+
                     sequencer.next_unit(count_attackers);
                     attacking_unit_index += count_attackers;
                     attacking_units_remaining -= count_attackers;
@@ -126,12 +120,12 @@ namespace ropufu
                 }
                 if (do_log) std::cout << " killing " << (defenders_killed - defending_group.count()) << "." << std::endl;
                 return attacking_group.count_at_snapshot();
-            }
+            } // hit(...)
 
             /** @brief Inflicts \p pure_damage splash onto \p defending_group, taking into account \p damage_factor damage multiplier.
              *  @return Remaining \p pure_damage.
              */
-            static std::size_t splash(std::size_t pure_damage, double damage_factor, unit_group& defending_group, bool do_log)
+            static std::size_t splash(std::size_t pure_damage, double damage_factor, unit_group& defending_group, bool do_log) noexcept
             {
                 if (pure_damage == 0) return 0;
                 
@@ -159,10 +153,10 @@ namespace ropufu
                 }
                 if (do_log) std::cout << '\t' << "Overshoot killing " << (defending_units_remaining - defending_group.count()) << " " << defending_group.unit().names().front() << std::endl;
                 return pure_damage;
-            }
+            } // splash(...)
 
             /** Inflicts the reduced damage, \p reduced_damage, onto \p defender, assuming the attaker always deals splash damage and there is no effective tower bonus. */
-            static void uniform_splash(std::size_t reduced_damage, army& defender, const aftermath::algebra::permutation& defender_ordering, bool do_log)
+            static void uniform_splash(std::size_t reduced_damage, army& defender, const aftermath::algebra::permutation& defender_ordering, bool do_log) noexcept
             {
                 //std::vector<unit_group>& defender_groups = defender.groups();
                 for (std::size_t j : defender_ordering)
@@ -189,31 +183,40 @@ namespace ropufu
                     if (do_log) std::cout << " killing " << defending_units_remaining << "." << std::endl;
                     reduced_damage -= total_hit_points;
                 }
-            }
+            } // uniform_splash(...)
 
             /** @brief When attacking units with low hit points: each non-splash hit will always kill exactly 1 defending unit.
              *  @return The attacking unit index after the attack has been completed.
              */
-            static std::size_t one_to_one(unit_group& defending_group, const unit_group& attacking_group, std::size_t attacking_unit_index, bool do_log)
+            static std::size_t one_to_one(unit_group& defending_group, const unit_group& attacking_group, std::size_t attacking_unit_index, bool do_log) noexcept
             {
-                if (do_log) std::cout << "\t??" << std::endl;
                 // Proceed to next attaking unit.
                 std::size_t attacking_units_remaining = attacking_group.count_at_snapshot() - attacking_unit_index;
-                std::size_t count_alive = defending_group.count();
-                if (attacking_units_remaining > count_alive)
+                std::size_t defending_units_remaining = defending_group.count();
+
+                if (do_log)
+                {
+                    std::cout << '\t' << "...against " <<
+                        defending_units_remaining << " " << defending_group.unit().names().front() <<
+                        " [" << defending_group.total_hit_points() << " hit points]";
+                }
+
+                if (attacking_units_remaining > defending_units_remaining)
                 {
                     defending_group.kill_all(); // The entire group has been eliminated.
-                    return attacking_unit_index + count_alive; // All defenders have been killed, and there still may be attackers left.
+                    if (do_log) std::cout << " killing " << defending_units_remaining << "." << std::endl;
+                    return attacking_unit_index + defending_units_remaining; // All defenders have been killed, and there still may be attackers left.
                 }
                 else
                 {
                     // All attacking units have made their hit, and there still may be survivors left.
                     defending_group.kill(attacking_units_remaining);
+                    if (do_log) std::cout << " killing " << attacking_units_remaining << "." << std::endl;
                     return attacking_group.count_at_snapshot();
                 }
-            }
+            } // one_to_one(...)
         } // namespace detail
     } // namespace settlers_online
-}
+} // namespace ropufu
 
 #endif // ROPUFU_SETTLERS_ONLINE_TECHNICAL_COMBAT_HPP_INCLUDED

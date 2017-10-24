@@ -75,7 +75,7 @@ namespace ropufu
             void set_names(const std::vector<std::string>& value) noexcept
             {
                 this->m_names = value;
-                if (this->m_names.empty()) this->m_names.emplace_back("");
+                if (this->m_names.empty()) this->m_names.emplace_back(""); // Make sure there is always a front().
             }
 
             /** Number to determine which phase (sub-round) the unit attacks. */

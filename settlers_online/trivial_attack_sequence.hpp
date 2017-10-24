@@ -5,7 +5,7 @@
 #include "attack_sequence.hpp"
 #include "unit_type.hpp"
 
-#include <cstddef>
+#include <cstddef> // std::size_t
 
 namespace ropufu
 {
@@ -30,7 +30,7 @@ namespace ropufu
                 if (x == 0) return false;
                 if (x == 1) return true;
                 return is_always_high;
-            }
+            } // peek_do_high_damage(...)
             
             /** @brief Counts the number of units in the range, starting with the current unit, that will do high damage.
              *  @param unit Type of attacking units.
@@ -42,7 +42,7 @@ namespace ropufu
                 if (x == 0) return 0;
                 if (x == 1) return count_units;
                 return is_always_high ? count_units : 0;
-            }
+            } // peek_count_high_damage(...)
 
             /** @brief Indicates whether the current unit will do splash damage.
              *  @param unit Type of attacking unit.
@@ -53,7 +53,7 @@ namespace ropufu
                 if (x == 0) return false;
                 if (x == 1) return true;
                 return is_always_splash;
-            }
+            } // peek_do_splash(...)
 
             /** @brief Indicates whether the previous unit did splash damage.
              *  @param unit Type of attacking unit.
@@ -64,9 +64,9 @@ namespace ropufu
                 if (x == 0) return false;
                 if (x == 1) return true;
                 return is_always_splash;
-            }
-        };
-    }
-}
+            } // did_last_splash(...)
+        }; // struct trivial_attack_sequence
+    } // namespace settlers_online
+} // namespace ropufu
 
 #endif // ROPUFU_SETTLERS_ONLINE_TRIVIAL_ATTACK_SEQUENCE_HPP_INCLUDED

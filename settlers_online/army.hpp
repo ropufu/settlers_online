@@ -71,8 +71,6 @@ namespace ropufu
 
             /** Groups (ordered by \c id). */
             const std::vector<unit_group>& groups() const noexcept { return this->m_groups; }
-            // /** Groups (ordered by \c id). */
-            // std::vector<unit_group>& groups() noexcept { return this->m_groups; }
 
             bool empty() const noexcept { return this->m_groups.empty(); }
 

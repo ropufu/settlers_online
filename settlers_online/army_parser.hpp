@@ -4,11 +4,11 @@
 
 #include <aftermath/not_an_error.hpp>
 
+#include "army.hpp"
 #include "char_string.hpp"
 #include "unit_database.hpp"
-#include "unit_type.hpp"
 #include "unit_group.hpp"
-#include "army.hpp"
+#include "unit_type.hpp"
 
 #include <cstddef> // std::size_t
 #include <string> // std::string
@@ -19,9 +19,7 @@ namespace ropufu
 {
     namespace settlers_online
     {
-        /** @brief Class for parsing armies.
-         *  @remark Singleton structure taken from https://stackoverflow.com/questions/11711920
-         */
+        /** @brief Class for parsing armies. */
         struct army_parser
         {
             using type = army_parser;
@@ -31,7 +29,7 @@ namespace ropufu
             std::vector<std::pair<std::size_t, std::string>> m_army_blueprint = { };
 
             /** Parses the provided \p value. It is assumed that the string has already been trimmed, and all spaces replaced with whitespaces. */
-            void blueprint(std::string&& value)
+            void blueprint(std::string&& value) noexcept
             {
                 constexpr std::size_t zero = static_cast<std::size_t>('0');
                 this->m_is_valid = false;
@@ -55,10 +53,6 @@ namespace ropufu
                         count += (static_cast<std::size_t>(c) - zero);
                     }
                     if (first_index == position) return; // The first non-whitespace character was not a digit: invalid format.
-                    // aftermath::quiet_error::instance().push(
-                    //     aftermath::not_an_error::all_good,
-                    //     aftermath::severity_level::not_at_all,
-                    //     "Group size aknowledged.", value, count);
 
                     for (; position < value.size(); ++position) if (value[position] != ' ') break; // Skip the leading whitespaces (at most one---cf. assumptions).
 
@@ -74,14 +68,9 @@ namespace ropufu
                     if (last_index == 0) return; // The first non-whitespace character was a digit (not a letter!): invalid format.
                     key = value.substr(first_index, last_index - first_index + 1);
                     this->m_army_blueprint.emplace_back(count, key);
-                    
-                    // aftermath::quiet_error::instance().push(
-                    //     aftermath::not_an_error::all_good,
-                    //     aftermath::severity_level::not_at_all,
-                    //     "Group parsed.", key, count);
                 }
                 this->m_is_valid = true;
-            }
+            } // blueprint(...)
 
         public:
             /** Clears the contents of the database. */
@@ -89,7 +78,7 @@ namespace ropufu
             {
                 this->blueprint(char_string::deep_trim_copy(value));
                 if (!this->m_is_valid) this->m_army_blueprint.clear();
-            }
+            } // army_parser(...)
 
             bool good() const noexcept { return this->m_is_valid; }
 
@@ -98,14 +87,14 @@ namespace ropufu
             bool try_build(const unit_database& db, army& a) noexcept
             {
                 return this->try_build(db, a, [] (const unit_type& /**u*/) { return true; });
-            }
+            } // try_build(...)
 
             template <typename t_predicate_type>
             bool try_build(const unit_database& db, army& a, const t_predicate_type& filter) noexcept
             {
                 if (!this->m_is_valid) return false;
 
-                std::vector<unit_group> groups = { };
+                std::vector<unit_group> groups { };
                 groups.reserve(this->m_army_blueprint.size());
                 for (const auto& pair : this->m_army_blueprint)
                 {
@@ -117,9 +106,9 @@ namespace ropufu
                 }
                 a = groups;
                 return true;
-            }
-        };
-    }
-}
+            } // try_build(...)
+        }; // struct army_parser
+    } // namespace settlers_online
+} // namespace ropufu
 
 #endif // ROPUFU_SETTLERS_ONLINE_ARMY_PARSER_HPP_INCLUDED

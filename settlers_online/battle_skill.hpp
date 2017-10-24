@@ -14,7 +14,7 @@ namespace ropufu
         /** @brief Traits that some units may have that modify the course of the entire battle.
          *  @remark Used internally as an indexer for \c enum_array, so don't go too high or negative. 
          **/
-        enum class battle_skill : std::size_t
+        enum struct battle_skill : std::size_t
         {
             none = 0,
             juggernaut = 1,         // Increases the general's (faction: general) attack damage by 20/40/60. These attacks have a 33/66/100% chance of dealing splash damage.
@@ -29,7 +29,7 @@ namespace ropufu
             cleave = 10,            // Increases the attack damage of Elite Soldiers by 4/8/12 and their attacks have a 33/66/100% chance of dealing splash damage.
             fast_learner = 11,      // Increases the XP gained from enemy units defeated by this army by 10/20/30%.
             overrun = 12            // Decreases the HP of enemy bosses by 8/16/25%.
-        };
+        }; // struct battle_skill
 
         /** Mark \c battle_skill as suitable for \c enum_array storage. */
         template <>
@@ -37,9 +37,9 @@ namespace ropufu
         {
             /** The maximum value of \c battle_skill plus one. */
             static constexpr std::size_t value = 13;
-        };
+        }; // struct enum_capacity
 
-        bool try_parse(const std::string& str, battle_skill& value)
+        bool try_parse(const std::string& str, battle_skill& value) noexcept
         {
             if (str == "none") { value = battle_skill::none; return true; }
             if (str == "juggernaut") { value = battle_skill::juggernaut; return true; }
@@ -55,32 +55,32 @@ namespace ropufu
             if (str == "fast_learner") { value = battle_skill::fast_learner; return true; }
             if (str == "overrun") { value = battle_skill::overrun; return true; }
             return false;
-        }
-    }
-}
+        } // try_parse(...)
+    } // namespace settlers_online
+} // namespace ropufu
 
 namespace std
 {
-    std::string to_string(ropufu::settlers_online::battle_skill value)
+    std::string to_string(ropufu::settlers_online::battle_skill value) noexcept
     {
         switch (value)
         {
-        case ropufu::settlers_online::battle_skill::none: return "none";
-        case ropufu::settlers_online::battle_skill::juggernaut: return "juggernaut";
-        case ropufu::settlers_online::battle_skill::garrison_annex: return "garrison annex";
-        case ropufu::settlers_online::battle_skill::lightning_slash: return "lightning slash";
-        case ropufu::settlers_online::battle_skill::unstoppable_charge: return "unstoppable charge";
-        case ropufu::settlers_online::battle_skill::weekly_maintenance: return "weekly maintenance";
-        case ropufu::settlers_online::battle_skill::master_planner: return "master planner";
-        case ropufu::settlers_online::battle_skill::battle_frenzy: return "battle frenzy";
-        case ropufu::settlers_online::battle_skill::rapid_fire: return "rapid fire";
-        case ropufu::settlers_online::battle_skill::sniper_training: return "sniper training";
-        case ropufu::settlers_online::battle_skill::cleave: return "cleave";
-        case ropufu::settlers_online::battle_skill::fast_learner: return "fast learner";
-        case ropufu::settlers_online::battle_skill::overrun: return "overrun";
-        default: return std::to_string(static_cast<std::size_t>(value));
+            case ropufu::settlers_online::battle_skill::none: return "none";
+            case ropufu::settlers_online::battle_skill::juggernaut: return "juggernaut";
+            case ropufu::settlers_online::battle_skill::garrison_annex: return "garrison annex";
+            case ropufu::settlers_online::battle_skill::lightning_slash: return "lightning slash";
+            case ropufu::settlers_online::battle_skill::unstoppable_charge: return "unstoppable charge";
+            case ropufu::settlers_online::battle_skill::weekly_maintenance: return "weekly maintenance";
+            case ropufu::settlers_online::battle_skill::master_planner: return "master planner";
+            case ropufu::settlers_online::battle_skill::battle_frenzy: return "battle frenzy";
+            case ropufu::settlers_online::battle_skill::rapid_fire: return "rapid fire";
+            case ropufu::settlers_online::battle_skill::sniper_training: return "sniper training";
+            case ropufu::settlers_online::battle_skill::cleave: return "cleave";
+            case ropufu::settlers_online::battle_skill::fast_learner: return "fast learner";
+            case ropufu::settlers_online::battle_skill::overrun: return "overrun";
+            default: return std::to_string(static_cast<std::size_t>(value));
         }
-    };
-}
+    } // to_string(...)
+} // namespace std
 
 #endif // ROPUFU_SETTLERS_ONLINE_BATTLE_SKILL_HPP_INCLUDED

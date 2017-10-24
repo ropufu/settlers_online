@@ -6,6 +6,7 @@
 #include "binomial_pool.hpp"
 #include "unit_type.hpp"
 
+#include <chrono> // std::chrono::high_resolution_clock
 #include <cstddef> // std::size_t
 #include <cstdint> // std::int_fast32_t
 #include <random> // std::default_random_engine, std::seed_seq
@@ -25,17 +26,17 @@ namespace ropufu
 
         private:
             pool_type& m_pool = pool_type::instance();
-            engine_type m_engine;
+            engine_type m_engine = { };
             bool m_did_last_splash = false;
 
         public:
-            randomized_attack_sequence()
+            randomized_attack_sequence() noexcept
                 : m_engine()
             {
                 auto now = std::chrono::high_resolution_clock::now();
                 std::seed_seq ss = { 875, 393, 19, static_cast<std::int_fast32_t>(now.time_since_epoch().count()) };
                 this->m_engine.seed(ss);
-            }
+            } // randomized_attack_sequence(...)
 
             /** @brief Indicates whether the current unit will do high damage.
              *  @param unit Type of attacking unit.
@@ -46,7 +47,7 @@ namespace ropufu
                 if (x == 0) return false;
                 if (x == 1) return true;
                 return this->m_pool.bernoulli_sampler(x)(this->m_engine) == 1;
-            }
+            } // peek_do_high_damage(...)
             
             /** @brief Counts the number of units in the range, starting with the current unit, that will do high damage.
              *  @param unit Type of attacking units.
@@ -58,7 +59,7 @@ namespace ropufu
                 if (x == 0) return 0;
                 if (x == 1) return count_units;
                 return this->m_pool.binomial_lookup_sampler(x)(count_units, this->m_engine);
-            }
+            } // peek_count_high_damage(...)
 
             /** @brief Indicates whether the current unit will do splash damage.
              *  @param unit Type of attacking unit.
@@ -70,7 +71,7 @@ namespace ropufu
                 if (x == 1) return true;
                 this->m_did_last_splash = (this->m_pool.bernoulli_sampler(x)(this->m_engine) == 1);
                 return this->m_did_last_splash;
-            }
+            } // peek_do_splash(...)
 
             /** @brief Indicates whether the previous unit did splash damage.
              *  @param unit Type of attacking unit.
@@ -81,9 +82,9 @@ namespace ropufu
                 if (x == 0) return false;
                 if (x == 1) return true;
                 return this->m_did_last_splash;
-            }
-        };
-    }
-}
+            } // did_last_splash(...)
+        }; // struct randomized_attack_sequence
+    } // namespace settlers_online
+} // namespace ropufu
 
 #endif // ROPUFU_SETTLERS_ONLINE_RANDOMIZED_ATTACK_SEQUENCE_HPP_INCLUDED

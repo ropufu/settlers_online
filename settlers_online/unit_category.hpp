@@ -14,7 +14,7 @@ namespace ropufu
         /** @brief Named categories of units.
          *  @remark Used internally as an indexer for \c enum_array, so don't go too high or negative. 
          **/
-        enum class unit_category : std::size_t
+        enum struct unit_category : std::size_t
         {
             unknown = 0,
             melee = 1,
@@ -22,7 +22,7 @@ namespace ropufu
             cavalry = 3,
             artillery = 4,
             elite = 5
-        };
+        }; // struct unit_category
 
         /** Mark \c unit_category as suitable for \c enum_array storage. */
         template <>
@@ -30,9 +30,9 @@ namespace ropufu
         {
             /** The maximum value of \c unit_category plus one. */
             static constexpr std::size_t value = 6;
-        };
+        }; // struct enum_capacity
 
-        bool try_parse(const std::string& str, unit_category& value)
+        bool try_parse(const std::string& str, unit_category& value) noexcept
         {
             if (str == "none") { value = unit_category::unknown; return true; }
             if (str == "unknown") { value = unit_category::unknown; return true; }
@@ -42,25 +42,25 @@ namespace ropufu
             if (str == "artillery") { value = unit_category::artillery; return true; }
             if (str == "elite") { value = unit_category::elite; return true; }
             return false;
-        }
-    }
-}
+        } // try_parse(...)
+    } // namespace settlers_online
+} // namespace ropufu
 
 namespace std
 {
-    std::string to_string(ropufu::settlers_online::unit_category value)
+    std::string to_string(ropufu::settlers_online::unit_category value) noexcept
     {
         switch (value)
         {
-        case ropufu::settlers_online::unit_category::unknown: return "unknown";
-        case ropufu::settlers_online::unit_category::melee: return "melee";
-        case ropufu::settlers_online::unit_category::ranged: return "ranged";
-        case ropufu::settlers_online::unit_category::cavalry: return "cavalry";
-        case ropufu::settlers_online::unit_category::artillery: return "artillery";
-        case ropufu::settlers_online::unit_category::elite: return "elite";
-        default: return std::to_string(static_cast<std::size_t>(value));
+            case ropufu::settlers_online::unit_category::unknown: return "unknown";
+            case ropufu::settlers_online::unit_category::melee: return "melee";
+            case ropufu::settlers_online::unit_category::ranged: return "ranged";
+            case ropufu::settlers_online::unit_category::cavalry: return "cavalry";
+            case ropufu::settlers_online::unit_category::artillery: return "artillery";
+            case ropufu::settlers_online::unit_category::elite: return "elite";
+            default: return std::to_string(static_cast<std::size_t>(value));
         }
-    };
-}
+    } // to_string(...)
+} // namespace std
 
 #endif // ROPUFU_SETTLERS_ONLINE_UNIT_CATEGORY_HPP_INCLUDED

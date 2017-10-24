@@ -4,10 +4,8 @@
 
 #include "unit_type.hpp"
 
-#include <cstddef>
-//#include <cstdint>
-#include <exception>
-#include <type_traits>
+#include <cstddef> // std::size_t
+#include <type_traits> // std::is_same
 
 namespace ropufu
 {
@@ -24,8 +22,8 @@ namespace ropufu
         template <typename t_derived_type>
         struct attack_sequence
         {
-            typedef t_derived_type derived_type;
-            typedef attack_sequence<t_derived_type> type;
+            using type = attack_sequence<t_derived_type>;
+            using derived_type = t_derived_type;
 
         private:
             std::size_t m_round_index = 0; // Zero-based index of the current round.
@@ -47,15 +45,13 @@ namespace ropufu
             bool is_destruction() const noexcept { return this->m_is_destruction; }
 
             /** Sets the destruction flag. */
-            void start_destruction()
+            void start_destruction() noexcept
             {
-                //if (this->m_is_destruction) throw std::logic_error("<start_destruction> cannot be called twice");
-
                 this->m_is_destruction = true;
                 this->m_round_index = 0;
                 this->m_phase_index = 0;
                 this->m_unit_index = 0;
-            }
+            } // start_destruction(...)
 
             /** Advances to the next round. */
             void next_round() noexcept 
@@ -63,20 +59,20 @@ namespace ropufu
                 this->m_round_index++;
                 this->m_phase_index = 0;
                 this->m_unit_index = 0;
-            }
+            } // next_round(...)
 
             /** Advances to the next phase. */
             void next_phase() noexcept 
             {
                 this->m_phase_index++; 
                 this->m_unit_index = 0;
-            }
+            } // next_phase(...)
 
             /** Advances to the next unit. */
             void next_unit() noexcept 
             {
                 this->m_unit_index++; 
-            }
+            } // next_unit(...)
 
             /** Increments \c unit_index by \p count. */
             void next_unit(std::size_t count) noexcept { this->m_unit_index += count; }
@@ -92,7 +88,7 @@ namespace ropufu
                 static_assert(!is_overwritten, "static polymorphic function <peek_do_high_damage> was not overwritten.");
                 derived_type* that = static_cast<derived_type*>(this);
                 return that->peek_do_high_damage(unit);
-            }
+            } // peek_do_high_damage(...)
             
             /** @brief Counts the number of units in the range, starting with the current unit, that will do high damage.
              *  @param unit Type of attacking units.
@@ -106,7 +102,7 @@ namespace ropufu
                 static_assert(!is_overwritten, "static polymorphic function <peek_count_high_damage> was not overwritten.");
                 derived_type* that = static_cast<derived_type*>(this);
                 return that->peek_count_high_damage(unit, count_units);
-            }
+            } // peek_count_high_damage(...)
 
             /** @brief Indicates whether the current unit will do splash damage.
              *  @param unit Type of attacking unit.
@@ -119,7 +115,7 @@ namespace ropufu
                 static_assert(!is_overwritten, "static polymorphic function <peek_do_splash> was not overwritten.");
                 derived_type* that = static_cast<derived_type*>(this);
                 return that->peek_do_splash(unit);
-            }
+            } // peek_do_splash(...)
 
             /** @brief Indicates whether the previous unit did splash damage.
              *  @param unit Type of attacking unit.
@@ -132,9 +128,9 @@ namespace ropufu
                 static_assert(!is_overwritten, "static polymorphic function <did_last_splash> was not overwritten.");
                 derived_type* that = static_cast<derived_type*>(this);
                 return that->did_last_splash(unit);
-            }
-        };
-    }
-}
+            } // did_last_splash(...)
+        }; // struct attack_sequence
+    } // namespace settlers_online
+} // namespace ropufu
 
 #endif // ROPUFU_SETTLERS_ONLINE_ATTACK_SEQUENCE_HPP_INCLUDED

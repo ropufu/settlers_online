@@ -16,11 +16,11 @@ namespace ropufu
         struct enum_capacity
         {
             static constexpr std::size_t value = 0;
-        };
+        }; // struct enum_capacity
         
         /** An iterator for \c enum_array to allow it to be used in range-based for loops. */
         template <typename t_enum_type, typename t_data_type, std::size_t t_capacity>
-        class enum_array_iterator
+        struct enum_array_iterator
         {
             using type = enum_array_iterator<t_enum_type, t_data_type, t_capacity>;
             using enum_type = t_enum_type;
@@ -29,6 +29,7 @@ namespace ropufu
             using collection_type = std::array<data_type, t_capacity>;
             using result_type = std::pair<enum_type, data_type>; // Iterates over all enum key/value pairs.
 
+        private:
             const collection_type* m_collection_pointer;
             underlying_type m_position;
 
@@ -36,7 +37,7 @@ namespace ropufu
             enum_array_iterator(const collection_type& collection, underlying_type position) noexcept
                 : m_collection_pointer(&collection), m_position(position)
             {
-            }
+            } // enum_array_iterator(...)
 
             /** Termination condition. */
             bool operator !=(const type& other) const noexcept { return this->m_position != other.m_position; }
@@ -46,7 +47,7 @@ namespace ropufu
             {
                 const collection_type& collection = *(this->m_collection_pointer);
                 return std::make_pair(static_cast<enum_type>(this->m_position), collection[this->m_position]);
-            }
+            } // operator *(...)
 
             /** If not at the end, advances the position of the iterator by one. */
             type& operator ++() noexcept
@@ -54,8 +55,8 @@ namespace ropufu
                 if (this->m_position == t_capacity) return *this;
                 ++(this->m_position);
                 return *this;
-            }
-        };
+            } // operator ++(...)
+        }; // struct enum_array_iterator
         
         /** An array indexed by an enum type. */
         template <typename t_enum_type, typename t_data_type, bool t_is_enabled = (enum_capacity<t_enum_type>::value != 0)>
@@ -87,11 +88,11 @@ namespace ropufu
             bool operator ==(const type& other) const noexcept { return this->m_data == other.m_data; }
             /** Checks two types for inequality. */
             bool operator !=(const type& other) const noexcept { return !(this->operator ==(other)); }
-        };
+        }; // struct enum_array
         
         /** An iterator for \c flags_t to allow it to be used in range-based for loops. */
         template <typename t_enum_type, std::size_t t_capacity>
-        class flags_iterator
+        struct flags_iterator
         {
             using type = flags_iterator<t_enum_type, t_capacity>;
             using enum_type = t_enum_type;
@@ -99,6 +100,7 @@ namespace ropufu
             using collection_type = std::array<bool, t_capacity>;
             using result_type = enum_type; // Iterates over the marked enum values.
 
+        private:
             const collection_type* m_collection_pointer;
             underlying_type m_position;
 
@@ -107,14 +109,14 @@ namespace ropufu
             {
                 const collection_type& collection = *(this->m_collection_pointer);
                 while (this->m_position < t_capacity && collection[this->m_position] == false) ++(this->m_position);
-            }
+            } // advance_to_true(...)
 
         public:
             flags_iterator(const collection_type& collection, underlying_type position) noexcept
                 : m_collection_pointer(&collection), m_position(position)
             {
                 this->advance_to_true();
-            }
+            } // flags_iterator(...)
 
             /** Termination condition. */
             bool operator !=(const type& other) const noexcept { return this->m_position != other.m_position; }
@@ -128,8 +130,8 @@ namespace ropufu
                 ++(this->m_position);
                 this->advance_to_true();
                 return *this;
-            }
-        };
+            } // operator ++(...)
+        }; // struct flags_iterator
 
         template <typename t_enum_type>
         using flags_t = enum_array<t_enum_type, bool, (enum_capacity<t_enum_type>::value != 0)>;
@@ -155,12 +157,12 @@ namespace ropufu
             enum_array(enum_type value) noexcept
             {
                 this->operator [](value) = true;
-            }
+            } // enum_array
 
             enum_array(std::initializer_list<enum_type> values) noexcept
             {
                 for (enum_type value : values) this->operator [](value) = true;
-            }
+            } // enum_array
 
             bool operator [](enum_type value) const noexcept { return this->m_flags[static_cast<underlying_type>(value)]; }
             bool& operator [](enum_type value) noexcept { return this->m_flags[static_cast<underlying_type>(value)]; }
@@ -204,14 +206,14 @@ namespace ropufu
             friend type operator |(type left, const type& right) noexcept { left |= right; return left; }
             friend type operator &(type left, const type& right) noexcept { left &= right; return left; }
             friend type operator ^(type left, const type& right) noexcept { left ^= right; return left; }
-        };
+        }; // struct enum_array
 
         template <typename t_enum_type, typename t_data_type>
         struct enum_array<t_enum_type, t_data_type, false>
         {
             t_enum_type value;
-        };
-    }
-}
+        }; // struct enum_array
+    } // namespace settlers_online
+} // namespace ropufu
 
 #endif // ROPUFU_SETTLERS_ONLINE_ENUM_ARRAY_HPP_INCLUDED
