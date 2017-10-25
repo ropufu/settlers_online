@@ -208,8 +208,8 @@ namespace ropufu
                 // Reconstruct the object.
                 x.set_low(low);
                 x.set_high(high);
-                x.set_high(accuracy);
-                x.set_high(splash_chance);
+                x.set_accuracy(accuracy);
+                x.set_splash_chance(splash_chance);
             } // from_json(...)
         } // namespace detail
     } // namespace settlers_online
