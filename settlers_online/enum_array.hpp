@@ -2,16 +2,25 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_ENUM_ARRAY_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_ENUM_ARRAY_HPP_INCLUDED
 
+#include <aftermath/not_an_error.hpp>
+#include <nlohmann/json.hpp>
+#include "json.hpp"
+#include "core.hpp"
+
 #include <array> // std::array
 #include <cstddef> // std::size_t
 #include <initializer_list> // std::initializer_list
 #include <type_traits> // std::underlying_type_t
+#include <string> // std::string, std::to_string
 #include <utility> // std::pair, std::make_pair
 
 namespace ropufu
 {
     namespace settlers_online
     {
+        template <typename t_enum_type>
+        bool try_parse(const std::string& str, t_enum_type& value) noexcept { return false; }
+
         template <typename t_enum_type>
         struct enum_capacity
         {
@@ -213,6 +222,55 @@ namespace ropufu
         {
             t_enum_type value;
         }; // struct enum_array
+
+        template <typename t_enum_type, typename t_data_type>
+        void to_json(nlohmann::json& j, const enum_array<t_enum_type, t_data_type, true>& x) noexcept
+        {
+            // Stored as an object { ..., "<enum key>": value, ... }
+            j = { };
+            t_data_type z { };
+            for (const auto& pair : x) if (pair.second != z) j[settlers_online::to_str(pair.first)] = pair.second;
+        } // to_json(...)
+
+        template <typename t_enum_type>
+        void to_json(nlohmann::json& j, const enum_array<t_enum_type, bool, true>& x) noexcept
+        {
+            // Stored as an array [ ..., "<enum key>", ... ]
+            std::vector<std::string> y { };
+            for (t_enum_type value : x) y.push_back(settlers_online::to_str(value));
+            j = y;
+        } // to_json(...)
+    
+        template <typename t_enum_type, typename t_data_type>
+        void from_json(const nlohmann::json& j, enum_array<t_enum_type, t_data_type, true>& x) noexcept
+        {
+            // Stored as an object { ..., "<enum key>": value, ... }
+            static constexpr std::size_t count = enum_capacity<t_enum_type>::value;
+            for (std::size_t k = 0; k < count; k++)
+            {
+                t_enum_type key = static_cast<t_enum_type>(k);
+                t_data_type value { };
+                if (quiet_json::optional(j, settlers_online::to_str(key), value)) x[key] = value;
+            }
+        } // from_json(...)
+    
+        template <typename t_enum_type>
+        void from_json(const nlohmann::json& j, enum_array<t_enum_type, bool, true>& x) noexcept
+        {
+            // Stored as an array [ ..., "<enum key>", ... ]
+            std::vector<std::string> y { };
+            if (!quiet_json::try_parse(j, "enum", y)) return;
+            
+            for (const std::string& z : y)
+            {
+                t_enum_type key;
+                if (settlers_online::try_parse_str(z, key)) x[key] = true;
+                else aftermath::quiet_error::instance().push(
+                    aftermath::not_an_error::runtime_error,
+                    aftermath::severity_level::negligible,
+                    std::string("Skipping unrecognized enum: ") + z + std::string("."), __FUNCTION__, __LINE__);
+            }
+        } // from_json(...)
     } // namespace settlers_online
 } // namespace ropufu
 

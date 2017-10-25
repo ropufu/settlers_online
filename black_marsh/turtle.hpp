@@ -92,35 +92,14 @@ namespace ropufu
 
                 static bool try_parse_skills(const nlohmann::json& what, std::map<std::string, skills_type>& where) noexcept
                 {
-                    if (!what.is_array()) return false;
-                    
-                    for (const nlohmann::json& j : what)
+                    if (!what.is_object()) return false;
+
+                    for (auto it = what.begin(); it != what.end(); ++it)
                     {
-                        if (j.count("general") == 0 || j.count("skills") == 0) continue;
-                        if (!j["general"].is_string()) continue;
-
-                        std::string key = j["general"];
-                        if (!j["skills"].is_array()) continue;
-
-                        skills_type skills { };
-                        for (const nlohmann::json& s : j["skills"])
-                        {
-                            if (s.count("name") == 0 || s.count("level") == 0) continue;
-                            if (!s["name"].is_string()) continue;
-                            if (!s["level"].is_number_unsigned()) continue;
-
-                            std::string name = s["name"];
-                            std::size_t level = s["level"];
-
-                            name = char_string::deep_trim_copy(name);
-                            char_string::to_lower(name);
-                            battle_skill skill = battle_skill::none;
-                            if (settlers_online::try_parse(name, skill)) skills[skill] = level;
-                            else std::cout << "Skill not recognized: " << name << "." << std::endl;
-                        }
-                        where.emplace(key, skills);
+                        skills_type skills = it.value();
+                        where.emplace(it.key(), skills);
                     }
-                    return true;
+                    return aftermath::quiet_error::instance().good();
                 } // parse_skills(...)
                 
                 static void print_skills(const std::map<std::string, skills_type>& skills) noexcept

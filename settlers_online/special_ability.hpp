@@ -35,20 +35,44 @@ namespace ropufu
             static constexpr std::size_t value = 9;
         }; // struct enum_capacity
 
-        bool try_parse(const std::string& str, special_ability& value) noexcept
+        template <>
+        struct converter<special_ability, std::string>
         {
-            if (str == "none") { value = special_ability::none; return true; }
-            if (str == "attack weakest target") { value = special_ability::attack_weakest_target; return true; }
-            if (str == "not weak") { value = special_ability::not_weak; return true; }
-            if (str == "tower bonus") { value = special_ability::tower_bonus; return true; }
-            if (str == "ignore tower bonus") { value = special_ability::ignore_tower_bonus; return true; }
-            if (str == "rapid fire") { value = special_ability::rapid_fire; return true; }
-            if (str == "sniper training") { value = special_ability::sniper_training; return true; }
-            if (str == "cleave") { value = special_ability::cleave; return true; }
-            if (str == "overrun") { value = special_ability::overrun; return true; }
-            if (str == "boss") { value = special_ability::overrun; return true; }
-            return false;
-        } // try_parse(...)
+            using from_type = special_ability;
+            using to_type = std::string;
+
+            static to_type to(const from_type& from) noexcept
+            {
+                switch (from)
+                {
+                    case special_ability::none: return "none";
+                    case special_ability::attack_weakest_target: return "attack weakest target";
+                    case special_ability::not_weak: return "not weak";
+                    case special_ability::tower_bonus: return "tower bonus";
+                    case special_ability::ignore_tower_bonus: return "ignore tower bonus";
+                    case special_ability::rapid_fire: return "rapid fire";
+                    case special_ability::sniper_training: return "sniper training";
+                    case special_ability::cleave: return "cleave";
+                    case special_ability::overrun: return "overrun";
+                    default: return std::to_string(static_cast<std::size_t>(from));
+                }
+            } // to(...)
+
+            static bool try_from(const to_type& from, from_type& to) noexcept
+            {
+                if (from == "none") { to = special_ability::none; return true; }
+                if (from == "attack weakest target") { to = special_ability::attack_weakest_target; return true; }
+                if (from == "not weak") { to = special_ability::not_weak; return true; }
+                if (from == "tower bonus") { to = special_ability::tower_bonus; return true; }
+                if (from == "ignore tower bonus") { to = special_ability::ignore_tower_bonus; return true; }
+                if (from == "rapid fire") { to = special_ability::rapid_fire; return true; }
+                if (from == "sniper training") { to = special_ability::sniper_training; return true; }
+                if (from == "cleave") { to = special_ability::cleave; return true; }
+                if (from == "overrun") { to = special_ability::overrun; return true; }
+                if (from == "boss") { to = special_ability::overrun; return true; }
+                return false;
+            } // try_from(...)
+        }; // struct converter
     } // namespace settlers_online
 } // namespace ropufu
 
@@ -56,19 +80,7 @@ namespace std
 {
     std::string to_string(ropufu::settlers_online::special_ability value) noexcept
     {
-        switch (value)
-        {
-            case ropufu::settlers_online::special_ability::none: return "none";
-            case ropufu::settlers_online::special_ability::attack_weakest_target: return "attack weakest target";
-            case ropufu::settlers_online::special_ability::not_weak: return "not weak";
-            case ropufu::settlers_online::special_ability::tower_bonus: return "tower bonus";
-            case ropufu::settlers_online::special_ability::ignore_tower_bonus: return "ignore tower bonus";
-            case ropufu::settlers_online::special_ability::rapid_fire: return "rapid fire";
-            case ropufu::settlers_online::special_ability::sniper_training: return "sniper training";
-            case ropufu::settlers_online::special_ability::cleave: return "cleave";
-            case ropufu::settlers_online::special_ability::overrun: return "overrun";
-            default: return std::to_string(static_cast<std::size_t>(value));
-        }
+        return ropufu::settlers_online::to_str(value);
     } // to_string(...)
 } // namespace std
 

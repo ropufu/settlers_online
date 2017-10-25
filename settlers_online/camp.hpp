@@ -4,11 +4,11 @@
 
 #include <aftermath/not_an_error.hpp>
 #include <nlohmann/json.hpp>
+#include "json.hpp"
 
 #include <cstddef> // std::size_t
 #include <functional> // std::hash
 #include <ostream> // std::ostream
-#include <stdexcept> // std::domain_error
 #include <string> // std::string
 
 namespace ropufu
@@ -160,19 +160,17 @@ namespace ropufu
                     return;
                 }
 
-                try
-                {
-                    if (j.count("hit points") != 0) x.set_hit_points(j["hit points"].get<std::size_t>());
-                    if (j.count("damage reduction") != 0) x.set_damage_reduction(j["damage reduction"].get<double>());
-                }
-                catch (std::domain_error)
-                {
-                    aftermath::quiet_error::instance().push(
-                        aftermath::not_an_error::domain_error,
-                        aftermath::severity_level::major,
-                        "JSON camp representation malformed. Using default instead.", __FUNCTION__, __LINE__);
-                    x = { };
-                }
+                // Populate default values.
+                std::size_t hit_points = x.hit_points();
+                double damage_reduction = x.damage_reduction();
+
+                // Parse json entries.
+                if (!quiet_json::optional(j, "hit points", hit_points)) return;
+                if (!quiet_json::optional(j, "damage reduction", damage_reduction)) return;
+                
+                // Reconstruct the object.
+                x.set_hit_points(hit_points);
+                x.set_damage_reduction(damage_reduction);
             } // from_json(...)
         } // namespace detail
     } // namespace settlers_online

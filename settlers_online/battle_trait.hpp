@@ -2,6 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_BATTLE_TRAIT_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_BATTLE_TRAIT_HPP_INCLUDED
 
+#include "core.hpp"
 #include "enum_array.hpp"
 
 #include <cstddef> // std::size_t
@@ -32,14 +33,33 @@ namespace ropufu
             static constexpr std::size_t value = 4;
         }; // struct enum_capacity
 
-        bool try_parse(const std::string& str, battle_trait& value) noexcept
+        template <>
+        struct converter<battle_trait, std::string>
         {
-            if (str == "none") { value = battle_trait::none; return true; }
-            if (str == "dazzle") { value = battle_trait::dazzle; return true; }
-            if (str == "intercept") { value = battle_trait::intercept; return true; }
-            if (str == "explosive ammunition") { value = battle_trait::explosive_ammunition; return true; }
-            return false;
-        } // try_parse(...)
+            using from_type = battle_trait;
+            using to_type = std::string;
+
+            static to_type to(const from_type& from) noexcept
+            {
+                switch (from)
+                {
+                    case battle_trait::none: return "none";
+                    case battle_trait::dazzle: return "dazzle";
+                    case battle_trait::intercept: return "intercept";
+                    case battle_trait::explosive_ammunition: return "explosive_ammunition";
+                    default: return std::to_string(static_cast<std::size_t>(from));
+                }
+            } // to(...)
+
+            static bool try_from(const to_type& from, from_type& to) noexcept
+            {
+                if (from == "none") { to = battle_trait::none; return true; }
+                if (from == "dazzle") { to = battle_trait::dazzle; return true; }
+                if (from == "intercept") { to = battle_trait::intercept; return true; }
+                if (from == "explosive ammunition") { to = battle_trait::explosive_ammunition; return true; }
+                return false;
+            } // try_from(...)
+        }; // struct converter
     } // namespace settlers_online
 } // namespace ropufu
 
@@ -47,14 +67,7 @@ namespace std
 {
     std::string to_string(ropufu::settlers_online::battle_trait value) noexcept
     {
-        switch (value)
-        {
-            case ropufu::settlers_online::battle_trait::none: return "none";
-            case ropufu::settlers_online::battle_trait::dazzle: return "dazzle";
-            case ropufu::settlers_online::battle_trait::intercept: return "intercept";
-            case ropufu::settlers_online::battle_trait::explosive_ammunition: return "explosive_ammunition";
-            default: return std::to_string(static_cast<std::size_t>(value));
-        }
+        return ropufu::settlers_online::to_str(value);
     } // to_string(...)
 } // namespace std
 

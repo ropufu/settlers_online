@@ -200,7 +200,10 @@ namespace ropufu
                 {
                     unit = this->m_database.at(key);
                     if (count_matches == 1) return true;
-                    aftermath::quiet_error::instance().push(aftermath::not_an_error::runtime_error, aftermath::severity_level::minor, "Multiple units match the specified query.", lowercase, count_matches);
+                    aftermath::quiet_error::instance().push(
+                        aftermath::not_an_error::runtime_error,
+                        aftermath::severity_level::minor,
+                        "Multiple units match the specified query.", lowercase, count_matches);
                     return false;
                 }
                 count_matches = this->m_misspelled_lookup.try_find(misspelled, key, [&] (const key_type& maybe) { return filter(this->m_database.at(maybe)); });
@@ -208,7 +211,11 @@ namespace ropufu
                 {
                     unit = this->m_database.at(key);
                     if (count_matches == 1) return true;
-                    aftermath::quiet_error::instance().push(aftermath::not_an_error::runtime_error, aftermath::severity_level::minor, "Multiple units match the specified query.", misspelled, count_matches);
+                    aftermath::quiet_error::instance().push(
+                        aftermath::not_an_error::runtime_error,
+                        aftermath::severity_level::minor,
+                        "Multiple units match the specified query.",
+                        misspelled, count_matches);
                     return false;
                 }
                 return false;
@@ -229,9 +236,12 @@ namespace ropufu
                         i >> map;
                         if (map.count("units") != 0) // Check if there are any unit definitions in the file.
                         {
-                            for (const nlohmann::json& unit : map["units"])
+                            unit_type bad { };
+                            for (const nlohmann::json& json_unit : map["units"])
                             {
-                                unit_type u = unit;
+                                unit_type u = json_unit;
+                                if (u == bad) continue;
+
                                 std::vector<std::string> names = u.names();
                                 for (std::string& name : names) name = char_string::deep_trim_copy(name);
                                 u.set_names(names);
@@ -243,14 +253,14 @@ namespace ropufu
                                     aftermath::quiet_error::instance().push(
                                         aftermath::not_an_error::logic_error,
                                         aftermath::severity_level::negligible,
-                                        "Unit with same name already exists.", p.path().string(), __LINE__);
+                                        std::string("Unit with name ") + key + std::string(" already exists."), p.path().string(), __LINE__);
                                 }
                                 else if (this->m_ids.count(u.id()) != 0)
                                 {
                                     aftermath::quiet_error::instance().push(
                                         aftermath::not_an_error::logic_error,
                                         aftermath::severity_level::negligible,
-                                        "Unit with same id already exists.", p.path().string(), __LINE__);
+                                        std::string("Unit with id ") + std::to_string(u.id()) + std::string(" already exists."), p.path().string(), __LINE__);
                                 }
                                 else
                                 {
@@ -268,7 +278,7 @@ namespace ropufu
                         aftermath::quiet_error::instance().push(
                             aftermath::not_an_error::runtime_error,
                             aftermath::severity_level::minor,
-                            "Parsing error encountered.", p.path().string(), __LINE__);
+                            std::string("Parsing error encountered in ") + p.path().string() + std::string("."), __FUNCTION__, __LINE__);
                         continue;
                     }
                     catch (...)
@@ -276,7 +286,7 @@ namespace ropufu
                         aftermath::quiet_error::instance().push(
                             aftermath::not_an_error::runtime_error,
                             aftermath::severity_level::fatal,
-                            "Something went very wrong.", __FUNCTION__, __LINE__);
+                            std::string("Something went very wrong.") + p.path().string() + std::string("."), __FUNCTION__, __LINE__);
                         continue;
                     }
                 }

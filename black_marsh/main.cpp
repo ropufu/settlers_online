@@ -181,7 +181,7 @@ Following the left / right command, one could use:
     Command Name   | Description
 ==============================================================
 ... camp, c        | Get or set camp.
-... skills, s      | Get or set skills.
+... skills, s      | Get skills.
 ==============================================================
 Following the left / right vcamp command, one could use:
     Command Name   | Description
@@ -205,7 +205,7 @@ will automatically execute "log" for /l, or "run" for 'r', and then quit.
 void display_units(const std::string& faction_name) noexcept
 {
     unit_faction faction = unit_faction::general;
-    bool do_take_all = !ropufu::settlers_online::try_parse(faction_name, faction);
+    bool do_take_all = !ropufu::settlers_online::try_parse_str(faction_name, faction);
     for (const auto& pair : unit_database::instance().data())
     {
         const ropufu::settlers_online::unit_type& u = pair.second;

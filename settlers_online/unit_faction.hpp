@@ -32,18 +32,39 @@ namespace ropufu
             static constexpr std::size_t value = 6;
         }; // struct enum_capacity
 
-        bool try_parse(const std::string& str, unit_faction& value) noexcept
+        template <>
+        struct converter<unit_faction, std::string>
         {
-            if (str == "non player adventure") { value = unit_faction::non_player_adventure; return true; }
-            if (str == "non-player adventure") { value = unit_faction::non_player_adventure; return true; }
-            if (str == "non player expedition") { value = unit_faction::non_player_expedition; return true; }
-            if (str == "non-player expedition") { value = unit_faction::non_player_expedition; return true; }
-            if (str == "general") { value = unit_faction::general; return true; }
-            if (str == "expedition") { value = unit_faction::expedition; return true; }
-            if (str == "common") { value = unit_faction::common; return true; }
-            if (str == "elite") { value = unit_faction::elite; return true; }
-            return false;
-        } // try_parse(...)
+            using from_type = unit_faction;
+            using to_type = std::string;
+
+            static to_type to(const from_type& from) noexcept
+            {
+                switch (from)
+                {
+                    case unit_faction::non_player_adventure: return "non player adventure";
+                    case unit_faction::non_player_expedition: return "non player expedition";
+                    case unit_faction::general: return "general";
+                    case unit_faction::expedition: return "expedition";
+                    case unit_faction::common: return "common";
+                    case unit_faction::elite: return "elite";
+                    default: return std::to_string(static_cast<std::size_t>(from));
+                }
+            } // to(...)
+
+            static bool try_from(const to_type& from, from_type& to) noexcept
+            {
+                if (from == "non player adventure") { to = unit_faction::non_player_adventure; return true; }
+                if (from == "non-player adventure") { to = unit_faction::non_player_adventure; return true; }
+                if (from == "non player expedition") { to = unit_faction::non_player_expedition; return true; }
+                if (from == "non-player expedition") { to = unit_faction::non_player_expedition; return true; }
+                if (from == "general") { to = unit_faction::general; return true; }
+                if (from == "expedition") { to = unit_faction::expedition; return true; }
+                if (from == "common") { to = unit_faction::common; return true; }
+                if (from == "elite") { to = unit_faction::elite; return true; }
+                return false;
+            } // try_from(...)
+        }; // struct converter
     } // namespace settlers_online
 } // namespace ropufu
 
@@ -51,16 +72,7 @@ namespace std
 {
     std::string to_string(ropufu::settlers_online::unit_faction value) noexcept
     {
-        switch (value)
-        {
-            case ropufu::settlers_online::unit_faction::non_player_adventure: return "non player adventure";
-            case ropufu::settlers_online::unit_faction::non_player_expedition: return "non player expedition";
-            case ropufu::settlers_online::unit_faction::general: return "general";
-            case ropufu::settlers_online::unit_faction::expedition: return "expedition";
-            case ropufu::settlers_online::unit_faction::common: return "common";
-            case ropufu::settlers_online::unit_faction::elite: return "elite";
-            default: return std::to_string(static_cast<std::size_t>(value));
-        }
+        return ropufu::settlers_online::to_str(value);
     } // to_string(...)
 } // namespace std
 

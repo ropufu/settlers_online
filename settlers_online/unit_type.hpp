@@ -4,6 +4,7 @@
 
 #include <aftermath/not_an_error.hpp>
 #include <nlohmann/json.hpp>
+#include "json.hpp"
 
 // ~~ Enumerations ~~
 #include "battle_phase.hpp"
@@ -19,7 +20,6 @@
 #include <cstddef> // std::size_t
 #include <functional> // std::hash
 #include <ostream> // std::ostream
-#include <stdexcept> // std::domain_error
 #include <string> // std::string, std::to_string
 #include <vector> // std::vector
 
@@ -217,127 +217,72 @@ namespace ropufu
     
         void from_json(const nlohmann::json& j, unit_type& x) noexcept
         {
-            std::string missing_property { };
-            // Required properties.
-            if (j.count("id") == 0) missing_property = "Missing required property: id.";
-            if (j.count("hit points") == 0) missing_property = "Missing required property: hit points.";
-            if (j.count("low damage") == 0) missing_property = "Missing required property: low damage.";
-            if (j.count("high damage") == 0) missing_property = "Missing required property: high damage.";
-            if (j.count("accuracy") == 0) missing_property = "Missing required property: accuracy.";
-            if (j.count("name") == 0) missing_property = "Missing required property: name.";
-            if (j.count("initiative") == 0) missing_property = "Missing required property: initiative.";
-            if (!missing_property.empty())
+            // Populate default values.
+            std::size_t id = x.id(); // required
+            std::vector<std::string> names = x.names(); // required
+            unit_faction faction = x.faction(); // optional
+            unit_category category = x.category(); // optional
+            std::size_t capacity = x.capacity(); // optional
+            std::size_t hit_points = x.hit_points(); // required
+            std::size_t low_damage = x.damage().low(); // required
+            std::size_t high_damage = x.damage().high(); // required
+            double accuracy = x.damage().accuracy(); // required
+            double splash_chance = x.damage().splash_chance(); // optional
+            std::size_t experience = x.experience(); // optional
+            flags_t<battle_phase> attack_phases = x.attack_phases(); // required
+            flags_t<special_ability> abilities = x.abilities(); // optional
+            flags_t<battle_trait> traits = x.traits(); // optional
+            // Auxiliary for enum struct.
+            std::string faction_str = std::to_string(faction); 
+            std::string category_str = std::to_string(category);
+
+            // Parse json entries.
+            if (!quiet_json::required(j, "id", id)) return;
+            if (!quiet_json::required(j, "name", names)) return;
+            if (!quiet_json::optional(j, "faction", faction_str)) return;
+            if (!quiet_json::optional(j, "class", category_str)) return;
+            if (!quiet_json::optional(j, "capacity", capacity)) return;
+            if (!quiet_json::required(j, "hit points", hit_points)) return;
+            if (!quiet_json::required(j, "low damage", low_damage)) return;
+            if (!quiet_json::required(j, "high damage", high_damage)) return;
+            if (!quiet_json::required(j, "accuracy", accuracy)) return;
+            if (!quiet_json::optional(j, "splash chance", splash_chance)) return;
+            if (!quiet_json::optional(j, "experience when killed", experience)) return;
+
+            // Custom structures.
+            if (!settlers_online::try_parse_str(faction_str, faction))
             {
                 aftermath::quiet_error::instance().push(
                     aftermath::not_an_error::runtime_error,
                     aftermath::severity_level::major,
-                    missing_property, __FUNCTION__, __LINE__);
-                x = { };
+                    std::string("Faction unrecognized: ") + faction_str + std::string("."), __FUNCTION__, __LINE__);
                 return;
             }
-
-            try
-            {
-                // ~~ Id: required ~~
-                std::size_t id = j["id"];
-                x.set_id(id);
-                // ~~ Hit Points: required ~~
-                std::size_t hit_points = j["hit points"];
-                x.set_hit_points(hit_points);
-                // ~~ Low Damage: required ~~
-                std::size_t low_damage = j["low damage"];
-                // ~~ High Damage: required ~~
-                std::size_t high_damage = j["high damage"];
-                // ~~ Accuracy: required ~~
-                double accuracy = j["accuracy"];
-                // ~~ Splash Chance: optional ~~
-                double splash_chance = 0;
-                if (j.count("splash chance") != 0) splash_chance = j["splash chance"];
-                x.set_damage(detail::damage(low_damage, high_damage, accuracy, splash_chance));
-                // ~~ Capacity: optional ~~
-                std::size_t capacity = 0;
-                if (j.count("capacity") != 0) capacity = j["capacity"];
-                x.set_capacity(capacity);
-
-                // ~~ Names: required ~~
-                std::vector<std::string> names { };
-                if (j["name"].is_array()) names = j["name"].get<std::vector<std::string>>();
-                else names = { j["name"].get<std::string>() };
-                x.set_names(names);
-
-                // ~~ Faction: optional ~~
-                unit_faction fac = unit_faction::non_player_adventure;
-                if (j.count("faction") != 0) try_parse(j["faction"].get<std::string>(), fac);
-                x.set_faction(fac);
-
-                // ~~ Category: optional ~~
-                unit_category cat = unit_category::unknown;
-                if (j.count("class") != 0) try_parse(j["class"].get<std::string>(), cat);
-                x.set_category(cat);
-
-                // ~~ Experience: optional ~~
-                std::size_t experience = 0;
-                if (j.count("experience when killed") != 0) experience = j["experience when killed"];
-                else if (j.count("experience") != 0) experience = j["experience"];
-                x.set_experience(experience);
-
-                // ~~ Attack Phases: required ~~
-                std::vector<std::string> phase_names { };
-                if (j["initiative"].is_array()) phase_names = j["initiative"].get<std::vector<std::string>>();
-                else phase_names = { j["initiative"].get<std::string>() };
-                for (const std::string& value : phase_names)
-                {
-                    battle_phase y;
-                    if (try_parse(value, y)) x.set_attack_phase(y, true);
-                    else
-                    {
-                        aftermath::quiet_error::instance().push(
-                            aftermath::not_an_error::runtime_error,
-                            aftermath::severity_level::negligible,
-                            "Skipping unrecognized battle phase.", __FUNCTION__, __LINE__);
-                    }
-                }
-
-                // ~~ Special Abilities: optional ~~
-                std::vector<std::string> ability_names { };
-                if (j.count("special abilities") != 0) ability_names = j["special abilities"].get<std::vector<std::string>>();
-                for (const std::string& value : ability_names)
-                {
-                    special_ability y;
-                    if (try_parse(value, y)) x.set_ability(y, true);
-                    else
-                    {
-                        aftermath::quiet_error::instance().push(
-                            aftermath::not_an_error::runtime_error,
-                            aftermath::severity_level::negligible,
-                            "Skipping unrecognized special ability.", __FUNCTION__, __LINE__);
-                    }
-                }
-
-                // ~~ Traits: optional ~~
-                std::vector<std::string> trait_names { };
-                if (j.count("traits") != 0) trait_names = j["traits"].get<std::vector<std::string>>();
-                for (const std::string& value : trait_names)
-                {
-                    battle_trait y;
-                    if (try_parse(value, y)) x.set_trait(y, true);
-                    else
-                    {
-                        aftermath::quiet_error::instance().push(
-                            aftermath::not_an_error::runtime_error,
-                            aftermath::severity_level::negligible,
-                            "Skipping unrecognized battle trait.", __FUNCTION__, __LINE__);
-                    }
-                }
-            }
-            catch (std::domain_error)
+            if (!settlers_online::try_parse_str(category_str, category))
             {
                 aftermath::quiet_error::instance().push(
-                    aftermath::not_an_error::domain_error,
+                    aftermath::not_an_error::runtime_error,
                     aftermath::severity_level::major,
-                    "JSON unit representation malformed. Using default instead.", __FUNCTION__, __LINE__);
-                x = { };
+                    std::string("Class unrecognized: ") + category_str + std::string("."), __FUNCTION__, __LINE__);
+                return;
             }
+            if (quiet_json::is_missing(j, "initiative")) return;
+            attack_phases = j["initiative"];
+            if (!quiet_json::is_missing(j, "special abilities", true)) abilities = j["special abilities"];
+            if (!quiet_json::is_missing(j, "traits", true)) traits = j["traits"];
+
+            // Reconstruct the object.
+            x.set_id(id);
+            x.set_names(names);
+            x.set_faction(faction);
+            x.set_category(category);
+            x.set_capacity(capacity);
+            x.set_hit_points(hit_points);
+            x.set_damage(detail::damage(low_damage, high_damage, accuracy, splash_chance));
+            x.set_experience(experience);
+            for (battle_phase y : attack_phases) x.set_attack_phase(y, true);
+            for (special_ability y : abilities) x.set_ability(y, true);
+            for (battle_trait y : traits) x.set_trait(y, true);
         } // from_json(...)
     } // namespace settlers_online
 } // namespace ropufu
@@ -350,7 +295,7 @@ namespace std
         using argument_type = ropufu::settlers_online::unit_type;
         using result_type = std::size_t;
 
-        result_type operator ()(const argument_type& x) const
+        result_type operator ()(const argument_type& x) const noexcept
         {
             std::hash<std::size_t> size_hash = { };
             std::hash<ropufu::settlers_online::battle_phase> phase_hash = { };

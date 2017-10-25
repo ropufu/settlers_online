@@ -2,6 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_BATTLE_PHASE_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_BATTLE_PHASE_HPP_INCLUDED
 
+#include "core.hpp"
 #include "enum_array.hpp"
 
 #include <cstddef> // std::size_t
@@ -29,13 +30,31 @@ namespace ropufu
             static constexpr std::size_t value = 3;
         }; // struct enum_capacity
 
-        bool try_parse(const std::string& str, battle_phase& value) noexcept
+        template <>
+        struct converter<battle_phase, std::string>
         {
-            if (str == "first strike") { value = battle_phase::first_strike; return true; }
-            if (str == "normal") { value = battle_phase::normal; return true; }
-            if (str == "last strike") { value = battle_phase::last_strike; return true; }
-            return false;
-        } // try_parse(...)
+            using from_type = battle_phase;
+            using to_type = std::string;
+
+            static to_type to(const from_type& from) noexcept
+            {
+                switch (from)
+                {
+                    case battle_phase::first_strike: return "first strike";
+                    case battle_phase::normal: return "normal";
+                    case battle_phase::last_strike: return "last strike";
+                    default: return std::to_string(static_cast<std::size_t>(from));
+                }
+            } // to(...)
+
+            static bool try_from(const to_type& from, from_type& to) noexcept
+            {
+                if (from == "first strike") { to = battle_phase::first_strike; return true; }
+                if (from == "normal") { to = battle_phase::normal; return true; }
+                if (from == "last strike") { to = battle_phase::last_strike; return true; }
+                return false;
+            } // try_from(...)
+        }; // struct converter
     } // namespace settlers_online
 } // namespace ropufu
 
@@ -43,13 +62,7 @@ namespace std
 {
     std::string to_string(ropufu::settlers_online::battle_phase value) noexcept
     {
-        switch (value)
-        {
-            case ropufu::settlers_online::battle_phase::first_strike: return "first strike";
-            case ropufu::settlers_online::battle_phase::normal: return "normal";
-            case ropufu::settlers_online::battle_phase::last_strike: return "last strike";
-            default: return std::to_string(static_cast<std::size_t>(value));
-        }
+        return ropufu::settlers_online::to_str(value);
     } // to_string(...)
 } // namespace std
 
