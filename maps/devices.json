@@ -2,89 +2,73 @@
     "units": [
         {
             "id": 30,
-            "name": "Caltrop",
-            "class": "unknown",
-            "initiative": "first strike",
+            "names": [ "Caltrop" ],
+            "category": "unknown",
+            "phases": [ "first strike" ],
             "hit points": 4,
-            "low damage": 0,
-            "high damage": 20,
-            "accuracy": 0.33,
+            "damage": { "low": 0, "high": 20, "accuracy": 0.33 },
             "experience when killed": 1,
             "special abilities": [ "attack weakest target" ]
         },
         {
             "id": 50,
-            "name": "Big Bertha",
-            "class": "unknown",
-            "initiative": "last strike",
+            "names": [ "Big Bertha" ],
+            "category": "unknown",
+            "phases": [ "last strike" ],
             "hit points": 40000,
-            "low damage": 50,
-            "high damage": 150,
-            "accuracy": 0.75,
-            "splash chance": 1,
+            "damage": { "low": 50, "high": 150, "accuracy": 0.75, "splash chance": 1 },
             "experience when killed": 350,
-            "special abilities": [ "attack weakest target" ]
+            "special abilities": [ "attack weakest target", "overrun" ]
         },
         {
             "id": 884,
-            "name": "Mossy Stone Statue",
-            "class": "unknown",
-            "initiative": "last strike",
+            "names": [ "Mossy Stone Statue" ],
+            "category": "unknown",
+            "phases": [ "last strike" ],
             "hit points": 500000,
-            "low damage": 400,
-            "high damage": 800,
-            "accuracy": 0.9,
-            "splash chance": 1,
-            "experience when killed": 17000
+            "damage": { "low": 400, "high": 800, "accuracy": 0.9, "splash chance": 1 },
+            "experience when killed": 17000,
+            "special abilities": [ "overrun" ]
         },
         {
             "id": 886,
-            "name": "Large Stone Statue",
-            "class": "unknown",
-            "initiative": "last strike",
+            "names": [ "Large Stone Statue" ],
+            "category": "unknown",
+            "phases": [ "last strike" ],
             "hit points": 400000,
-            "low damage": 450,
-            "high damage": 1000,
-            "accuracy": 0.9,
-            "splash chance": 1,
-            "experience when killed": 13000
+            "damage": { "low": 450, "high": 1000, "accuracy": 0.9, "splash chance": 1 },
+            "experience when killed": 13000,
+            "special abilities": [ "overrun" ]
         },
         {
             "id": 991,
-            "name": "Library Golem",
-            "class": "unknown",
-            "initiative": "normal",
+            "names": [ "Library Golem" ],
+            "category": "unknown",
+            "phases": [ "normal" ],
             "hit points": 70000,
-            "low damage": 1750,
-            "high damage": 3500,
-            "accuracy": 0.9,
-            "splash chance": 1,
+            "damage": { "low": 1750, "high": 3500, "accuracy": 0.9, "splash chance": 1 },
             "experience when killed": 2500,
-            "special abilities": [ "attack weakest target" ]
+            "special abilities": [ "attack weakest target", "overrun" ]
         },
         {
             "id": 992,
-            "name": "Giant Cannon One",
-            "class": "unknown",
-            "initiative": "last strike",
+            "names": [ "Giant Cannon One" ],
+            "category": "unknown",
+            "phases": [ "last strike" ],
             "hit points": 35000,
-            "low damage": 7500,
-            "high damage": 15000,
-            "accuracy": 0.85,
-            "splash chance": 1,
-            "experience when killed": 1600
+            "damage": { "low": 7500, "high": 15000, "accuracy": 0.85, "splash chance": 1 },
+            "experience when killed": 1600,
+            "special abilities": [ "overrun" ]
         },
         {
             "id": 993,
-            "name": "Giant Cannon Two",
-            "class": "unknown",
-            "initiative": "normal",
+            "names": [ "Giant Cannon Two" ],
+            "category": "unknown",
+            "phases": [ "normal" ],
             "hit points": 40000,
-            "low damage": 7500,
-            "high damage": 15000,
-            "accuracy": 0.85,
-            "splash chance": 1,
-            "experience when killed": 1750
+            "damage": { "low": 7500, "high": 15000, "accuracy": 0.85, "splash chance": 1 },
+            "experience when killed": 1750,
+            "special abilities": [ "overrun" ]
         }
     ]
 }

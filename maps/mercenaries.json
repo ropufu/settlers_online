@@ -2,72 +2,60 @@
     "units": [
         {
             "id": 4011,
-            "name": "Mercenary Duelist",
+            "names": [ "Mercenary Duelist" ],
             "faction": "non player expedition",
-            "class": "melee",
-            "initiative": "normal",
+            "category": "melee",
+            "phases": [ "normal" ],
             "hit points": 180,
-            "low damage": 25,
-            "high damage": 25,
-            "accuracy": 1,
-            "rivals": [ { "class": "cavalry", "bonus": 0.75 } ]
+            "damage": { "low": 25, "high": 25, "accuracy": 1 },
+            "rivals": [ { "category": "cavalry", "bonus": 0.75 } ]
         },
         {
             "id": 4012,
-            "name": "Mercenary Sharpshooter",
+            "names": [ "Mercenary Sharpshooter" ],
             "faction": "non player expedition",
-            "class": "ranged",
-            "initiative": "normal",
+            "category": "ranged",
+            "phases": [ "normal" ],
             "hit points": 180,
-            "low damage": 25,
-            "high damage": 25,
-            "accuracy": 1,
-            "rivals": [ { "class": "melee", "bonus": 0.75 } ]
+            "damage": { "low": 25, "high": 25, "accuracy": 1 },
+            "rivals": [ { "category": "melee", "bonus": 0.75 } ]
         },
         {
             "id": 4013,
-            "name": "Mercenary Charger",
+            "names": [ "Mercenary Charger" ],
             "faction": "non player expedition",
-            "class": "cavalry",
-            "initiative": "normal",
+            "category": "cavalry",
+            "phases": [ "normal" ],
             "hit points": 180,
-            "low damage": 25,
-            "high damage": 25,
-            "accuracy": 1,
-            "rivals": [ { "class": "ranged", "bonus": 0.75 } ]
+            "damage": { "low": 25, "high": 25, "accuracy": 1 },
+            "rivals": [ { "category": "ranged", "bonus": 0.75 } ]
         },
         {
             "id": 4014,
-            "name": "Mercenary Infantry",
+            "names": [ "Mercenary Infantry" ],
             "faction": "non player expedition",
-            "class": "melee",
-            "initiative": "normal",
+            "category": "melee",
+            "phases": [ "normal" ],
             "hit points": 180,
-            "low damage": 35,
-            "high damage": 35,
-            "accuracy": 1
+            "damage": { "low": 35, "high": 35, "accuracy": 1 }
         },
         {
             "id": 4015,
-            "name": "Mercenary Archer",
+            "names": [ "Mercenary Archer" ],
             "faction": "non player expedition",
-            "class": "ranged",
-            "initiative": "normal",
+            "category": "ranged",
+            "phases": [ "normal" ],
             "hit points": 180,
-            "low damage": 35,
-            "high damage": 35,
-            "accuracy": 1
+            "damage": { "low": 35, "high": 35, "accuracy": 1 }
         },
         {
             "id": 4016,
-            "name": "Mercenary Cavalry",
+            "names": [ "Mercenary Cavalry" ],
             "faction": "non player expedition",
-            "class": "cavalry",
-            "initiative": "normal",
+            "category": "cavalry",
+            "phases": [ "normal" ],
             "hit points": 180,
-            "low damage": 35,
-            "high damage": 35,
-            "accuracy": 1
+            "damage": { "low": 35, "high": 35, "accuracy": 1 }
         }
     ]
 }

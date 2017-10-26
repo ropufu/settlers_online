@@ -114,15 +114,18 @@ namespace ropufu
              *  @exception not_an_error::domain_error This error is pushed to \c quiet_error if one of the elements is of a wrong type (incompatible).
              */
             template <typename t_value_type>
-            static bool try_parse(const nlohmann::json& entry, const std::string& name, std::vector<t_value_type>& value) noexcept
+            static bool try_parse(const nlohmann::json& entry, const std::string& name, std::vector<t_value_type>& value, bool do_allow_singletons = false) noexcept
             {
                 // Identify <x> with singleton set { <x> }.
-                bool is_singular = detail::json_type_check<t_value_type>::is(entry);
-                if (is_singular)
+                if (do_allow_singletons)
                 {
-                    value.clear();
-                    value.push_back(entry.get<t_value_type>());
-                    return true;
+                    bool is_singular = detail::json_type_check<t_value_type>::is(entry);
+                    if (is_singular)
+                    {
+                        value.clear();
+                        value.push_back(entry.get<t_value_type>());
+                        return true;
+                    }
                 }
 
                 // Otherwise require array notation [ ... ].

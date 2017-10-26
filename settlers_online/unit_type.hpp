@@ -183,34 +183,26 @@ namespace ropufu
 
         void to_json(nlohmann::json& j, const unit_type& x) noexcept
         {
-            std::vector<std::string> initiative { };
+            std::vector<std::string> attack_phases { };
             std::vector<std::string> abilities { };
             std::vector<std::string> traits { };
 
-            for (battle_phase phase : x.attack_phases()) initiative.push_back(std::to_string(phase));
+            for (battle_phase phase : x.attack_phases()) attack_phases.push_back(std::to_string(phase));
             for (special_ability ability : x.abilities()) abilities.push_back(std::to_string(ability));
             for (battle_trait trait : x.traits()) traits.push_back(std::to_string(trait));
 
             j = nlohmann::json{
                 {"id", x.id()},
-                {"name", x.names()},
+                {"names", x.names()},
                 {"faction", std::to_string(x.faction())},
-                {"class", std::to_string(x.category())},
+                {"category", std::to_string(x.category())},
+                {"phases", attack_phases},
                 {"capacity", x.capacity()},
                 {"hit points", x.hit_points()},
-                {"low damage", x.damage().low()},
-                {"high damage", x.damage().high()},
-                {"accuracy", x.damage().accuracy()},
-                {"splash chance", x.damage().splash_chance()},
+                {"damage", x.damage()},
                 {"experience when killed", x.experience()}
             };
 
-            if (initiative.size() != 1) j["initiative"] = initiative;
-            else
-            {
-                std::string single = initiative[0];
-                j["initiative"] = single;
-            }
             if (!abilities.empty()) j["special abilities"] = abilities;
             if (!traits.empty()) j["traits"] = traits;
         } // to_json(...)
@@ -224,10 +216,7 @@ namespace ropufu
             unit_category category = x.category(); // optional
             std::size_t capacity = x.capacity(); // optional
             std::size_t hit_points = x.hit_points(); // required
-            std::size_t low_damage = x.damage().low(); // required
-            std::size_t high_damage = x.damage().high(); // required
-            double accuracy = x.damage().accuracy(); // required
-            double splash_chance = x.damage().splash_chance(); // optional
+            detail::damage damage = x.damage(); // required
             std::size_t experience = x.experience(); // optional
             flags_t<battle_phase> attack_phases = x.attack_phases(); // required
             flags_t<special_ability> abilities = x.abilities(); // optional
@@ -238,15 +227,13 @@ namespace ropufu
 
             // Parse json entries.
             if (!quiet_json::required(j, "id", id)) return;
-            if (!quiet_json::required(j, "name", names)) return;
+            if (!quiet_json::required(j, "names", names)) return;
             if (!quiet_json::optional(j, "faction", faction_str)) return;
-            if (!quiet_json::optional(j, "class", category_str)) return;
+            if (!quiet_json::optional(j, "category", category_str)) return;
             if (!quiet_json::optional(j, "capacity", capacity)) return;
             if (!quiet_json::required(j, "hit points", hit_points)) return;
-            if (!quiet_json::required(j, "low damage", low_damage)) return;
-            if (!quiet_json::required(j, "high damage", high_damage)) return;
-            if (!quiet_json::required(j, "accuracy", accuracy)) return;
-            if (!quiet_json::optional(j, "splash chance", splash_chance)) return;
+            if (quiet_json::is_missing(j, "damage")) return;
+            damage = j["damage"];
             if (!quiet_json::optional(j, "experience when killed", experience)) return;
 
             // Custom structures.
@@ -263,11 +250,11 @@ namespace ropufu
                 aftermath::quiet_error::instance().push(
                     aftermath::not_an_error::runtime_error,
                     aftermath::severity_level::major,
-                    std::string("Class unrecognized: ") + category_str + std::string("."), __FUNCTION__, __LINE__);
+                    std::string("Category unrecognized: ") + category_str + std::string("."), __FUNCTION__, __LINE__);
                 return;
             }
-            if (quiet_json::is_missing(j, "initiative")) return;
-            attack_phases = j["initiative"];
+            if (quiet_json::is_missing(j, "phases")) return;
+            attack_phases = j["phases"];
             if (!quiet_json::is_missing(j, "special abilities", true)) abilities = j["special abilities"];
             if (!quiet_json::is_missing(j, "traits", true)) traits = j["traits"];
 
@@ -278,7 +265,7 @@ namespace ropufu
             x.set_category(category);
             x.set_capacity(capacity);
             x.set_hit_points(hit_points);
-            x.set_damage(detail::damage(low_damage, high_damage, accuracy, splash_chance));
+            x.set_damage(damage);
             x.set_experience(experience);
             for (battle_phase y : attack_phases) x.set_attack_phase(y, true);
             for (special_ability y : abilities) x.set_ability(y, true);

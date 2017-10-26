@@ -2,14 +2,12 @@
     "units": [
         {
             "id": 1520,
-            "name": "Ancient Dragon",
-            "class": "elite",
-            "initiative": "first strike",
+            "names": [ "Ancient Dragon" ],
+            "category": "elite",
+            "phases": [ "first strike" ],
             "hit points": 50000,
-            "low damage": 500,
-            "high damage": 750,
-            "accuracy": 0.5,
-            "splash chance": 1
+            "damage": { "low": 500, "high": 750, "accuracy": 0.5, "splash chance": 1 },
+            "special abilities": [ "overrun" ]
         }
     ]
 }

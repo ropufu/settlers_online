@@ -191,10 +191,10 @@ namespace ropufu
                 }
 
                 // Primary search failed. Secondary search: all lowercase!
-                key_type key;
+                key_type key { };
                 key_type lowercase = unit_database::relax_to_lowercase(query);
                 key_type misspelled = unit_database::relax_spelling(lowercase);
-                std::size_t count_matches;
+                std::size_t count_matches = 0;
                 count_matches = this->m_lowercase_lookup.try_find(lowercase, key, [&] (const key_type& maybe) { return filter(this->m_database.at(maybe)); });
                 if (count_matches >= 1)
                 {
@@ -232,7 +232,7 @@ namespace ropufu
 
                     try
                     {
-                        nlohmann::json map;// = nlohmann::json::parse(i);
+                        nlohmann::json map { };// = nlohmann::json::parse(i);
                         i >> map;
                         if (map.count("units") != 0) // Check if there are any unit definitions in the file.
                         {

@@ -1,47 +1,53 @@
 {
     "camps": [
         {
-            "name": "No Camp",
+            "names": [ "No Camp" ],
             "hit points": 0
         },
         {
-            "name": "Trap",
+            "names": [ "Trap" ],
             "hit points": 125
         },
         {
-            "name": "Encampment",
+            "names": [ "Encampment" ],
             "hit points": 250
         },
         {
-            "name": "Watchtower",
+            "names": [ "Watchtower" ],
             "hit points": 1000,
-            "damage reduction": 0.5
+            "damage reduction": 0.5,
+            "special abilities": [ "overrun" ]
         },
         {
-            "name": "Fortified Watchtower",
+            "names": [ "Fortified Watchtower" ],
             "hit points": 1500,
-            "damage reduction": 0.75
+            "damage reduction": 0.75,
+            "special abilities": [ "overrun" ]
         },
         {
-            "name": "Stone Tower",
+            "names": [ "Stone Tower" ],
             "hit points": 2000,
-            "damage reduction": 0.9
+            "damage reduction": 0.9,
+            "special abilities": [ "overrun" ]
         },
         {
-            "name": "Witch Tower",
-            "hit points": 2000
+            "names": [ "Witch Tower" ],
+            "hit points": 2000,
+            "special abilities": [ "overrun" ]
         },
         {
-            "name": "Bone Church",
-            "hit points": 2000
+            "names": [ "Bone Church" ],
+            "hit points": 2000,
+            "special abilities": [ "overrun" ]
         },
         {
-            "name": "White Castle",
+            "names": [ "White Castle" ],
             "hit points": 250
         },
         {
-            "name": "Dark Castle",
-            "hit points": 2000
+            "names": [ "Dark Castle" ],
+            "hit points": 2000,
+            "special abilities": [ "overrun" ]
         }
     ]
 }
