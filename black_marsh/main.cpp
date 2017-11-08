@@ -1,6 +1,7 @@
 
 #include <aftermath/not_an_error.hpp>
 
+#include "config.hpp"
 #include "turtle.hpp"
 #include "../settlers_online/army.hpp"
 #include "../settlers_online/char_string.hpp"
@@ -183,11 +184,11 @@ Following the left / right command, one could use:
 ... camp, c        | Get or set camp.
 ... skills, s      | Get skills.
 ==============================================================
-Following the left / right vcamp command, one could use:
+Following the left / right camp command, one could use:
     Command Name   | Description
 ==============================================================
-... hitpoints, hp  | Get or set camp.
-... reduction, r   | Get or set skills.
+... hitpoints, hp  | Get or set camp hit points.
+... reduction, r   | Get or set camp damage reduction.
 ==============================================================
 Commands with get or set option will take an optional argument to set the
 value of corresponding parameter.
@@ -245,6 +246,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
         return 1;
     }
 
+    ropufu::settlers_online::black_marsh::config& config = ropufu::settlers_online::black_marsh::config::instance();
     ropufu::settlers_online::black_marsh::turtle lucy { };
     if (argc > 2)
     {
@@ -297,58 +299,56 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
                 std::cout << "Right army: " << lucy.right() << std::endl;
                 break;
             case command_name::left_camp:
-                std::cout << "Left campt: " << lucy.left_camp() << std::endl;
+                std::cout << "Left campt: " << config.left().camp() << std::endl;
                 break;
             case command_name::right_camp:
-                std::cout << "Right camp: " << lucy.right_camp() << std::endl;
+                std::cout << "Right camp: " << config.right().camp() << std::endl;
                 break;
             case command_name::left_camp_reduction:
                 if (!argument.empty())
                 {
-                    auto camp = lucy.left_camp();
+                    auto camp = config.left().camp();
                     camp.set_damage_reduction(std::stod(argument));
-                    lucy.set_left_camp(camp);
+                    config.left().set_camp(camp);
                 }
-                std::cout << "Left camp damage recution: " << lucy.left_camp().damage_reduction() << std::endl;
+                std::cout << "Left camp damage recution: " << config.left().camp().damage_reduction() << std::endl;
                 break;
             case command_name::right_camp_reduction:
                 if (!argument.empty())
                 {
-                    auto camp = lucy.right_camp();
+                    auto camp = config.right().camp();
                     camp.set_damage_reduction(std::stod(argument));
-                    lucy.set_right_camp(camp);
+                    config.right().set_camp(camp);
                 }
-                std::cout << "Right camp damage recution: " << lucy.right_camp().damage_reduction() << std::endl;
+                std::cout << "Right camp damage recution: " << config.right().camp().damage_reduction() << std::endl;
                 break;
             case command_name::left_camp_hit_points:
                 if (!argument.empty())
                 {
-                    auto camp = lucy.left_camp();
+                    auto camp = config.left().camp();
                     camp.set_hit_points(static_cast<std::size_t>(std::stol(argument)));
-                    lucy.set_left_camp(camp);
+                    config.left().set_camp(camp);
                 }
-                std::cout << "Left camp hit points: " << lucy.left_camp().hit_points() << std::endl;
+                std::cout << "Left camp hit points: " << config.left().camp().hit_points() << std::endl;
                 break;
             case command_name::right_camp_hit_points:
                 if (!argument.empty())
                 {
-                    auto camp = lucy.right_camp();
+                    auto camp = config.right().camp();
                     camp.set_hit_points(static_cast<std::size_t>(std::stol(argument)));
-                    lucy.set_right_camp(camp);
+                    config.right().set_camp(camp);
                 }
-                std::cout << "Right camp hit points: " << lucy.right_camp().hit_points() << std::endl;
+                std::cout << "Right camp hit points: " << config.right().camp().hit_points() << std::endl;
                 break;
             case command_name::left_skills:
-                std::cout << "Left skills:" << std::endl;
-                lucy.print_left_skills();
+                std::cout << config.left() << std::endl;
                 break;
             case command_name::right_skills:
-                std::cout << "Right skills:" << std::endl;
-                lucy.print_right_skills();
+                std::cout << config.right() << std::endl;
                 break;
             case command_name::n:
-                if (!argument.empty()) lucy.set_simulation_count(static_cast<std::size_t>(std::stol(argument)));
-                std::cout << "Number of simulations: " << lucy.simulation_count() << std::endl;
+                if (!argument.empty()) config.set_simulation_count(static_cast<std::size_t>(std::stol(argument)));
+                std::cout << "Number of simulations: " << config.simulation_count() << std::endl;
                 break;
             case command_name::log:
                 lucy.run(true);

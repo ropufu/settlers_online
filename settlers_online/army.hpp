@@ -16,6 +16,7 @@
 #include "camp.hpp"
 #include "damage.hpp"
 // ~~ Misc ~~
+#include "char_string.hpp"
 #include "enum_array.hpp"
 #include "typedef.hpp"
 #include "unit_group.hpp"
@@ -227,7 +228,7 @@ namespace ropufu
             friend std::ostream& operator <<(std::ostream& os, const type& self)
             {
                 bool is_first = true;
-                if (self.m_groups.empty()) os << "Empty";
+                if (self.m_groups.empty()) os << "empty";
                 for (const unit_group& g : self.m_groups)
                 {
                     if (is_first) is_first = false;
@@ -236,6 +237,18 @@ namespace ropufu
                 }
                 return os;
             } // operator <<(...)
+
+            template <typename t_format_type>
+            std::string to_string(const t_format_type& format) const noexcept
+            {
+                if (this->m_groups.empty()) return "empty";
+                std::vector<std::string> group_names(this->m_groups.size());
+                for (const unit_group& g : this->m_groups)
+                {
+                    group_names.push_back(std::to_string(g.count()) + format(g.unit()));
+                }
+                return char_string::join(group_names, " ");
+            } // to_string(...)
         }; // struct army
 
         army::army(const std::vector<unit_group>& groups, const detail::camp& camp) noexcept

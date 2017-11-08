@@ -298,7 +298,7 @@ namespace ropufu
             {
                 // Since it's a static variable, if the class has already been created, it won't be created again.
                 // Note: it is thread-safe in C++11.
-                static type s_instance;
+                static type s_instance { };
                 // Return a reference to our instance.
                 return s_instance;
             } // instance(...)

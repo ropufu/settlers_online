@@ -24,7 +24,7 @@
         },
         {
             "id": 9003,
-            "names": [ "Major", "Major General", "((m))" ],
+            "names": [ "Major General", "((m))" ],
             "faction": "general",
             "category": "unknown",
             "phases": [ "normal" ],

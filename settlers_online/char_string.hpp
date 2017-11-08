@@ -2,8 +2,11 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_CHAR_STRING_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_CHAR_STRING_HPP_INCLUDED
 
+#include <algorithm> // std::copy
 #include <cctype> // std::isspace, std::tolower
 #include <cstddef> // std::size_t
+#include <iterator> // std::ostream_iterator
+#include <sstream> // std::stringstream
 #include <string> // std::string
 #include <vector> // std::vector
 
@@ -110,6 +113,13 @@ namespace ropufu
                 char_string::remove_repeated_whitespace(result);
                 return result;
             } // deep_trim_copy(...)
+
+            static std::string join(const std::vector<std::string>& values, const std::string& delimiter) noexcept
+            {
+                std::stringstream s { };
+                std::copy(values.begin(), values.end(), std::ostream_iterator<std::string>(s, delimiter.c_str()));
+                return s.str();
+            } // join(...)
         }; // struct char_string
     } // namespace settlers_online
 } // namespace ropufu
