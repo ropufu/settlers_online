@@ -20,6 +20,7 @@
 #include "../settlers_online/combat_result.hpp"
 #include "../settlers_online/conditioned_army.hpp"
 #include "../settlers_online/randomized_attack_sequence.hpp"
+#include "../settlers_online/report_entry.hpp"
 #include "../settlers_online/trivial_attack_sequence.hpp"
 #include "../settlers_online/unit_faction.hpp"
 #include "../settlers_online/unit_group.hpp"
@@ -29,8 +30,6 @@
 #include <chrono> // std::chrono::steady_clock, std::chrono::duration_cast
 #include <cstddef> // std::size_t
 #include <cstdint> // std::int32_t
-#include <stdexcept> // std::domain_error
-#include <iostream> // std::cout, std::endl
 #include <map> // std::map
 #include <set> // std::set
 #include <string> // std::string, std::to_string
@@ -57,7 +56,6 @@ namespace ropufu
                 {
                     config& c = config::instance();
                     if (!c.good()) return false;
-
                     return true;
                 } // is_config_valid(...)
 
@@ -72,41 +70,18 @@ namespace ropufu
                     return elapsed_seconds;
                 } // elapsed_seconds(...)
 
-                static void unwind_errors(bool do_skip_log, bool is_quiet = false) noexcept
+                static void present_losses(std::vector<report_entry>& report, const army& a, const std::vector<empirical_measure>& losses) noexcept
                 {
-                    aftermath::quiet_error& err = aftermath::quiet_error::instance();
-                
-                    if (!is_quiet)
+                    for (std::size_t k = 0; k < a.count_groups(); k++)
                     {
-                        if (!err.good()) std::cout << "~~ Oh no! Errors encoutered: ~~" << std::endl;
-                        else if (!err.empty()) std::cout << "~~ Something to keep in mind: ~~" << std::endl;
+                        report_entry entry(a[k], losses[k]);
+                        entry.set_text("Losses in " + a[k].unit().names().front());
+                        report.push_back(entry);
                     }
-                    while (!err.empty())
-                    {
-                        aftermath::quiet_error_descriptor desc = err.pop();
-                        if (is_quiet) continue;
-                        if (do_skip_log && desc.severity() == aftermath::severity_level::not_at_all) continue; // Skip log messages.
-                
-                        std::cout << '\t' <<
-                            " " << std::to_string(desc.severity()) <<
-                            " " << std::to_string(desc.error_code()) <<
-                            " on line " << desc.caller_line_number() <<
-                            " of <" << desc.caller_function_name() << ">: " << desc.description() << std::endl;
-                    }
-                } // unwind_errors(...)
-
-                void unwind_warnings() noexcept
-                {
-                    if (this->m_warnings.empty()) return;
-                    while (!this->m_warnings.empty()) 
-                    {
-                        std::cout << '\t' << this->m_warnings.front() << std::endl;
-                        this->m_warnings.pop_front();
-                    }
-                } // unwind_warnings(...)
+                } // present_losses(...)
 
             private:
-                warnings m_warnings = { };
+                settlers_online::warnings m_warnings = { };
                 army m_left = { };
                 army m_right = { };
 
@@ -124,17 +99,19 @@ namespace ropufu
                     c.read();
                     if (!c.good())
                     {
-                        std::cout << "Failed to read config file." << std::endl;
+                        this->m_warnings.push_back("Failed to read config file.");
                         return;
                     }
 
                     // ~~ Build unit database ~~
                     std::size_t count_units = db.load_from_folder(c.maps_path());
-                    std::cout << "Loaded " << count_units << " units." << std::endl;
+                    this->m_warnings.push_back("Loaded " + std::to_string(count_units) + " units.");
                     this->m_left = { };
                     this->m_right = { };
-                    type::unwind_errors(false);
                 } // reload(...)
+
+                const settlers_online::warnings& warnings() const noexcept { return this->m_warnings; }
+                settlers_online::warnings& warnings() noexcept { return this->m_warnings; }
 
                 const army& left() const noexcept { return this->m_left; }
                 const army& right() const noexcept { return this->m_right; }
@@ -143,32 +120,31 @@ namespace ropufu
                 {
                     army_parser parser = army_string;
                     this->m_left = parser.build(this->m_warnings, true, true, false);
-                    this->unwind_warnings();
                 } // parse_left(...)
 
                 void parse_right(const std::string& army_string) noexcept
                 {
                     army_parser parser = army_string;
                     this->m_right = parser.build(this->m_warnings);
-                    this->unwind_warnings();
                 } // parse_right(...)
 
-                void run(bool is_log = false) noexcept
+                std::vector<report_entry> log() noexcept { return this->run(true); }
+
+                std::vector<report_entry> run(bool is_log = false) noexcept
                 {
-                    type::unwind_errors(false);
-                    this->unwind_warnings();
+                    std::vector<report_entry> report { };
                     
                     const config& c = config::instance();
                     if (this->m_left.count_groups() == 0 || this->m_right.count_groups() == 0)
                     {
-                        std::cout << "Armies (left and right) have to be set prior to execution." << std::endl;
-                        return;
+                        this->m_warnings.push_back("Armies (left and right) have to be set prior to execution.");
+                        return report;
                     }
-
-                    c.left().decorate(this->m_left, this->m_warnings);
-                    this->unwind_warnings();
-                    c.right().decorate(this->m_right, this->m_warnings);
-                    this->unwind_warnings();
+                    
+                    settlers_online::warnings left_decorator_warnings { };
+                    settlers_online::warnings right_decorator_warnings { };
+                    c.left().decorate(this->m_left, left_decorator_warnings);
+                    c.right().decorate(this->m_right, right_decorator_warnings);
                     
                     // ~~ Combat phase ~~
                     ropufu::settlers_online::combat_mechanics combat(this->m_left, this->m_right);
@@ -176,32 +152,37 @@ namespace ropufu
                 
                     //std::cout << "Building left cache..." << std::endl;
                     sequencer_type::pool_type::instance().cache(combat.left().underlying());
-                    unwind_errors(true);
                     //std::cout << "Building right cache..." << std::endl;
                     sequencer_type::pool_type::instance().cache(combat.right().underlying());
-                    unwind_errors(true);
+
+                    auto army_format = [] (const unit_type& u) { return " " + u.names().front(); };
+                    std::string left_army_string = this->m_left.to_string(army_format);
+                    std::string right_army_string = this->m_right.to_string(army_format);
                 
                     // ~~ Choose sequencers ~~
                     sequencer_type left_seq { };
                     sequencer_type right_seq { };
                 
-                    std::cout << this->m_left << " vs. " << this->m_right << std::endl;
+                    report.emplace_back(left_army_string + " vs. " + right_army_string);
                     if (is_log)
                     {
                         combat.set_do_log(true);
                         combat.execute(left_seq, right_seq);
-                        return;
+                        return report;
                     }
                     
                     empirical_measure rounds { };
                     std::vector<empirical_measure> left_losses(this->m_left.count_groups());
+                    std::vector<empirical_measure> right_losses(this->m_right.count_groups());
                     for (std::size_t i = 0; i < c.simulation_count(); ++i)
                     {
                         std::size_t combat_rounds = combat.execute(left_seq, right_seq);
                         //const ropufu::settlers_online::combat_result& result = combat.outcome();
 
                         std::vector<std::size_t> x = combat.left().calculate_losses();
+                        std::vector<std::size_t> y = combat.right().calculate_losses();
                         for (std::size_t k = 0; k < x.size(); k++) left_losses[k].observe(x[k]);
+                        for (std::size_t k = 0; k < y.size(); k++) right_losses[k].observe(y[k]);
                 
                         for (std::size_t j = 0; j < c.destruction_count(); ++j)
                         {
@@ -211,14 +192,18 @@ namespace ropufu
                         combat = snapshot;
                     }
                     
-                    std::cout << "Rounds:" << std::endl << rounds << std::endl;
-                    for (std::size_t k = 0; k < this->m_left.count_groups(); k++)
-                    {
-                        std::cout << "Losses in " << this->m_left[k].unit().names().front() << ":" << std::endl;
-                        std::cout << left_losses[k] << std::endl;
-                    }
+                    report.emplace_back("Rounds", rounds);
+
+                    report.emplace_back("Left army", left_army_string);
+                    if (!left_decorator_warnings.empty()) left_decorator_warnings.unwind([&] (const std::string& w) { report.emplace_back("Skills", w); });
+                    type::present_losses(report, this->m_left, left_losses);
+
+                    report.emplace_back("Right army", left_army_string);
+                    if (!right_decorator_warnings.empty()) right_decorator_warnings.unwind([&] (const std::string& w) { report.emplace_back("Skills", w); });
+                    type::present_losses(report, this->m_right, right_losses);
                 
-                    unwind_errors(false);
+                    c.to_cbor(report);
+                    return report;
                 } // run(...)
             }; // struct turtle
         } // namespace black_marsh

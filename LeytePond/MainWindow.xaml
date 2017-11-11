@@ -1,0 +1,39 @@
+﻿<Window x:Class="Ropufu.LeytePond.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Ropufu.LeytePond"
+        mc:Ignorable="d"
+        Title="Leyte Pond Simulator"
+        Height="{local:SettingsBinding WindowHeight}" Width="{local:SettingsBinding WindowWidth}" 
+        MinHeight="300" MinWidth="600" x:Name="self">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10*" />
+            <ColumnDefinition Width="9*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="60" />
+            <RowDefinition Height="25" />
+        </Grid.RowDefinitions>
+
+        <local:ArmyView Grid.Column="0" x:Name="leftArmyView" DoCheckGenerals="True" DoCoerceFactions="True" IsPlayerArmy="True" />
+        <local:ArmyView Grid.Column="1" x:Name="rightArmyView" />
+
+        <DockPanel Grid.Row="1" Grid.ColumnSpan="2" LastChildFill="False">
+            <TextBlock DockPanel.Dock="Left" Text="Simulations: " Margin="10,1,10,1" VerticalAlignment="Center" />
+            <local:GroupCountUpDown DockPanel.Dock="Left" Value='{local:ConfigBinding CountCombatSims}' VerticalAlignment="Center" Width="80" Margin="0,2,5,2" />
+            <TextBlock DockPanel.Dock="Left" Text="Destruction Passes per Sim: " Margin="10,1,10,1" VerticalAlignment="Center" />
+            <local:GroupCountUpDown DockPanel.Dock="Left" Value='{local:ConfigBinding CountDestructSimsPerCombat}' VerticalAlignment="Center" Width="50" Margin="0,2,5,2" />
+        </DockPanel>
+        
+        <StatusBar Grid.Row="2" Grid.ColumnSpan="2" x:Name="statusBar">
+            <DockPanel LastChildFill="False" Width="{Binding ElementName=statusBar, Path=ActualWidth, Mode=OneWay}">
+                <Button DockPanel.Dock="Left" Style='{StaticResource FolderWarningIcon}' Visibility='{Binding ElementName=self, Path=Warnings.IsNotEmpty, Converter={StaticResource VisibilityConverter}}' Margin="0,0,10,0" Click="WarningsHandler" />
+                <!--<Button DockPanel.Dock="Right" Style='{StaticResource DownloadIcon}' Visibility='{Binding ElementName=self, Path=Warnings.IsNotEmpty, Converter={StaticResource VisibilityConverter}}' Margin="0,0,10,0" Click="UpdateHandler" />-->
+            </DockPanel>
+        </StatusBar>
+    </Grid>
+</Window>

@@ -1,0 +1,75 @@
+﻿<UserControl x:Class="Ropufu.LeytePond.ArmyView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Ropufu.LeytePond"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300"
+             x:Name="self" IsTabStop="False">
+    <UserControl.Resources>
+        <local:GroupSum x:Key="GroupSum" />
+        <local:Warnings x:Key="Warnings" />
+        <Style TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+    </UserControl.Resources>
+    
+    <StackPanel Orientation="Vertical">
+        <!--Text representation-->
+        <DockPanel LastChildFill="True">
+            <Button DockPanel.Dock="Right" Style='{StaticResource KeyWarningIcon}' Visibility='{Binding Source={StaticResource Warnings}, Path=IsNotEmpty, Converter={StaticResource VisibilityConverter}}' Margin="0,10,10,10" Click="WarningsHandler" />
+            <!--Last child-->
+            <TextBox x:Name="armyTextBox" Text='{Binding ElementName=self, Path=ArmyString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}' Margin="10,10,10,10" />
+        </DockPanel>
+        <!--Visual representation-->
+        <ListView x:Name="itemView" BorderThickness="0" KeyboardNavigation.TabNavigation="Cycle" VirtualizingStackPanel.IsVirtualizing="False" d:DataContext='{d:DesignData Source=ArmyDesign.xaml}' ItemsSource='{Binding}'>
+            <ListView.Resources>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="IsTabStop" Value="False" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="ToolTip">
+                        <Setter.Value>
+                            <ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold">
+                                        <TextBlock Foreground="Maroon" Text="{Binding Path=Unit.NamesString}" />
+                                        <TextBlock Text="{Binding Path=Unit.Category}" Margin="10 0 0 0" />
+                                    </TextBlock>
+                                    <TextBlock>Hit points: <TextBlock Text="{Binding Path=Unit.HitPoints}" /></TextBlock>
+                                    <TextBlock>
+                                        Damage: <TextBlock Text="{Binding Path=Unit.Damage.Low}" /> / <TextBlock Text="{Binding Path=Unit.Damage.High}" />
+                                    </TextBlock>
+                                    <TextBlock>Accuracy: <TextBlock Text="{Binding Path=Unit.Damage.Accuracy}" /></TextBlock>
+                                    <TextBlock>Splash chance: <TextBlock Text="{Binding Path=Unit.Damage.SplashChance}" /></TextBlock>
+                                    <TextBlock>Experience: <TextBlock Text="{Binding Path=Unit.Experience}" /></TextBlock>
+                                    <TextBlock Foreground="Maroon">
+                                        Initiative: <TextBlock Text="{Binding Path=Unit.AttackPhasesString}" />
+                                    </TextBlock>
+                                    <TextBlock Foreground="DarkBlue" Text="{Binding Path=Unit.AbilitiesString}" Visibility="{Binding Path=Unit.HasAbilities, Converter={StaticResource VisibilityConverter}}" />
+                                    <TextBlock Foreground="DarkBlue" Text="{Binding Path=Unit.TraitsString}" Visibility="{Binding Path=Unit.HasTraits, Converter={StaticResource VisibilityConverter}}" />
+                                </StackPanel>
+                            </ToolTip>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.Resources>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <DockPanel Margin="5,0,5,0" LastChildFill="True">
+                        <Image DockPanel.Dock="Left" Source='{Binding Path=Unit.FirstName, Converter={StaticResource FaceConverter}}' Height="25" Width="25" Margin="0,1,10,1" />
+                        <local:GroupCountUpDown DockPanel.Dock="Right" Value='{Binding Path=Count, Mode=TwoWay}' IsCoupled='{Binding Path=IsCoupled, Mode=TwoWay}' Constraint='{StaticResource ResourceKey=GroupSum}' VerticalAlignment="Center" Width="50" Margin="0,2,5,2" />
+                        <ContentControl DockPanel.Dock="Right" Style='{StaticResource UnlinkIcon}' Visibility='{Binding Path=IsCoupled, Converter={StaticResource VisibilityConverter}}' Margin="0,1,10,1" />
+                        <!--Last child-->
+                        <TextBlock Text='{Binding Path=Unit.FirstName}' VerticalAlignment="Center" Height="20" />
+                    </DockPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <DockPanel LastChildFill="False">
+            <TextBlock DockPanel.Dock="Right" Text='{Binding Source={StaticResource ResourceKey=GroupSum}, Path=CurrentSum}' Margin="10,1,36,1" />
+            <TextBlock DockPanel.Dock="Right" Text="Total: " Margin="10,1,10,1" />
+        </DockPanel>
+    </StackPanel>
+</UserControl>

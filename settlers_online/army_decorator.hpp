@@ -59,7 +59,7 @@ namespace ropufu
                         skill_names.push_back(std::to_string(skill_pair.first) + " (" + std::to_string(skill_pair.second) + ")");
                         a.set_level(skill_pair.first, skill_pair.second);
                     }
-                    if (!skill_names.empty()) w.push_back("Applying skills: " + char_string::join(skill_names, prefix) + ".");
+                    if (!skill_names.empty()) w.push_back(char_string::join(skill_names, prefix));
                 }
             } // decorate(...)
             

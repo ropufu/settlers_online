@@ -4,6 +4,7 @@
 
 #include <string> // std::string
 #include <deque> // std::deque
+#include <iostream> // std::cout, std::endl
 
 namespace ropufu
 {
@@ -13,6 +14,22 @@ namespace ropufu
         struct warnings : public std::deque<std::string>
         {
             using type = warnings;
+
+            void unwind() noexcept 
+            {
+                this->unwind([] (const std::string& w) { std::cout << '\t' << w << std::endl; });
+            } // unwind(...)
+
+            template <typename t_format_type>
+            void unwind(const t_format_type& format) noexcept
+            {
+                if (this->empty()) return;
+                while (!this->empty()) 
+                {
+                    format(this->front());
+                    this->pop_front();
+                }
+            } // unwind(...)
         }; // struct warnings
     } // namespace settlers_online
 } // namespace ropufu

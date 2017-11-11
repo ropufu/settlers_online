@@ -1,0 +1,35 @@
+﻿<Window x:Class="Ropufu.LeytePond.HelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Ropufu.LeytePond"
+        mc:Ignorable="d"
+        Title="About Lucy" Height="400" Width="600" WindowStyle="ToolWindow" ResizeMode="NoResize">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Consolas" />
+        </Style>
+    </Window.Resources>
+    <StackPanel Orientation="Horizontal">
+        <Image Source="pack://application:,,,/Images/lucy_standing.png" Stretch="Uniform" Margin="10" HorizontalAlignment="Left" />
+        <StackPanel Orientation="Vertical" Margin="10,10,0,0">
+            <TextBlock Text="~~ Main Window ~~" HorizontalAlignment="Center" FontWeight="Bold" />
+            <TextBlock xml:space="preserve">
+F1               -- shows this window.
+Enter            -- start simulation.
+Ctrl + Enter     -- log simulation.
+            </TextBlock>
+            <TextBlock Text="~~ Main Window: Unit Group ~~" HorizontalAlignment="Center" FontWeight="Bold" />
+            <TextBlock xml:space="preserve">
+↑↓, PageUp/Down  -- increase / decrease group count.
+Tab, Shift + Tab -- navigate to next / previous group.
+L                -- link group in a fixed sum block.
+            </TextBlock>
+            <TextBlock Text="~~ Elsewhere ~~" HorizontalAlignment="Center" FontWeight="Bold" />
+            <TextBlock xml:space="preserve">
+Esc              -- close window / tab.
+            </TextBlock>
+        </StackPanel>
+    </StackPanel>
+</Window>

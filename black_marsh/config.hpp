@@ -6,11 +6,14 @@
 
 #include "../settlers_online/army.hpp"
 #include "../settlers_online/army_decorator.hpp"
+#include "../settlers_online/report_entry.hpp"
 #include "../settlers_online/warnings.hpp"
 
+#include <cstdint> // std::uint8_t
 #include <fstream> // std::ifstream, std::ofstream
 #include <iostream> // std::ostream
 #include <string> // std::string
+#include <vector> // std::vector
 
 namespace ropufu
 {
@@ -30,6 +33,7 @@ namespace ropufu
                 bool m_is_good = false;
                 bool m_has_changed = false;
                 std::string m_filename = ""; // Where the configuration was loaded from.
+                std::string m_cbor_filename = "";
                 nlohmann::json m_json = { }; // Raw configuration json.
                 // ~~ Specific properties ~~
                 std::string m_maps_path = "./maps/";
@@ -99,6 +103,11 @@ namespace ropufu
                     try
                     {
                         this->m_filename = filename; // Remember the filename.
+                        // Replace extension with .cbor.
+                        std::size_t index_of_dot = filename.rfind(".");
+                        if (index_of_dot == std::string::npos) this->m_cbor_filename = filename + ".cbor";
+                        else this->m_cbor_filename = filename.substr(0, index_of_dot) + ".cbor";
+
                         i >> this->m_json;
                         this->m_is_good = true;
 
@@ -134,7 +143,7 @@ namespace ropufu
                         this->m_is_good = false;
                         return false;
                     }
-                }
+                } // read(...)
                 
                 /** Write the configuration to a file. */
                 bool write() noexcept { return this->write(this->m_filename); }
@@ -157,7 +166,26 @@ namespace ropufu
                     o << std::setw(4) << this->m_json << std::endl;
                     this->m_has_changed = false;
                     return true;
-                }
+                } // write(...)
+                
+                /** Write .cbor output. */
+                bool to_cbor(const std::vector<report_entry>& entries) const noexcept
+                {
+                    return this->to_cbor(entries, this->m_cbor_filename);
+                } // to_cbor(...)
+
+                /** Write .cbor output. */
+                bool to_cbor(const std::vector<report_entry>& entries, const std::string& cbor_filename) const noexcept
+                {
+                    std::ofstream o(cbor_filename, std::ios::binary); // Try to open the file for writing.
+                    if (!o.good()) return false; // Stop on failure.
+
+                    nlohmann::json j { };
+                    j["report"] = entries;
+                    std::vector<std::uint8_t> v_cbor = nlohmann::json::to_cbor(j);
+                    o.write(reinterpret_cast<char*>(v_cbor.data()), v_cbor.size() * sizeof(std::uint8_t));
+                    return true;
+                } // to_cbor(...)
 
                 /** The only instance of this type. */
                 static type& instance()

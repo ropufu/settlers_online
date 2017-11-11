@@ -2,7 +2,6 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_CHAR_STRING_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_CHAR_STRING_HPP_INCLUDED
 
-#include <algorithm> // std::copy
 #include <cctype> // std::isspace, std::tolower
 #include <cstddef> // std::size_t
 #include <iterator> // std::ostream_iterator
@@ -117,7 +116,13 @@ namespace ropufu
             static std::string join(const std::vector<std::string>& values, const std::string& delimiter) noexcept
             {
                 std::stringstream s { };
-                std::copy(values.begin(), values.end(), std::ostream_iterator<std::string>(s, delimiter.c_str()));
+                bool is_first = true;
+                for (const std::string& x : values)
+                {
+                    if (!is_first) s << delimiter;
+                    s << x;
+                    is_first = false;
+                }
                 return s.str();
             } // join(...)
         }; // struct char_string

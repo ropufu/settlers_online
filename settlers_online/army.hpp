@@ -242,7 +242,8 @@ namespace ropufu
             std::string to_string(const t_format_type& format) const noexcept
             {
                 if (this->m_groups.empty()) return "empty";
-                std::vector<std::string> group_names(this->m_groups.size());
+                std::vector<std::string> group_names { };
+                group_names.reserve(this->m_groups.size());
                 for (const unit_group& g : this->m_groups)
                 {
                     group_names.push_back(std::to_string(g.count()) + format(g.unit()));

@@ -1,0 +1,20 @@
+﻿<UnitGroups xmlns="clr-namespace:Ropufu.LeytePond.Bridge">
+    <UnitGroup Count="10" IsCoupled="True">
+        <UnitGroup.Unit>
+            <UnitType>
+                <UnitType.Names>
+                    Debug Linked
+                </UnitType.Names>
+            </UnitType>
+        </UnitGroup.Unit>
+    </UnitGroup>
+    <UnitGroup Count="1" IsCoupled="False">
+        <UnitGroup.Unit>
+            <UnitType>
+                <UnitType.Names>
+                    Debug not Linked
+                </UnitType.Names>
+            </UnitType>
+        </UnitGroup.Unit>
+    </UnitGroup>
+</UnitGroups>
