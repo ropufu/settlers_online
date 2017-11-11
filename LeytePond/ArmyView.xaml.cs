@@ -61,7 +61,7 @@ namespace Ropufu.LeytePond
         private Boolean doCoerceFactions = false;
         private Boolean isStrict = false;
         private Boolean isPlayerArmy = false;
-        private ArmyParser parser;
+        private ArmyParser parser = new ArmyParser(String.Empty);
         private UnitGroups armySource = new UnitGroups();
         private Boolean doHold = false;
 

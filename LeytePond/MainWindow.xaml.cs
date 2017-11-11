@@ -42,10 +42,12 @@ namespace Ropufu
                         if (!(e.OriginalSource is System.Windows.Controls.ComboBoxItem))
                         {
                             var isLog = (e.KeyboardDevice.Modifiers == ModifierKeys.Control);
-                            this.blackMarsh.Execute(
-                                this.leftArmyView.ToArmy().ToString(), 
-                                this.rightArmyView.ToArmy().ToString(),
-                                isLog);
+                            var leftArmy = this.leftArmyView.ToArmy();
+                            var rightArmy = this.rightArmyView.ToArmy();
+                            if (leftArmy.IsEmpty) break;
+                            if (rightArmy.IsEmpty) break;
+
+                            this.blackMarsh.Execute(leftArmy.ToString(), rightArmy.ToString(), isLog);
                             // MessageBox.Show(this.blackMarsh.Output);
                             new ReportWindow(this.blackMarsh.Report) { Owner = this }.Show();
                             e.Handled = true;
