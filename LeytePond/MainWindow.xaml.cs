@@ -18,6 +18,9 @@ namespace Ropufu
             public MainWindow()
             {
                 this.InitializeComponent();
+
+                this.leftArmyView.Decorator = Bridge.Config.Instance.Left;
+                this.rightArmyView.Decorator = Bridge.Config.Instance.Right;
             }
 
             private void ShowHelp() => new HelpWindow() { Owner = this }.Show();
@@ -42,13 +45,12 @@ namespace Ropufu
                         if (!(e.OriginalSource is System.Windows.Controls.ComboBoxItem))
                         {
                             var isLog = (e.KeyboardDevice.Modifiers == ModifierKeys.Control);
-                            var leftArmy = this.leftArmyView.ToArmy();
-                            var rightArmy = this.rightArmyView.ToArmy();
+                            var leftArmy = this.leftArmyView.Army;
+                            var rightArmy = this.rightArmyView.Army;
                             if (leftArmy.IsEmpty) break;
                             if (rightArmy.IsEmpty) break;
 
                             this.blackMarsh.Execute(leftArmy.ToString(), rightArmy.ToString(), isLog);
-                            // MessageBox.Show(this.blackMarsh.Output);
                             new ReportWindow(this.blackMarsh.Report) { Owner = this }.Show();
                             e.Handled = true;
                         }

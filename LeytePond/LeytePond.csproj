@@ -102,6 +102,8 @@
     <Compile Include="Bridge\black_marsh.cs" />
     <Compile Include="Bridge\config.cs" />
     <Compile Include="Bridge\report.cs" />
+    <Compile Include="Converters\EnumConverter.cs" />
+    <Compile Include="Converters\BattleSkillsConverter.cs" />
     <Compile Include="EmpiricalMeasure.cs" />
     <Compile Include="Bridge\enum_array.cs" />
     <Compile Include="Bridge\JsonConverters.cs" />

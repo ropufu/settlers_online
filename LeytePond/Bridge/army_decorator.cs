@@ -25,7 +25,7 @@ namespace Ropufu.LeytePond.Bridge
             foreach (var pair in this.skills)
             {
                 var isMatch = false;
-                foreach (var g in a.Groups) foreach (var name in g.Unit.Names) if (name == pair.Key) isMatch = true;
+                foreach (var g in a) foreach (var name in g.Unit.Names) if (name == pair.Key) isMatch = true;
                 if (!isMatch) continue;
 
                 var skillStrings = new List<String>();

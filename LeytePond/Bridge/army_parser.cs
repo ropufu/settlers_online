@@ -107,7 +107,7 @@ namespace Ropufu.LeytePond.Bridge
             if (doCoerceFactions)
             {
                 var factions = new HashSet<UnitFaction>();
-                foreach (var g in army.Groups) factions.Add(g.Unit.Faction);
+                foreach (var g in army) factions.Add(g.Unit.Faction);
                 factions.Remove(UnitFaction.General); // Generals do not count.
 
                 var countOptions = 0;

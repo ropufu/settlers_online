@@ -32,11 +32,11 @@ namespace Ropufu.LeytePond.Bridge
             return builder.ToString().Trim();
         }
 
-        public static String ToReadable<TEnum>(this TEnum e) where TEnum : struct, IConvertible
+        public static String ToReadable(this String camelString)
         {
             var builder = new StringBuilder();
             var wasLowercase = false;
-            foreach (var c in e.ToString())
+            foreach (var c in camelString)
             {
                 var isUppercase = Char.IsUpper(c);
                 if (wasLowercase && isUppercase) builder.Append(' ');
@@ -46,6 +46,7 @@ namespace Ropufu.LeytePond.Bridge
             return builder.ToString().Trim();
         }
 
+        public static String ToReadable<TEnum>(this TEnum e) where TEnum : struct, IConvertible => e.ToString().ToReadable();
         public static TEnum CppParse<TEnum>(this String cppString) where TEnum : struct, IConvertible => (TEnum)Enum.Parse(typeof(TEnum), cppString.ToCsharp());
         public static void CppParse<TEnum>(this String cppString, out TEnum e) where TEnum : struct, IConvertible => e = cppString.CppParse<TEnum>();
     }

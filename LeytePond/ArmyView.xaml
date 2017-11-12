@@ -4,12 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Ropufu.LeytePond"
+             xmlns:bridge="clr-namespace:Ropufu.LeytePond.Bridge"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"
              x:Name="self" IsTabStop="False">
     <UserControl.Resources>
         <local:GroupSum x:Key="GroupSum" />
         <local:Warnings x:Key="Warnings" />
+        <bridge:Army x:Key="ArmySource" />
         <Style TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
@@ -68,8 +70,39 @@
         </ListView>
 
         <DockPanel LastChildFill="False">
-            <TextBlock DockPanel.Dock="Right" Text='{Binding Source={StaticResource ResourceKey=GroupSum}, Path=CurrentSum}' Margin="10,1,36,1" />
+            <TextBlock DockPanel.Dock="Left" Margin="10,1,10,1">
+                <TextBlock Text="Capacity: " />
+                <TextBlock Text='{Binding Source={StaticResource ResourceKey=ArmySource}, Path=Capacity}' />
+            </TextBlock>
+            <TextBlock DockPanel.Dock="Right" Text='{Binding Source={StaticResource ResourceKey=ArmySource}, Path=CountUnits}' Margin="10,1,36,1" />
             <TextBlock DockPanel.Dock="Right" Text="Total: " Margin="10,1,10,1" />
         </DockPanel>
+
+        <ItemsControl ItemsSource='{Binding Source={StaticResource ResourceKey=ArmySource}, Path=Skills}'>
+            <ItemsControl.Template>
+                <ControlTemplate TargetType="ItemsControl">
+                    <ItemsPresenter/>
+                </ControlTemplate>
+            </ItemsControl.Template>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="10,10,36,10" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Image DockPanel.Dock="Left" Source='{Binding Converter={StaticResource SkillsConverter}}' Height="16" Width="16" Margin="0,1,10,1">
+                        <Image.ToolTip>
+                            <TextBlock>
+                                <TextBlock Text='{Binding Path=Key, Converter={StaticResource EnumConverter}}' />
+                                <TextBlock Text=" (" />
+                                <TextBlock Text='{Binding Path=Value}' />
+                                <TextBlock Text=")" />
+                            </TextBlock>
+                        </Image.ToolTip>
+                    </Image>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </StackPanel>
 </UserControl>

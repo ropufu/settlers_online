@@ -5,7 +5,9 @@
              xmlns:converters="clr-namespace:Ropufu.LeytePond.Converters"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <converters:EnumConverter x:Key="EnumConverter" />
         <converters:UnitImageConverter x:Key="FaceConverter" />
+        <converters:BattleSkillsConverter x:Key="SkillsConverter" />
         <converters:IsNotEmptyConverter x:Key="NotEmptyConverter" />
         <BooleanToVisibilityConverter x:Key="VisibilityConverter" />
         <Style x:Key="UnlinkIcon" TargetType="ContentControl">

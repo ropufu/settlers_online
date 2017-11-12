@@ -24,6 +24,7 @@ namespace Ropufu.LeytePond
     {
         const String GroupSumKey = "GroupSum";
         const String WarningsKey = "Warnings";
+        const String ArmySourceKey = "ArmySource";
 
         #region Dependency Property: ArmyString
 
@@ -34,8 +35,8 @@ namespace Ropufu.LeytePond
         {
             var sender = (ArmyView)d;
             var newValue = (String)e.NewValue;
-            var warnings = (Warnings)sender.Resources[ArmyView.WarningsKey];
-            warnings.Clear();
+
+            sender.warnings.Clear();
             sender.parser = new ArmyParser(newValue);
             sender.InitializeArmySource();
         }
@@ -44,8 +45,8 @@ namespace Ropufu.LeytePond
         {
             var sender = (ArmyView)d;
             var value = (String)baseValue;
-            if (Object.ReferenceEquals(value, null)) value = String.Empty;
 
+            if (Object.ReferenceEquals(value, null)) value = String.Empty;
             return value;
         }
 
@@ -57,13 +58,25 @@ namespace Ropufu.LeytePond
 
         #endregion
 
+        private readonly GroupSum groupSum = null;
+        private readonly Warnings warnings = null;
+        private readonly Army armySource = null;
+
         private Boolean doCheckGenerals = false;
         private Boolean doCoerceFactions = false;
         private Boolean isStrict = false;
         private Boolean isPlayerArmy = false;
         private ArmyParser parser = new ArmyParser(String.Empty);
-        private UnitGroups armySource = new UnitGroups();
+        private ArmyDecorator decorator = new ArmyDecorator();
         private Boolean doHold = false;
+
+        public Army Army => this.armySource;
+
+        public ArmyDecorator Decorator
+        {
+            get => this.decorator;
+            set => this.decorator = value;
+        }
 
         public Boolean DoCheckGenerals
         {
@@ -89,43 +102,39 @@ namespace Ropufu.LeytePond
             set => this.isPlayerArmy = value;
         }
 
-        public Army ToArmy()
-        {
-            var warnings = (Warnings)this.Resources[ArmyView.WarningsKey];
-            warnings.Clear();
-            return this.parser.Build(warnings, this.doCheckGenerals, this.doCoerceFactions, this.isStrict);
-        }
-
         private void InitializeArmySource()
         {
             if (this.doHold) return;
+            
+            this.warnings.Clear();
+            this.groupSum.ClearChildren();
 
-            var groupSum = (GroupSum)this.Resources[ArmyView.GroupSumKey];
-            groupSum.ClearChildren();
-            this.armySource.Clear();
-            var army = this.ToArmy();
-            foreach (var g in army.Groups) this.armySource.Add(g);
+            var newArmy = this.parser.Build(this.warnings, this.doCheckGenerals, this.doCoerceFactions, this.isStrict);
+            this.decorator?.Decorate(newArmy, new Warnings());
+
+            newArmy.CopyTo(this.armySource);
         }
 
         public ArmyView()
         {
             this.InitializeComponent();
+
+            this.armySource = (Army)this.Resources[ArmyView.ArmySourceKey];
+            this.warnings = (Warnings)this.Resources[ArmyView.WarningsKey];
+            this.groupSum = (GroupSum)this.Resources[ArmyView.GroupSumKey];
+
+            this.groupSum.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(GroupSum.Children))
+                {
+                    this.doHold = true;
+                    this.ArmyString = this.isPlayerArmy ? this.armySource.ToCompactString() : this.armySource.ToString();
+                    this.doHold = false;
+                }
+            };
+
             this.itemView.Items.Clear();
             this.itemView.ItemsSource = this.armySource;
-
-            var groupSum = (GroupSum)this.Resources[ArmyView.GroupSumKey];
-            groupSum.PropertyChanged += this.OnGroupSumChanged;
-        }
-
-        private void OnGroupSumChanged(Object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(GroupSum.Children))
-            {
-                this.doHold = true;
-                var army = new Army(armySource);
-                this.ArmyString = this.isPlayerArmy ? army.ToCompactString() : army.ToString();
-                this.doHold = false;
-            }
         }
 
         public void ToggleLink()
@@ -141,11 +150,7 @@ namespace Ropufu.LeytePond
             }
         }
 
-        private void WarningsHandler(Object sender, RoutedEventArgs e)
-        {
-            var warnings = (Warnings)this.Resources[ArmyView.WarningsKey];
-            warnings.Unwind();
-        }
+        private void WarningsHandler(Object sender, RoutedEventArgs e) => this.warnings.Unwind();
 
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
@@ -159,6 +164,13 @@ namespace Ropufu.LeytePond
                             this.ToggleLink();
                             e.Handled = true;
                         }
+                    }
+                    break;
+                case Key.V:
+                    if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
+                    {
+                        this.ArmyString = Clipboard.GetText();
+                        e.Handled = true;
                     }
                     break;
             }

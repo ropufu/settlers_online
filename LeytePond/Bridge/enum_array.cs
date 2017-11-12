@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 
 namespace Ropufu.LeytePond.Bridge
 {
     /** Mirrors structural behavior of \c enum_array.hpp. */
-    public class EnumArray<TEnum, TValue> : IEnumerable<KeyValuePair<TEnum, TValue>>
+    public class EnumArray<TEnum, TValue> : IEnumerable<KeyValuePair<TEnum, TValue>>, INotifyCollectionChanged
         where TEnum : struct, IConvertible
         where TValue : IComparable<TValue>
     {
@@ -26,9 +27,17 @@ namespace Ropufu.LeytePond.Bridge
 
             public Boolean MoveNext()
             {
-                if (this.position == keys.Length - 1) return false;
-                ++this.position;
-                return true;
+                while (this.position < keys.Length)
+                {
+                    ++this.position;
+                    if (this.position == keys.Length) return false;
+
+                    var value = this.collection.values[this.position];
+                    if (Object.ReferenceEquals(value, null)) continue;
+                    if (value.CompareTo(default(TValue)) == 0) continue;
+                    return true;
+                }
+                return false;
             }
 
             public void Reset() => this.position = -1;
@@ -68,11 +77,30 @@ namespace Ropufu.LeytePond.Bridge
 
         private TValue[] values = new TValue[keys.Length];
 
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+        private void NotifyReset() => this.CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+
         public EnumArray()
         {
             if (!typeof(TEnum).IsEnum) throw new TypeInitializationException(typeof(TEnum).FullName, null);
 
             this.values.Initialize();
+        }
+
+        public EnumArray(EnumArray<TEnum, TValue> other)
+        {
+            if (!typeof(TEnum).IsEnum) throw new TypeInitializationException(typeof(TEnum).FullName, null);
+            if (Object.ReferenceEquals(other, null)) throw new ArgumentNullException(nameof(other));
+
+            other.values.CopyTo(this.values, 0);
+        }
+
+        public void CopyTo(EnumArray<TEnum, TValue> other)
+        {
+            if (Object.ReferenceEquals(other, null)) throw new ArgumentNullException(nameof(other));
+            this.values.CopyTo(other.values, 0);
+            other.NotifyReset();
         }
 
         public EnumArray(Dictionary<TEnum, TValue> map)
@@ -102,10 +130,18 @@ namespace Ropufu.LeytePond.Bridge
         public TValue this[TEnum key]
         {
             get => this.values[lookup[key]];
-            set => this.values[lookup[key]] = value;
+            set
+            {
+                this.values[lookup[key]] = value;
+                this.NotifyReset();
+            }
         }
 
-        public void Initialize() => this.values.Initialize();
+        public void Initialize()
+        {
+            this.values.Initialize();
+            this.NotifyReset();
+        }
 
         public override String ToString()
         {

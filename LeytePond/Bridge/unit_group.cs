@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ropufu.LeytePond.Bridge
 {
-    public class UnitGroups : ObservableCollection<UnitGroup> { }
-
     /** Minimal behavior of \c unit_group.hpp with extra bells and whistles for GUI. */
     public class UnitGroup : IComparable<UnitGroup>, INotifyPropertyChanged
     {
