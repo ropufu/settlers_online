@@ -198,7 +198,7 @@ namespace ropufu
                     if (!left_decorator_warnings.empty()) left_decorator_warnings.unwind([&] (const std::string& w) { report.emplace_back("Skills", w); });
                     type::present_losses(report, this->m_left, left_losses);
 
-                    report.emplace_back("Right army", left_army_string);
+                    report.emplace_back("Right army", right_army_string);
                     if (!right_decorator_warnings.empty()) right_decorator_warnings.unwind([&] (const std::string& w) { report.emplace_back("Skills", w); });
                     type::present_losses(report, this->m_right, right_losses);
                 
