@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ropufu.LeytePond.Bridge;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,5 +34,8 @@ namespace Ropufu.LeytePond
             var count = VisualTreeHelper.GetChildrenCount(item);
             for (var i = 0; i < count; i++) VisualTreeHelper.GetChild(item, i).ForVisualChildren(predicate, action);
         }
+
+        public static Boolean IsNull<T>(this T item) => Object.ReferenceEquals(item, null);
+        //public static Boolean Is<T>(this T item, Type type) => Object.ReferenceEquals(item.GetType(), type);
     }
 }

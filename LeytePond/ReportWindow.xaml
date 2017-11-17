@@ -28,7 +28,11 @@
                 <ListView.Resources>
                     <!--<SolidColorBrush x:Key="{x:Static SystemColors.InfoBrush}" Color="Transparent" />-->
                     <ContextMenu x:Key="ItemContextMenu">
-                        <MenuItem Header="_Histogram" Click="HistogramClickHandler" IsEnabled='{Binding Path=HasNonDegenerateHistogram}' Icon="{StaticResource HistogramIcon}" />
+                        <MenuItem Header="_Histogram" Click="HistogramClickHandler" IsEnabled='{Binding Path=HasNonDegenerateHistogram}'>
+                            <MenuItem.Icon>
+                                <ContentControl Style='{StaticResource HistogramIcon}' />
+                            </MenuItem.Icon>
+                        </MenuItem>
                     </ContextMenu>
                     <ControlTemplate x:Key="DefaultItem" TargetType="{x:Type ListViewItem}">
                         <Border x:Name="rowBorder" Style="{StaticResource InactiveGridViewBorderStyle}">

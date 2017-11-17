@@ -31,8 +31,14 @@
         
         <StatusBar Grid.Row="2" Grid.ColumnSpan="2" x:Name="statusBar">
             <DockPanel LastChildFill="False" Width="{Binding ElementName=statusBar, Path=ActualWidth, Mode=OneWay}">
-                <Button DockPanel.Dock="Left" Style='{StaticResource FolderWarningIcon}' Visibility='{Binding ElementName=self, Path=Warnings.IsNotEmpty, Converter={StaticResource VisibilityConverter}}' Margin="0,0,10,0" Click="WarningsHandler" />
-                <!--<Button DockPanel.Dock="Right" Style='{StaticResource DownloadIcon}' Visibility='{Binding ElementName=self, Path=Warnings.IsNotEmpty, Converter={StaticResource VisibilityConverter}}' Margin="0,0,10,0" Click="UpdateHandler" />-->
+                <Button DockPanel.Dock="Left" Style='{StaticResource FolderWarningIcon}' Visibility='{Binding ElementName=self, Path=Warnings.IsNotEmpty, Converter={StaticResource VisibilityConverter}}' ToolTip="Warnings" Margin="5,0,10,0" Click="WarningsHandler" />
+                <!--Right-->
+                <Control DockPanel.Dock="Right" Margin="0,0,10,0" />
+                <TextBlock DockPanel.Dock="Right">
+                    Loaded <TextBlock Text='{local:UnitDatabaseBinding Count}' /> units.
+                </TextBlock>
+                <Separator DockPanel.Dock="Right" Width="20" Margin="10,0,10,0" />
+                <!--<Button DockPanel.Dock="Right" Style='{StaticResource DownloadIcon}' Visibility='{Binding ElementName=self, Path=Warnings.IsNotEmpty, Converter={StaticResource VisibilityConverter}}' ToolTip="Updates available" Margin="0,0,10,0" Click="UpdateHandler" />-->
             </DockPanel>
         </StatusBar>
     </Grid>

@@ -6,11 +6,36 @@ using System.Collections.Specialized;
 namespace Ropufu.LeytePond.Bridge
 {
     /** Mirrors structural behavior of \c enum_array.hpp. */
-    public class EnumArray<TEnum, TValue> : IEnumerable<KeyValuePair<TEnum, TValue>>, INotifyCollectionChanged
+    public class EnumArray<TEnum, TValue> : IEnumerable<EnumArray<TEnum, TValue>.EnumArrayItem>, INotifyCollectionChanged
         where TEnum : struct, IConvertible
         where TValue : IComparable<TValue>
     {
-        public sealed class Enumerator : IEnumerator<KeyValuePair<TEnum, TValue>>
+        public sealed class EnumArrayItem
+        {
+            private EnumArray<TEnum, TValue> collection = null;
+            private Int32 position = -1;
+
+            public EnumArrayItem(EnumArray<TEnum, TValue> collection, Int32 position)
+            {
+                if (collection.IsNull()) throw new ArgumentNullException(nameof(collection));
+                this.collection = collection;
+                this.position = position;
+            }
+
+            public TEnum Key => keys[this.position];
+
+            public TValue Value
+            {
+                get => this.collection.values[this.position];
+                set
+                {
+                    this.collection.values[this.position] = value;
+                    this.collection.NotifyReset();
+                }
+            }
+        }
+
+        public sealed class Enumerator : IEnumerator<EnumArrayItem>
         {
             private Int32 position = -1;
             private EnumArray<TEnum, TValue> collection = null;
@@ -21,7 +46,7 @@ namespace Ropufu.LeytePond.Bridge
                 this.collection = collection;
             }
 
-            public KeyValuePair<TEnum, TValue> Current => new KeyValuePair<TEnum, TValue>(keys[this.position], this.collection.values[this.position]);
+            public EnumArrayItem Current => new EnumArrayItem(this.collection, this.position);
 
             Object IEnumerator.Current => this.Current;
 
@@ -31,6 +56,7 @@ namespace Ropufu.LeytePond.Bridge
                 {
                     ++this.position;
                     if (this.position == keys.Length) return false;
+                    if (!this.collection.doSkipDefault) return true;
 
                     var value = this.collection.values[this.position];
                     if (Object.ReferenceEquals(value, null)) continue;
@@ -75,6 +101,7 @@ namespace Ropufu.LeytePond.Bridge
             }
         }
 
+        private Boolean doSkipDefault = false;
         private TValue[] values = new TValue[keys.Length];
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
@@ -84,7 +111,7 @@ namespace Ropufu.LeytePond.Bridge
         public EnumArray()
         {
             if (!typeof(TEnum).IsEnum) throw new TypeInitializationException(typeof(TEnum).FullName, null);
-
+            
             this.values.Initialize();
         }
 
@@ -93,12 +120,15 @@ namespace Ropufu.LeytePond.Bridge
             if (!typeof(TEnum).IsEnum) throw new TypeInitializationException(typeof(TEnum).FullName, null);
             if (Object.ReferenceEquals(other, null)) throw new ArgumentNullException(nameof(other));
 
+            this.doSkipDefault = other.doSkipDefault;
             other.values.CopyTo(this.values, 0);
         }
 
         public void CopyTo(EnumArray<TEnum, TValue> other)
         {
             if (Object.ReferenceEquals(other, null)) throw new ArgumentNullException(nameof(other));
+
+            other.doSkipDefault = this.doSkipDefault;
             this.values.CopyTo(other.values, 0);
             other.NotifyReset();
         }
@@ -125,6 +155,27 @@ namespace Ropufu.LeytePond.Bridge
                 result[pair.Key.CppParse<TEnum>()] = pair.Value;
             }
             return result;
+        }
+
+        public Boolean IsEmpty
+        {
+            get
+            {
+                var x = default(TValue);
+                foreach (var value in this.values)
+                {
+                    if (value.IsNull()) continue;
+                    if (value.CompareTo(x) == 0) continue;
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        public Boolean DoSkipDefault
+        {
+            get => this.doSkipDefault;
+            set => this.doSkipDefault = value;
         }
 
         public TValue this[TEnum key]
@@ -169,7 +220,7 @@ namespace Ropufu.LeytePond.Bridge
             return result;
         }
 
-        public IEnumerator<KeyValuePair<TEnum, TValue>> GetEnumerator() => new Enumerator(this);
+        public IEnumerator<EnumArrayItem> GetEnumerator() => new Enumerator(this);
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }

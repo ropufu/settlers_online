@@ -153,6 +153,10 @@ namespace Ropufu.LeytePond.Bridge
                 config.isGood = true;
                 config.fileName = path;
                 Config.instance = config;
+                config.left.Listen();
+                config.right.Listen();
+                config.left.PropertyChanged += (s, e) => { config.Write(); };
+                config.right.PropertyChanged += (s, e) => { config.Write(); };
             }
             catch (JsonReaderException)
             {

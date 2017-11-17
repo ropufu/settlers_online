@@ -164,6 +164,12 @@ namespace Ropufu.LeytePond.Bridge
         public Boolean Has(UnitCategory category) => this.Has(u => u.Category == category);
         public Boolean Has(BattleTrait trait) => this.traits.Contains(trait);
 
+        public Boolean DoSkipEmptySkills
+        {
+            get => this.skills.DoSkipDefault;
+            set => this.skills.DoSkipDefault = value;
+        }
+
         public Camp Camp
         {
             get => this.camp;

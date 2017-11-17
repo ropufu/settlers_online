@@ -11,7 +11,7 @@
     <UserControl.Resources>
         <local:GroupSum x:Key="GroupSum" />
         <local:Warnings x:Key="Warnings" />
-        <bridge:Army x:Key="ArmySource" />
+        <bridge:Army x:Key="ArmySource" DoSkipEmptySkills="True" />
         <Style TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
@@ -20,9 +20,10 @@
     <StackPanel Orientation="Vertical">
         <!--Text representation-->
         <DockPanel LastChildFill="True">
+            <Button DockPanel.Dock="Left" Style='{StaticResource LibraryIcon}' ToolTip="Skills" Click="SkillsHandler" Margin="5,0,0,0" Padding="5" />
             <Button DockPanel.Dock="Right" Style='{StaticResource KeyWarningIcon}' Visibility='{Binding Source={StaticResource Warnings}, Path=IsNotEmpty, Converter={StaticResource VisibilityConverter}}' Margin="0,10,10,10" Click="WarningsHandler" />
             <!--Last child-->
-            <TextBox x:Name="armyTextBox" Text='{Binding ElementName=self, Path=ArmyString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}' Margin="10,10,10,10" />
+            <TextBox x:Name="armyTextBox" Text='{Binding ElementName=self, Path=ArmyString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}' Margin="5,10,10,10" />
         </DockPanel>
         <!--Visual representation-->
         <ListView x:Name="itemView" BorderThickness="0" KeyboardNavigation.TabNavigation="Cycle" VirtualizingStackPanel.IsVirtualizing="False" d:DataContext='{d:DesignData Source=ArmyDesign.xaml}' ItemsSource='{Binding}'>

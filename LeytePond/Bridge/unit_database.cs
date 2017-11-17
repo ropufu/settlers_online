@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Ropufu.LeytePond.Bridge
@@ -119,9 +120,13 @@ namespace Ropufu.LeytePond.Bridge
             this.misspelledLookup.Clear();
         }
 
-        public IEnumerable<UnitType> Units { get => this.database.Values; }
+        public IEnumerable<UnitType> Generals => from pair in this.database where pair.Value.Is(UnitFaction.General) select pair.Value;
 
-        public UnitType this[String key] { get => this.database[key]; }
+        public Int32 Count => this.database.Count;
+
+        public IEnumerable<UnitType> Units => this.database.Values;
+
+        public UnitType this[String key] => this.database[key];
 
         public Boolean TryFind(String query, ref UnitType unit, Func<UnitType, Boolean> filter = null)
         {

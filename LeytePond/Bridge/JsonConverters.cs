@@ -82,7 +82,7 @@ namespace Ropufu.LeytePond.Bridge
                 {
                     case "none":
                     case "empty":
-                        return new Dictionary<String, EnumArray<BattleSkill, Int32>>();
+                        return new SkillMap();
                 }
                 throw new ArgumentOutOfRangeException();
             }
@@ -90,12 +90,12 @@ namespace Ropufu.LeytePond.Bridge
             {
                 var json = JObject.Load(reader);
                 var dictionary = new Dictionary<String, Dictionary<String, Int32>>();
-                var map = new Dictionary<String, EnumArray<BattleSkill, Int32>>();
+                var map = new SkillMap();
                 serializer.Populate(json.CreateReader(), dictionary);
 
                 foreach (var entry in dictionary)
                 {
-                    if (map.ContainsKey(entry.Key)) throw new ArgumentException();
+                    if (map.Contains(entry.Key)) throw new ArgumentException();
                     var e = EnumArray<BattleSkill, Int32>.Parse(entry.Value);
                     map.Add(entry.Key, e);
                 }
@@ -110,9 +110,9 @@ namespace Ropufu.LeytePond.Bridge
         public override void WriteJson(JsonWriter writer, Object value, JsonSerializer serializer)
         {
             if (Object.ReferenceEquals(value, null)) throw new ArgumentNullException(nameof(value));
-            if (!value.GetType().Equals(typeof(Dictionary<String, EnumArray<BattleSkill, Int32>>))) throw new ArgumentException();
+            if (!value.GetType().Equals(typeof(SkillMap))) throw new ArgumentException();
 
-            var map = (Dictionary<String, EnumArray<BattleSkill, Int32>>)value;
+            var map = (SkillMap)value;
             var dictionary = new Dictionary<String, Dictionary<String, Int32>>();
             if (map.Count == 0) writer.WriteValue("none");
             else
@@ -120,6 +120,7 @@ namespace Ropufu.LeytePond.Bridge
                 var json = new JObject();
                 foreach (var pair in map)
                 {
+                    if (pair.Value.IsEmpty) continue;
                     var arrayJson = new JObject();
                     foreach (var x in pair.Value) if (x.Value != 0) arrayJson.Add(x.Key.ToString().ToCpp(), JToken.FromObject(x.Value));
                     json.Add(pair.Key, JToken.FromObject(arrayJson, serializer));

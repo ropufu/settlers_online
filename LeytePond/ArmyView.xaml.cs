@@ -111,6 +111,7 @@ namespace Ropufu.LeytePond
 
             var newArmy = this.parser.Build(this.warnings, this.doCheckGenerals, this.doCoerceFactions, this.isStrict);
             this.decorator?.Decorate(newArmy, new Warnings());
+            newArmy.Skills.DoSkipDefault = true;
 
             newArmy.CopyTo(this.armySource);
         }
@@ -150,7 +151,17 @@ namespace Ropufu.LeytePond
             }
         }
 
+        private void ShowSkills()
+        {
+            var general = default(UnitType);
+            foreach (var g in this.armySource) if (g.Unit.Is(UnitFaction.General)) general = g.Unit;
+
+            new SkillsWindow(this.decorator, general) { Owner = App.Current.MainWindow }.ShowDialog();
+        }
+
         private void WarningsHandler(Object sender, RoutedEventArgs e) => this.warnings.Unwind();
+
+        private void SkillsHandler(Object sender, RoutedEventArgs e) => this.ShowSkills();
 
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {

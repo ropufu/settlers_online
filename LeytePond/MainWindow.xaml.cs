@@ -23,7 +23,12 @@ namespace Ropufu
                 this.rightArmyView.Decorator = Bridge.Config.Instance.Right;
             }
 
-            private void ShowHelp() => new HelpWindow() { Owner = this }.Show();
+            private void ShowHelp() => new HelpWindow() { Owner = this }.ShowDialog();
+
+            private void DownloadUpdates()
+            {
+                /** @todo Use Github API to update \c ./maps and \c ./faces. */
+            }
 
             public Warnings Warnings => App.Warnings;
 
@@ -59,15 +64,9 @@ namespace Ropufu
                 base.OnPreviewKeyDown(e);
             }
 
-            private void WarningsHandler(Object sender, RoutedEventArgs e)
-            {
-                App.Warnings.Unwind(this);
-            }
+            private void WarningsHandler(Object sender, RoutedEventArgs e) => App.Warnings.Unwind(this);
 
-            private void UpdateHandler(Object sender, RoutedEventArgs e)
-            {
-                /** @todo Use Github API to update \c ./maps and \c ./faces. */
-            }
+            private void UpdateHandler(Object sender, RoutedEventArgs e) => this.DownloadUpdates();
         }
     }
 }

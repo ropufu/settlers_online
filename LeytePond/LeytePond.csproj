@@ -102,6 +102,10 @@
     <Compile Include="Bridge\black_marsh.cs" />
     <Compile Include="Bridge\config.cs" />
     <Compile Include="Bridge\report.cs" />
+    <Compile Include="SkillsWindow.xaml.cs">
+      <DependentUpon>SkillsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UnitDatabaseBindingExtension.cs" />
     <Compile Include="Converters\EnumConverter.cs" />
     <Compile Include="Converters\BattleSkillsConverter.cs" />
     <Compile Include="EmpiricalMeasure.cs" />
@@ -158,6 +162,10 @@
     <Page Include="ReportWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SkillsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
