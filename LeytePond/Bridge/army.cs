@@ -217,9 +217,10 @@ namespace Ropufu.LeytePond.Bridge
         {
             get
             {
+                var cap = new Func<UnitType, Int32>(u => (u.Capacity == 0 ? 0 : (u.Capacity + 1)));
                 var bonus = 5 * this.skills[BattleSkill.GarrisonAnnex];
                 var capacity = 0;
-                foreach (var g in this.groups) capacity += (g.Count * g.Unit.Capacity);
+                foreach (var g in this.groups) capacity += (g.Count * cap(g.Unit));
                 return capacity + bonus;
             }
         }

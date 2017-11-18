@@ -180,7 +180,7 @@ namespace Ropufu.LeytePond
                 case Key.V:
                     if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
                     {
-                        this.ArmyString = Clipboard.GetText();
+                        this.ArmyString = Clipboard.GetText().DeepTrim();
                         e.Handled = true;
                     }
                     break;

@@ -203,7 +203,7 @@ namespace ropufu
                 if (!quiet_json::optional(j, "low", low)) return;
                 if (!quiet_json::optional(j, "high", high)) return;
                 if (!quiet_json::optional(j, "accuracy", accuracy)) return;
-                if (!quiet_json::optional(j, "splash_chance", splash_chance)) return;
+                if (!quiet_json::optional(j, "splash chance", splash_chance)) return;
                 
                 // Reconstruct the object.
                 x.reset(low, high, accuracy, splash_chance);
