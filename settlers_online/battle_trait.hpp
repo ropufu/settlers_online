@@ -46,7 +46,7 @@ namespace ropufu
                     case battle_trait::none: return "none";
                     case battle_trait::dazzle: return "dazzle";
                     case battle_trait::intercept: return "intercept";
-                    case battle_trait::explosive_ammunition: return "explosive_ammunition";
+                    case battle_trait::explosive_ammunition: return "explosive ammunition";
                     default: return std::to_string(static_cast<std::size_t>(from));
                 }
             } // to(...)

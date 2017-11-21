@@ -23,6 +23,16 @@ namespace ropufu
         {
             using type = report_entry;
             using empirical_measure = aftermath::probability::empirical_measure<std::size_t, std::size_t, double>;
+            // ~~ Json names ~~
+            static constexpr char is_header_name[] = "header";
+            static constexpr char caption_name[] = "caption";
+            static constexpr char details_name[] = "details";
+            static constexpr char clipboard_text_name[] = "clipboard text";
+            static constexpr char unit_name_name[] = "unit name"; // orz
+            static constexpr char lower_bound_name[] = "lower bound";
+            static constexpr char upper_bound_name[] = "upper bound";
+            static constexpr char observed_values_name[] = "observed values";
+            static constexpr char observed_counts_name[] = "observed counts";
 
         private:
             bool m_is_header = false;
@@ -93,26 +103,30 @@ namespace ropufu
         
         void to_json(nlohmann::json& j, const report_entry& x) noexcept
         {
-            j["header"] = x.is_header();
-            j["caption"] = x.caption();
-            if (!x.details().empty()) j["details"] = x.details();
-            if (!x.clipboard_text().empty()) j["clipboard text"] = x.clipboard_text();
-            if (!x.unit_name().empty()) j["unit name"] = x.unit_name();
-            if (x.has_lower_bound()) j["lower bound"] = x.lower_bound();
-            if (x.has_upper_bound()) j["upper bound"] = x.upper_bound();
+            using type = report_entry;
+
+            j[type::is_header_name] = x.is_header();
+            j[type::caption_name] = x.caption();
+            if (!x.details().empty()) j[type::details_name] = x.details();
+            if (!x.clipboard_text().empty()) j[type::clipboard_text_name] = x.clipboard_text();
+            if (!x.unit_name().empty()) j[type::unit_name_name] = x.unit_name();
+            if (x.has_lower_bound()) j[type::lower_bound_name] = x.lower_bound();
+            if (x.has_upper_bound()) j[type::upper_bound_name] = x.upper_bound();
             if (!x.observations().empty())
             {
                 std::size_t size = x.observations().data().size();
                 std::vector<std::size_t> values(size);
                 std::vector<std::size_t> counts(size);
                 x.observations().copy_to(values.data(), counts.data());
-                j["observed values"] = values;
-                j["observed counts"] = counts;
+                j[type::observed_values_name] = values;
+                j[type::observed_counts_name] = counts;
             }
         } // to_json(...)
     
         void from_json(const nlohmann::json& j, report_entry& x) noexcept
         {
+            using type = report_entry;
+
             // Populate default values.
             bool is_header = x.is_header();
             std::string caption = x.caption();
@@ -128,29 +142,29 @@ namespace ropufu
             std::vector<std::size_t> counts = { };
 
             // Parse json entries.
-            if (!quiet_json::required(j, "header", is_header)) return;
-            if (!quiet_json::required(j, "caption", caption)) return;
-            if (!quiet_json::optional(j, "details", details)) return;
-            if (!quiet_json::optional(j, "clipboard text", clipboard_text)) return;
-            if (!quiet_json::optional(j, "unit name", unit_name)) return;
-            if (!quiet_json::is_missing(j, "lower bound"))
+            if (!quiet_json::required(j, type::is_header_name, is_header)) return;
+            if (!quiet_json::required(j, type::caption_name, caption)) return;
+            if (!quiet_json::optional(j, type::details_name, details)) return;
+            if (!quiet_json::optional(j, type::clipboard_text_name, clipboard_text)) return;
+            if (!quiet_json::optional(j, type::unit_name_name, unit_name)) return;
+            if (!quiet_json::is_missing(j, type::lower_bound_name))
             {
-                if (!j["lower bound"].is_null())
+                if (!j[type::lower_bound_name].is_null())
                 {
                     has_lower_bound = true;
-                    quiet_json::required(j, "lower bound", lower_bound);
+                    quiet_json::required(j, type::lower_bound_name, lower_bound);
                 }
             }
-            if (!quiet_json::is_missing(j, "upper bound"))
+            if (!quiet_json::is_missing(j, type::upper_bound_name))
             {
-                if (!j["upper bound"].is_null())
+                if (!j[type::upper_bound_name].is_null())
                 {
                     has_upper_bound = true;
-                    quiet_json::required(j, "upper bound", upper_bound);
+                    quiet_json::required(j, type::upper_bound_name, upper_bound);
                 }
             }
-            if (!quiet_json::optional(j, "observed values", values)) return;
-            if (!quiet_json::optional(j, "observed counts", counts)) return;
+            if (!quiet_json::optional(j, type::observed_values_name, values)) return;
+            if (!quiet_json::optional(j, type::observed_counts_name, counts)) return;
             if (values.size() != counts.size())
             {
                 aftermath::quiet_error::instance().push(

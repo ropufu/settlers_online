@@ -31,6 +31,18 @@ namespace ropufu
         struct unit_type
         {
             using type = unit_type;
+            // ~~ Json names ~~
+            static constexpr char id_name[] = "id";
+            static constexpr char names_name[] = "names"; // orz
+            static constexpr char faction_name[] = "faction";
+            static constexpr char category_name[] = "category";
+            static constexpr char attack_phases_name[] = "phases";
+            static constexpr char capacity_name[] = "capacity";
+            static constexpr char hit_points_name[] = "hit points";
+            static constexpr char damage_name[] = "damage";
+            static constexpr char experience_name[] = "experience when killed";
+            static constexpr char abilities_name[] = "special abilities";
+            static constexpr char traits_name[] = "traits";
 
         private:
             // When a unit attacks an enemy army, there are two types of attack order.
@@ -38,17 +50,17 @@ namespace ropufu
             // Alternative is (smallest hit points -- ... -- highest hit points) (not weak, smallest id -- ... -- not weak, highest id).
             std::size_t m_id = 0; // Used for attack order.
             std::vector<std::string> m_names = { "" };   // Names.
-            flags_t<battle_phase> m_attack_phases = { }; // Determines phases (sub-rounds) when the unit attacks within each round.
-            flags_t<special_ability> m_abilities = { };  // Special abilities.
-            flags_t<battle_trait> m_traits = { };        // Special traits that affect the entire battle.
-            
             unit_faction m_faction = unit_faction::non_player_adventure; // Unit faction.
             unit_category m_category = unit_category::unknown; // Unit category.
-            std::size_t m_experience = 0;  // Experience gained by murderer when the unit is killed.
-            std::size_t m_capacity = 0;    // The number of units this one can lead (typically used for "generals").
+            flags_t<battle_phase> m_attack_phases = { }; // Determines phases (sub-rounds) when the unit attacks within each round.
 
+            std::size_t m_capacity = 0;    // The number of units this one can lead (typically used for "generals").
             std::size_t m_hit_points = 0;  // Health.
             detail::damage m_damage = { }; // Damage.
+            std::size_t m_experience = 0;  // Experience gained by murderer when the unit is killed.
+
+            flags_t<special_ability> m_abilities = { };  // Special abilities.
+            flags_t<battle_trait> m_traits = { };        // Special traits that affect the entire battle.
 
         public:
             /** Default constructor intended for initializing arrays etc. */
@@ -183,6 +195,8 @@ namespace ropufu
 
         void to_json(nlohmann::json& j, const unit_type& x) noexcept
         {
+            using type = unit_type;
+
             std::vector<std::string> attack_phases { };
             std::vector<std::string> abilities { };
             std::vector<std::string> traits { };
@@ -192,23 +206,25 @@ namespace ropufu
             for (battle_trait trait : x.traits()) traits.push_back(std::to_string(trait));
 
             j = nlohmann::json{
-                {"id", x.id()},
-                {"names", x.names()},
-                {"faction", std::to_string(x.faction())},
-                {"category", std::to_string(x.category())},
-                {"phases", attack_phases},
-                {"capacity", x.capacity()},
-                {"hit points", x.hit_points()},
-                {"damage", x.damage()},
-                {"experience when killed", x.experience()}
+                {type::id_name, x.id()},
+                {type::names_name, x.names()},
+                {type::faction_name, std::to_string(x.faction())},
+                {type::category_name, std::to_string(x.category())},
+                {type::attack_phases_name, attack_phases},
+                {type::capacity_name, x.capacity()},
+                {type::hit_points_name, x.hit_points()},
+                {type::damage_name, x.damage()},
+                {type::experience_name, x.experience()}
             };
 
-            if (!abilities.empty()) j["special abilities"] = abilities;
-            if (!traits.empty()) j["traits"] = traits;
+            if (!abilities.empty()) j[type::abilities_name] = abilities;
+            if (!traits.empty()) j[type::traits_name] = traits;
         } // to_json(...)
     
         void from_json(const nlohmann::json& j, unit_type& x) noexcept
         {
+            using type = unit_type;
+
             // Populate default values.
             std::size_t id = x.id(); // required
             std::vector<std::string> names = x.names(); // required
@@ -226,15 +242,15 @@ namespace ropufu
             std::string category_str = std::to_string(category);
 
             // Parse json entries.
-            if (!quiet_json::required(j, "id", id)) return;
-            if (!quiet_json::required(j, "names", names)) return;
-            if (!quiet_json::optional(j, "faction", faction_str)) return;
-            if (!quiet_json::optional(j, "category", category_str)) return;
-            if (!quiet_json::optional(j, "capacity", capacity)) return;
-            if (!quiet_json::required(j, "hit points", hit_points)) return;
-            if (quiet_json::is_missing(j, "damage")) return;
-            damage = j["damage"];
-            if (!quiet_json::optional(j, "experience when killed", experience)) return;
+            if (!quiet_json::required(j, type::id_name, id)) return;
+            if (!quiet_json::required(j, type::names_name, names)) return;
+            if (!quiet_json::optional(j, type::faction_name, faction_str)) return;
+            if (!quiet_json::optional(j, type::category_name, category_str)) return;
+            if (!quiet_json::optional(j, type::capacity_name, capacity)) return;
+            if (!quiet_json::required(j, type::hit_points_name, hit_points)) return;
+            if (quiet_json::is_missing(j, type::damage_name)) return;
+            damage = j[type::damage_name];
+            if (!quiet_json::optional(j, type::experience_name, experience)) return;
 
             // Custom structures.
             if (!settlers_online::try_parse_str(faction_str, faction))
@@ -253,10 +269,10 @@ namespace ropufu
                     std::string("Category unrecognized: ") + category_str + std::string("."), __FUNCTION__, __LINE__);
                 return;
             }
-            if (quiet_json::is_missing(j, "phases")) return;
-            attack_phases = j["phases"];
-            if (!quiet_json::is_missing(j, "special abilities", true)) abilities = j["special abilities"];
-            if (!quiet_json::is_missing(j, "traits", true)) traits = j["traits"];
+            if (quiet_json::is_missing(j, type::attack_phases_name)) return;
+            attack_phases = j[type::attack_phases_name];
+            if (!quiet_json::is_missing(j, type::abilities_name, true)) abilities = j[type::abilities_name];
+            if (!quiet_json::is_missing(j, type::traits_name, true)) traits = j[type::traits_name];
 
             // Reconstruct the object.
             x.set_id(id);

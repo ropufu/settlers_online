@@ -21,8 +21,14 @@ namespace ropufu
             struct damage
             {
                 using type = damage;
+                // ~~ Json names ~~
+                static constexpr char low_name[] = "low";
+                static constexpr char high_name[] = "high";
+                static constexpr char accuracy_name[] = "accuracy";
+                static constexpr char splash_chance_name[] = "splash chance";
 
             private:
+
                 bool m_is_quiet = false;    // Indicates if errors are to be pushed onto \c quiet_error when coercing occurs.
                 std::size_t m_low = 0;      // Low damage.
                 std::size_t m_high = 0;     // High damage.
@@ -183,16 +189,20 @@ namespace ropufu
 
             void to_json(nlohmann::json& j, const damage& x) noexcept
             {
+                using type = damage;
+
                 j = nlohmann::json{
-                    {"low", x.low()},
-                    {"high", x.high()},
-                    {"accuracy", x.accuracy()},
-                    {"splash chance", x.splash_chance()}
+                    {type::low_name, x.low()},
+                    {type::high_name, x.high()},
+                    {type::accuracy_name, x.accuracy()},
+                    {type::splash_chance_name, x.splash_chance()}
                 };
             } // to_json(...)
         
             void from_json(const nlohmann::json& j, damage& x) noexcept
             {
+                using type = damage;
+
                 // Populate default values.
                 std::size_t low = x.low();
                 std::size_t high = x.high();
@@ -200,10 +210,10 @@ namespace ropufu
                 double splash_chance = x.splash_chance();
 
                 // Parse json entries.
-                if (!quiet_json::optional(j, "low", low)) return;
-                if (!quiet_json::optional(j, "high", high)) return;
-                if (!quiet_json::optional(j, "accuracy", accuracy)) return;
-                if (!quiet_json::optional(j, "splash chance", splash_chance)) return;
+                if (!quiet_json::optional(j, type::low_name, low)) return;
+                if (!quiet_json::optional(j, type::high_name, high)) return;
+                if (!quiet_json::optional(j, type::accuracy_name, accuracy)) return;
+                if (!quiet_json::optional(j, type::splash_chance_name, splash_chance)) return;
                 
                 // Reconstruct the object.
                 x.reset(low, high, accuracy, splash_chance);

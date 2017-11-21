@@ -70,13 +70,23 @@ namespace ropufu
                     return elapsed_seconds;
                 } // elapsed_seconds(...)
 
-                static void present_losses(std::vector<report_entry>& report, const army& a, const std::vector<empirical_measure>& losses) noexcept
+                /** Adds information about losses to the report, and calculates the upper and lower bounds on the surviving army. */
+                static void present_losses(std::vector<report_entry>& report, const army& a, 
+                    const std::vector<std::size_t>& losses_lower_bound, const std::vector<empirical_measure>& losses, const std::vector<std::size_t>& losses_upper_bound,
+                    army& worst_case, army& best_case) noexcept
                 {
+                    worst_case = a;
+                    best_case = a;
                     for (std::size_t k = 0; k < a.count_groups(); k++)
                     {
                         report_entry entry(a[k], losses[k]);
+                        entry.set_lower_bound(losses_lower_bound[k]);
+                        entry.set_upper_bound(losses_upper_bound[k]);
                         entry.set_text("Losses in " + a[k].unit().names().front());
                         report.push_back(entry);
+
+                        worst_case[k].kill(losses[k].max());
+                        best_case[k].kill(losses[k].min());
                     }
                 } // present_losses(...)
 
@@ -156,6 +166,8 @@ namespace ropufu
                     sequencer_type::pool_type::instance().cache(combat.right().underlying());
 
                     auto army_format = [] (const unit_type& u) { return " " + u.names().front(); };
+                    auto compact_format = [] (const unit_type& u) { return unit_database::build_key(u); };
+                    std::string left_army_compact_string = this->m_left.to_string(compact_format);
                     std::string left_army_string = this->m_left.to_string(army_format);
                     std::string right_army_string = this->m_right.to_string(army_format);
                 
@@ -170,13 +182,28 @@ namespace ropufu
                         combat.execute(left_seq, right_seq);
                         return report;
                     }
+
+                    // ~~ Bounds ~~
+                    sequencer_type_low weak_seq { };
+                    sequencer_type_high strong_seq { };
+
+                    combat.execute(weak_seq, strong_seq);
+                    std::vector<std::size_t> left_losses_upper_bound = combat.left().calculate_losses();
+                    std::vector<std::size_t> right_losses_lower_bound = combat.right().calculate_losses();
+                    combat = snapshot; // Reset combat.
+                    combat.execute(strong_seq, weak_seq);
+                    std::vector<std::size_t> left_losses_lower_bound = combat.left().calculate_losses();
+                    std::vector<std::size_t> right_losses_upper_bound = combat.right().calculate_losses();
+                    combat = snapshot; // Reset combat.
                     
-                    empirical_measure rounds { };
+                    empirical_measure combat_rounds { };
+                    empirical_measure destruction_rounds { };
+                    empirical_measure total_rounds { };
                     std::vector<empirical_measure> left_losses(this->m_left.count_groups());
                     std::vector<empirical_measure> right_losses(this->m_right.count_groups());
                     for (std::size_t i = 0; i < c.simulation_count(); ++i)
                     {
-                        std::size_t combat_rounds = combat.execute(left_seq, right_seq);
+                        std::size_t count_combat_rounds = combat.execute(left_seq, right_seq);
                         //const ropufu::settlers_online::combat_result& result = combat.outcome();
 
                         std::vector<std::size_t> x = combat.left().calculate_losses();
@@ -184,23 +211,37 @@ namespace ropufu
                         for (std::size_t k = 0; k < x.size(); k++) left_losses[k].observe(x[k]);
                         for (std::size_t k = 0; k < y.size(); k++) right_losses[k].observe(y[k]);
                 
+                        combat_rounds.observe(count_combat_rounds);
                         for (std::size_t j = 0; j < c.destruction_count(); ++j)
                         {
-                            std::size_t destruction_rounds = combat.destruct(left_seq, right_seq);
-                            rounds.observe(combat_rounds + destruction_rounds);
+                            std::size_t count_destruction_rounds = combat.destruct(left_seq, right_seq);
+                            destruction_rounds.observe(count_destruction_rounds);
+                            total_rounds.observe(count_combat_rounds + count_destruction_rounds);
                         }
-                        combat = snapshot;
+                        combat = snapshot; // Reset combat.
                     }
                     
-                    report.emplace_back("Rounds", rounds);
+                    report.emplace_back("Rounds", total_rounds);
+                    if (!destruction_rounds.empty() && destruction_rounds.max() != 0)
+                    {
+                        report.emplace_back("Combat Rounds", combat_rounds);
+                        report.emplace_back("Destruction Rounds", destruction_rounds);
+                    }
 
-                    report.emplace_back("Left army", left_army_string);
+                    army dummy { };
+                    army worst_case_left { };
+                    army best_case_right { };
+
+                    report.emplace_back("Left army", left_army_string, left_army_compact_string);
                     if (!left_decorator_warnings.empty()) left_decorator_warnings.unwind([&] (const std::string& w) { report.emplace_back("Skills", w); });
-                    type::present_losses(report, this->m_left, left_losses);
+                    type::present_losses(report, this->m_left, left_losses_lower_bound, left_losses, left_losses_upper_bound, worst_case_left, dummy);
 
-                    report.emplace_back("Right army", right_army_string);
+                    report.emplace_back("Right army", right_army_string, right_army_string);
                     if (!right_decorator_warnings.empty()) right_decorator_warnings.unwind([&] (const std::string& w) { report.emplace_back("Skills", w); });
-                    type::present_losses(report, this->m_right, right_losses);
+                    type::present_losses(report, this->m_right, right_losses_lower_bound, right_losses, right_losses_upper_bound, dummy, best_case_right);
+
+                    if (worst_case_left.count_units() != 0) report.emplace_back("Next wave", worst_case_left.to_string(army_format), worst_case_left.to_string(compact_format));
+                    if (best_case_right.count_units() != 0) report.emplace_back("Next wave", best_case_right.to_string(army_format), best_case_right.to_string(army_format));
                 
                     c.to_cbor(report);
                     return report;

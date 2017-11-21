@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Text;
 using System.Windows;
@@ -27,7 +29,35 @@ namespace Ropufu
 
             private void DownloadUpdates()
             {
-                /** @todo Use Github API to update \c ./maps and \c ./faces. */
+                var mapsUrl = "https://api.github.com/repos/ropufu/settlers_online/contents/maps";
+                var maps = GitHubFileInfo.Get(mapsUrl);
+
+                var updates = default(List<GitHubFileInfo>);
+                App.Current.SyncMaps(maps, out updates);
+
+                if (updates.Count > 0)
+                {
+                    var builder = new StringBuilder();
+                    builder.AppendLine("The following updates are available:");
+                    foreach (var mapFile in updates)
+                    {
+                        switch (mapFile.UpdateAction)
+                        {
+                            case NotifyCollectionChangedAction.Add: builder.Append(" + "); break;
+                            case NotifyCollectionChangedAction.Remove: builder.Append(" x "); break;
+                            default: builder.Append(" - "); break;
+                        }
+                        builder.AppendLine(mapFile.Name);
+                    }
+                    builder.AppendLine().AppendLine("Proceed with download?");
+
+                    switch (MessageBox.Show(this, builder.ToString(), "Updates Available", MessageBoxButton.OKCancel, MessageBoxImage.Question))
+                    {
+                        case MessageBoxResult.OK:
+                            foreach (var mapFile in updates) if (!mapFile.Update()) App.Warnings.Push($"Failed to update map {mapFile.Name}.");
+                            break;
+                    }
+                }
             }
 
             public Warnings Warnings => App.Warnings;

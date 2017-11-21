@@ -60,6 +60,9 @@
   <PropertyGroup>
     <ApplicationIcon>LeytePond.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CBOR, Version=3.0.3.0, Culture=neutral, PublicKeyToken=9cd62db60ea5554c, processorArchitecture=MSIL">
       <HintPath>packages\PeterO.Cbor.3.0.3\lib\netstandard1.0\CBOR.dll</HintPath>
@@ -102,6 +105,7 @@
     <Compile Include="Bridge\black_marsh.cs" />
     <Compile Include="Bridge\config.cs" />
     <Compile Include="Bridge\report.cs" />
+    <Compile Include="GitHubFileInfo.cs" />
     <Compile Include="SkillsWindow.xaml.cs">
       <DependentUpon>SkillsWindow.xaml</DependentUpon>
     </Compile>
@@ -194,6 +198,7 @@
       <Link>black_marsh.config</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="app.manifest" />
     <None Include="LeytePond.snk" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

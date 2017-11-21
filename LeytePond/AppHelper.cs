@@ -37,5 +37,12 @@ namespace Ropufu.LeytePond
 
         public static Boolean IsNull<T>(this T item) => Object.ReferenceEquals(item, null);
         //public static Boolean Is<T>(this T item, Type type) => Object.ReferenceEquals(item.GetType(), type);
+
+        public static String ToHex(this Byte[] bytes, Boolean isUpperCase = false)
+        {
+            var result = new StringBuilder(2 * bytes.Length);
+            foreach (var b in bytes) result.Append(b.ToString(isUpperCase ? "X2" : "x2"));
+            return result.ToString();
+        }
     }
 }

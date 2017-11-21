@@ -21,6 +21,9 @@ namespace ropufu
             struct camp
             {
                 using type = camp;
+                // ~~ Json names ~~
+                static constexpr char hit_points_name[] = "hit points";
+                static constexpr char damage_reduction_name[] = "damage reduction";
 
             private:
                 bool m_is_quiet = false;       // Indicates if errors are to be pushed onto \c quiet_error when coercing occurs.
@@ -139,14 +142,18 @@ namespace ropufu
             
             void to_json(nlohmann::json& j, const camp& x) noexcept
             {
+                using type = camp;
+
                 j = nlohmann::json{
-                    {"hit points", x.hit_points()},
-                    {"damage reduction", x.damage_reduction()}
+                    {type::hit_points_name, x.hit_points()},
+                    {type::damage_reduction_name, x.damage_reduction()}
                 };
             } // to_json(...)
         
             void from_json(const nlohmann::json& j, camp& x) noexcept
             {
+                using type = camp;
+
                 if (j.is_string())
                 {
                     std::string value = j;
@@ -165,8 +172,8 @@ namespace ropufu
                 double damage_reduction = x.damage_reduction();
 
                 // Parse json entries.
-                if (!quiet_json::optional(j, "hit points", hit_points)) return;
-                if (!quiet_json::optional(j, "damage reduction", damage_reduction)) return;
+                if (!quiet_json::optional(j, type::hit_points_name, hit_points)) return;
+                if (!quiet_json::optional(j, type::damage_reduction_name, damage_reduction)) return;
                 
                 // Reconstruct the object.
                 x.set_hit_points(hit_points);

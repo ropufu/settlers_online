@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Configuration;
 using System.Data;
 using System.Linq;
@@ -18,7 +19,9 @@ namespace Ropufu
         {
             private Warnings warnings = new Warnings();
 
-            public static Warnings Warnings => ((App)Application.Current).warnings;
+            public static Warnings Warnings => App.Current.warnings;
+
+            public static new App Current => (App)Application.Current;
 
             protected override void OnStartup(StartupEventArgs e)
             {
@@ -33,6 +36,57 @@ namespace Ropufu
 
                 this.CheckImages();
                 base.OnStartup(e);
+            }
+
+            public void SyncMaps(List<GitHubFileInfo> maps, out List<GitHubFileInfo> updates)
+            {
+                updates = new List<GitHubFileInfo>(maps.Count);
+                try
+                {
+                    var mapsPath = System.IO.Path.GetFullPath(Bridge.Config.Instance.MapsPath);
+                    if (!System.IO.Directory.Exists(mapsPath))
+                    {
+                        this.warnings.Push($"Invalid location for maps.");
+                        return;
+                    }
+                    foreach (var mapInfo in maps)
+                    {
+                        var mapPath = System.IO.Path.Combine(mapsPath, mapInfo.Name);
+                        if (!System.IO.File.Exists(mapPath))
+                        {
+                            this.warnings.Push($"Missing map {mapInfo.Name}.");
+                            mapInfo.MarkForUpdate(mapPath, NotifyCollectionChangedAction.Add);
+                            updates.Add(mapInfo);
+                        }
+                        else if (GitHubFileInfo.HashFile(mapPath).ToHex() != mapInfo.Sha)
+                        {
+                            this.warnings.Push($"Update available for map {mapInfo.Name}.");
+                            mapInfo.MarkForUpdate(mapPath, NotifyCollectionChangedAction.Replace);
+                            updates.Add(mapInfo);
+                        }
+                    }
+                    foreach (var mapPath in System.IO.Directory.GetFiles(mapsPath))
+                    {
+                        var mapName = System.IO.Path.GetFileName(mapPath);
+                        var isMissing = true;
+                        foreach (var mapInfo in maps) if (mapInfo.Name == mapName) isMissing = false;
+                        if (isMissing)
+                        {
+                            this.warnings.Push($"Map deprecated: {mapName}.");
+                            var mapInfo = new GitHubFileInfo() { Name = mapName };
+                            mapInfo.MarkForUpdate(mapPath, NotifyCollectionChangedAction.Remove);
+                            updates.Add(mapInfo);
+                        }
+                    }
+                }
+                catch (System.Security.SecurityException)
+                {
+                    this.warnings.Push($"Encountered security exception when trying to read {Bridge.Config.Instance.MapsPath}.");
+                }
+                catch (System.IO.PathTooLongException)
+                {
+                    this.warnings.Push($"Path too long: {Bridge.Config.Instance.MapsPath}.");
+                }
             }
 
             private void CheckImages()
