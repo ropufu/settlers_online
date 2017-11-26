@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Text;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Ropufu
@@ -20,12 +21,59 @@ namespace Ropufu
             public MainWindow()
             {
                 this.InitializeComponent();
-
-                this.leftArmyView.Decorator = Bridge.Config.Instance.Left;
-                this.rightArmyView.Decorator = Bridge.Config.Instance.Right;
             }
 
             private void ShowHelp() => new HelpWindow() { Owner = this }.ShowDialog();
+
+            private void AddWaveAfter(ArmyView waveView = null)
+            {
+                if (waveView.IsNull()) this.rightWavesView.Items.Add(new Object());
+                else
+                {
+                    var waveIndex = -1;
+                    var generator = this.rightWavesView.ItemContainerGenerator;
+                    foreach (var item in this.rightWavesView.Items)
+                    {
+                        ++waveIndex;
+                        var container = (ListViewItem)generator.ContainerFromItem(item);
+                        var armyView = (ArmyView)container.FindVisualChild(o => o is ArmyView);
+                        if (Object.ReferenceEquals(armyView, waveView)) break;
+                    }
+                    this.rightWavesView.Items.Insert(waveIndex + 1, new Object());
+                    //newWaveView.CaptureCursor();
+                }
+            }
+
+            private void DeleteWave(ArmyView waveView = null)
+            {
+                if (waveView.IsNull()) return;
+                if (this.rightWavesView.Items.Count == 1) return;
+
+                var waveIndex = 0;
+                var generator = this.rightWavesView.ItemContainerGenerator;
+                foreach (var item in this.rightWavesView.Items)
+                {
+                    var container = (ListViewItem)generator.ContainerFromItem(item);
+                    var armyView = (ArmyView)container.FindVisualChild(o => o is ArmyView);
+                    if (Object.ReferenceEquals(armyView, waveView)) break;
+                    ++waveIndex;
+                }
+                if (waveIndex < this.rightWavesView.Items.Count) this.rightWavesView.Items.RemoveAt(waveIndex);
+            }
+
+            private String BuildWavesString()
+            {
+                var waveStrings = new List<String>(this.rightWavesView.Items.Count);
+                var generator = this.rightWavesView.ItemContainerGenerator;
+                foreach (var item in this.rightWavesView.Items)
+                {
+                    var container = (ListViewItem)generator.ContainerFromItem(item);
+                    var armyView = (ArmyView)container.FindVisualChild(o => o is ArmyView);
+                    var wave = armyView.Army;
+                    if (!wave.IsEmpty) waveStrings.Add(wave.ToString());
+                }
+                return String.Join(" + ", waveStrings);
+            }
 
             private void DownloadUpdates()
             {
@@ -77,15 +125,14 @@ namespace Ropufu
                         e.Handled = true;
                         break;
                     case Key.Enter:
-                        if (!(e.OriginalSource is System.Windows.Controls.ComboBoxItem))
+                        var isLog = (e.KeyboardDevice.Modifiers == ModifierKeys.Shift);
+                        if (e.KeyboardDevice.Modifiers == ModifierKeys.None || isLog)
                         {
-                            var isLog = (e.KeyboardDevice.Modifiers == ModifierKeys.Control);
                             var leftArmy = this.leftArmyView.Army;
-                            var rightArmy = this.rightArmyView.Army;
+                            var rightWaves = this.BuildWavesString();
                             if (leftArmy.IsEmpty) break;
-                            if (rightArmy.IsEmpty) break;
 
-                            this.blackMarsh.Execute(leftArmy.ToString(), rightArmy.ToString(), isLog);
+                            this.blackMarsh.Execute(leftArmy.ToString(), rightWaves, isLog);
                             new ReportWindow(this.blackMarsh.Report) { Owner = this }.Show();
                             e.Handled = true;
                         }
@@ -97,6 +144,10 @@ namespace Ropufu
             private void WarningsHandler(Object sender, RoutedEventArgs e) => App.Warnings.Unwind(this);
 
             private void UpdateHandler(Object sender, RoutedEventArgs e) => this.DownloadUpdates();
+
+            private void AddWaveHandler(Object sender, RoutedEventArgs e) => this.AddWaveAfter(sender as ArmyView);
+
+            private void DeleteWaveHandler(Object sender, RoutedEventArgs e) => this.DeleteWave(sender as ArmyView);
         }
     }
 }

@@ -30,7 +30,7 @@ namespace Ropufu.LeytePond.Bridge
         public String CborPath { get => this.cborPath; set => this.cborPath = value; }
         public String Output => this.builder.ToString();
 
-        public void Execute(String leftArmy, String rightArmy, Boolean isLog = false)
+        public void Execute(String leftArmy, String rightWaves, Boolean isLog = false)
         {
             if (this.isRunning) return;
             this.isLog = isLog;
@@ -41,7 +41,7 @@ namespace Ropufu.LeytePond.Bridge
             using (var proc = new Process())
             {
                 proc.StartInfo.FileName = this.processPath;
-                proc.StartInfo.Arguments = $"\"{leftArmy}\" \"{rightArmy}\" {keys}";
+                proc.StartInfo.Arguments = $"\"{leftArmy}\" \"{rightWaves}\" {keys}";
                 proc.StartInfo.UseShellExecute = false;
                 proc.StartInfo.RedirectStandardOutput = true;
                 proc.StartInfo.RedirectStandardError = true;

@@ -18,7 +18,9 @@
             <TextBlock xml:space="preserve">
 F1               -- shows this window.
 Enter            -- start simulation.
-Ctrl + Enter     -- log simulation.
+Shift + Enter    -- log simulation.
+Ctrl + Enter     -- add wave.
+Ctrl + Delete    -- delete wave.
             </TextBlock>
             <TextBlock Text="~~ Main Window: Unit Group ~~" HorizontalAlignment="Center" FontWeight="Bold" />
             <TextBlock xml:space="preserve">

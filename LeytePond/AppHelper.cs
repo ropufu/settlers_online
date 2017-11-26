@@ -10,6 +10,9 @@ namespace Ropufu.LeytePond
 {
     static class AppHelper
     {
+        public static Boolean IsNull<T>(this T item) => Object.ReferenceEquals(item, null);
+        //public static Boolean Is<T>(this T item, Type type) => Object.ReferenceEquals(item.GetType(), type);
+
         public static DependencyObject FindVisualChild(this DependencyObject item, Predicate<DependencyObject> predicate)
         {
             if (Object.ReferenceEquals(item, null)) return null;
@@ -34,9 +37,6 @@ namespace Ropufu.LeytePond
             var count = VisualTreeHelper.GetChildrenCount(item);
             for (var i = 0; i < count; i++) VisualTreeHelper.GetChild(item, i).ForVisualChildren(predicate, action);
         }
-
-        public static Boolean IsNull<T>(this T item) => Object.ReferenceEquals(item, null);
-        //public static Boolean Is<T>(this T item, Type type) => Object.ReferenceEquals(item.GetType(), type);
 
         public static String ToHex(this Byte[] bytes, Boolean isUpperCase = false)
         {

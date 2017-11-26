@@ -253,7 +253,7 @@ namespace ropufu
             if (!quiet_json::optional(j, type::experience_name, experience)) return;
 
             // Custom structures.
-            if (!settlers_online::try_parse_str(faction_str, faction))
+            if (!detail::try_parse_str(faction_str, faction))
             {
                 aftermath::quiet_error::instance().push(
                     aftermath::not_an_error::runtime_error,
@@ -261,7 +261,7 @@ namespace ropufu
                     std::string("Faction unrecognized: ") + faction_str + std::string("."), __FUNCTION__, __LINE__);
                 return;
             }
-            if (!settlers_online::try_parse_str(category_str, category))
+            if (!detail::try_parse_str(category_str, category))
             {
                 aftermath::quiet_error::instance().push(
                     aftermath::not_an_error::runtime_error,

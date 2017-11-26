@@ -125,6 +125,29 @@ namespace ropufu
                 }
                 return s.str();
             } // join(...)
+
+            static std::vector<std::string> split(const std::string& value, const std::string& delimiter) noexcept
+            {
+                if (delimiter.empty()) return { };
+
+                std::vector<std::string> result { };
+                std::size_t offset = 0;
+                std::size_t index_of_delimiter = value.find(delimiter, offset);
+                while (index_of_delimiter != std::string::npos) 
+                {
+                    // ---  .  ---  .  ---  #  --- # --- . ---  
+                    //      ^               ^                   
+                    //      offset          index               
+                    result.push_back(value.substr(offset, index_of_delimiter - offset));
+                    offset = index_of_delimiter + delimiter.size();
+                    // ---  .  ---  .  ---  #  --- # --- . ---  
+                    //                                   ^      
+                    //                                   offset 
+                    index_of_delimiter = value.find(delimiter, offset);
+                }
+                result.push_back(value.substr(offset));
+                return result;
+            } // split(...)
         }; // struct char_string
     } // namespace settlers_online
 } // namespace ropufu

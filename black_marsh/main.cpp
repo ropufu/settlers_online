@@ -21,6 +21,19 @@ using unit_database = ropufu::settlers_online::unit_database;
 using char_string = ropufu::settlers_online::char_string;
 using quiet_error = ropufu::aftermath::quiet_error;
 
+template <typename t_collection_type>
+void print_elements(const t_collection_type& container, const std::string& delimiter = ", ")
+{
+    if (container.empty()) std::cout << "empty";
+    bool is_first = true;
+    for (const auto& item : container)
+    {
+        if (!is_first) std::cout << delimiter;
+        std::cout << item;
+        is_first = false;
+    }
+}
+
 void welcome() noexcept
 {
     std::cout << R"?(
@@ -230,7 +243,7 @@ will automatically execute "log" for /l, or "run" for 'r', and then quit.
 void display_units(const std::string& faction_name) noexcept
 {
     unit_faction faction = unit_faction::general;
-    bool do_take_all = !ropufu::settlers_online::try_parse_str(faction_name, faction);
+    bool do_take_all = !ropufu::settlers_online::detail::try_parse_str(faction_name, faction);
     for (const auto& pair : unit_database::instance().data())
     {
         const ropufu::settlers_online::unit_type& u = pair.second;
@@ -295,7 +308,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
         std::string argument;
 
         unwind_errors(false);
-        lucy.warnings().unwind();
+        lucy.logger().unwind();
 
         std::cout << "> ";
         command = read_line();
@@ -315,7 +328,9 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
                 break;
             case command_name::right:
                 if (!argument.empty()) lucy.parse_right(argument);
-                std::cout << "Right army: " << lucy.right() << std::endl;
+                std::cout << "Right army: ";
+                print_elements(lucy.right_sequence(), " + ");
+                std::cout << std::endl;
                 break;
             case command_name::left_camp:
                 std::cout << "Left campt: " << config.left().camp() << std::endl;

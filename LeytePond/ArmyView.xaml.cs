@@ -26,6 +26,19 @@ namespace Ropufu.LeytePond
         const String WarningsKey = "Warnings";
         const String ArmySourceKey = "ArmySource";
 
+        #region Dependency Property: Decorator
+
+        public static DependencyProperty DecoratorProperty = DependencyProperty.Register(nameof(ArmyView.Decorator), typeof(ArmyDecorator), typeof(ArmyView),
+            new PropertyMetadata(new ArmyDecorator()));
+
+        public ArmyDecorator Decorator
+        {
+            get => (ArmyDecorator)this.GetValue(ArmyView.DecoratorProperty);
+            set => this.SetValue(ArmyView.DecoratorProperty, value);
+        }
+
+        #endregion
+
         #region Dependency Property: ArmyString
 
         public static DependencyProperty ArmyStringProperty = DependencyProperty.Register(nameof(ArmyView.ArmyString), typeof(String), typeof(ArmyView),
@@ -67,17 +80,12 @@ namespace Ropufu.LeytePond
         private Boolean isStrict = false;
         private Boolean isPlayerArmy = false;
         private ArmyParser parser = new ArmyParser(String.Empty);
-        private ArmyDecorator decorator = new ArmyDecorator();
         private Boolean doHold = false;
 
+        public event RoutedEventHandler DeleteWave, AddWave;
+
         public Army Army => this.armySource;
-
-        public ArmyDecorator Decorator
-        {
-            get => this.decorator;
-            set => this.decorator = value;
-        }
-
+        
         public Boolean DoCheckGenerals
         {
             get => this.doCheckGenerals;
@@ -110,7 +118,7 @@ namespace Ropufu.LeytePond
             this.groupSum.ClearChildren();
 
             var newArmy = this.parser.Build(this.warnings, this.doCheckGenerals, this.doCoerceFactions, this.isStrict);
-            this.decorator?.Decorate(newArmy, new Warnings());
+            this.Decorator?.Decorate(newArmy, new Warnings());
             newArmy.Skills.DoSkipDefault = true;
 
             newArmy.CopyTo(this.armySource);
@@ -138,6 +146,19 @@ namespace Ropufu.LeytePond
             this.itemView.ItemsSource = this.armySource;
         }
 
+        public void CaptureCursor()
+        {
+            Keyboard.ClearFocus();
+
+            var scope = FocusManager.GetFocusScope(this.armyTextBox);
+            FocusManager.SetFocusedElement(scope, this.armyTextBox);
+            Mouse.Capture(this.armyTextBox);
+            Keyboard.Focus(this.armyTextBox);
+
+            //this.Focus();
+            //this.armyTextBox.Focus();
+        }
+
         public void ToggleLink()
         {
             if (!this.isPlayerArmy) return;
@@ -156,7 +177,7 @@ namespace Ropufu.LeytePond
             var general = default(UnitType);
             foreach (var g in this.armySource) if (g.Unit.Is(UnitFaction.General)) general = g.Unit;
 
-            new SkillsWindow(this.decorator, general) { Owner = App.Current.MainWindow }.ShowDialog();
+            new SkillsWindow(this.Decorator, general) { Owner = App.Current.MainWindow }.ShowDialog();
         }
 
         private void WarningsHandler(Object sender, RoutedEventArgs e) => this.warnings.Unwind();
@@ -181,6 +202,20 @@ namespace Ropufu.LeytePond
                     if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
                     {
                         this.ArmyString = Clipboard.GetText().DeepTrim();
+                        e.Handled = true;
+                    }
+                    break;
+                case Key.Delete:
+                    if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
+                    {
+                        this.DeleteWave?.Invoke(this, new RoutedEventArgs());
+                        e.Handled = true;
+                    }
+                    break;
+                case Key.Enter:
+                    if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
+                    {
+                        this.AddWave?.Invoke(this, new RoutedEventArgs());
                         e.Handled = true;
                     }
                     break;

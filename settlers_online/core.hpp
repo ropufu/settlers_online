@@ -20,17 +20,20 @@ namespace ropufu
             static bool try_from(const to_type& from, from_type& to) noexcept;
         }; // struct converter
 
-        template <typename t_type>
-        std::string to_str(const t_type& from) noexcept
+        namespace detail
         {
-            return converter<t_type, std::string>::to(from);
-        } // to_str(...)
+            template <typename t_type>
+            std::string to_str(const t_type& from) noexcept
+            {
+                return converter<t_type, std::string>::to(from);
+            } // to_str(...)
 
-        template <typename t_type>
-        bool try_parse_str(const std::string& from, t_type& to) noexcept
-        {
-            return converter<t_type, std::string>::try_from(from, to);
-        } // try_parse_str(...)
+            template <typename t_type>
+            bool try_parse_str(const std::string& from, t_type& to) noexcept
+            {
+                return converter<t_type, std::string>::try_from(from, to);
+            } // try_parse_str(...)
+        } // namespace detail
     } // namespace settlers_online
 } // namespace ropufu
 

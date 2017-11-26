@@ -10,8 +10,9 @@
 #include <array> // std::array
 #include <cstddef> // std::size_t
 #include <initializer_list> // std::initializer_list
-#include <type_traits> // std::underlying_type_t
+#include <ostream> // std::ostream
 #include <string> // std::string, std::to_string
+#include <type_traits> // std::underlying_type_t
 #include <utility> // std::pair, std::make_pair
 
 namespace ropufu
@@ -90,6 +91,13 @@ namespace ropufu
 
             void fill(const data_type& value) noexcept { this->m_data.fill(value); }
 
+            bool empty() const noexcept
+            {
+                data_type z { };
+                for (const data_type& x : this->m_data) if (x != z) return false;
+                return true;
+            } // empty(...)
+
             iterator_type begin() const noexcept { return iterator_type(this->m_data, 0); }
             iterator_type end() const noexcept { return iterator_type(this->m_data, capacity); }
             
@@ -97,6 +105,12 @@ namespace ropufu
             bool operator ==(const type& other) const noexcept { return this->m_data == other.m_data; }
             /** Checks two types for inequality. */
             bool operator !=(const type& other) const noexcept { return !(this->operator ==(other)); }
+
+            friend std::ostream& operator <<(std::ostream& os, const type& self) noexcept
+            {
+                nlohmann::json j = self;
+                return os << j;
+            } // operator <<(...)
         }; // struct enum_array
         
         /** An iterator for \c flags_t to allow it to be used in range-based for loops. */
@@ -178,6 +192,12 @@ namespace ropufu
 
             void fill(bool value) noexcept { this->m_data.fill(value); }
 
+            bool empty() const noexcept
+            {
+                for (bool x : this->m_flags) if (x) return false;
+                return true;
+            } // empty(...)
+
             bool has(enum_type value) const noexcept { return this->operator [](value); }
             void set(enum_type value) noexcept { this->operator [](value) = true; }
             void unset(enum_type value) noexcept { this->operator [](value) = false; }
@@ -193,21 +213,21 @@ namespace ropufu
             /** Elementwise "or". */
             type& operator |=(const type& other) noexcept
             {
-                for (std::size_t i = 0; i < capacity; i++) this->m_flags[i] |= other.m_flags[i];
+                for (std::size_t i = 0; i < capacity; i++) this->m_flags[i] = (this->m_flags[i] || other.m_flags[i]);
                 return *this;
             } // operator |=(...)
 
             /** Elementwise "and". */
             type& operator &=(const type& other) noexcept
             {
-                for (std::size_t i = 0; i < capacity; i++) this->m_flags[i] &= other.m_flags[i];
+                for (std::size_t i = 0; i < capacity; i++) this->m_flags[i] = (this->m_flags[i] && other.m_flags[i]);
                 return *this;
             } // operator &=(...)
 
             /** Elementwise "exclusive or". */
             type& operator ^=(const type& other) noexcept
             {
-                for (std::size_t i = 0; i < capacity; i++) this->m_flags[i] ^= other.m_flags[i];
+                for (std::size_t i = 0; i < capacity; i++) this->m_flags[i] = (this->m_flags[i] ^ other.m_flags[i]);
                 return *this;
             } // operator ^=(...)
 
@@ -215,6 +235,12 @@ namespace ropufu
             friend type operator |(type left, const type& right) noexcept { left |= right; return left; }
             friend type operator &(type left, const type& right) noexcept { left &= right; return left; }
             friend type operator ^(type left, const type& right) noexcept { left ^= right; return left; }
+
+            friend std::ostream& operator <<(std::ostream& os, const type& self) noexcept
+            {
+                nlohmann::json j = self;
+                return os << j;
+            } // operator <<(...)
         }; // struct enum_array
 
         template <typename t_enum_type, typename t_data_type>
@@ -229,7 +255,7 @@ namespace ropufu
             // Stored as an object { ..., "<enum key>": value, ... }
             j = { };
             t_data_type z { };
-            for (const auto& pair : x) if (pair.second != z) j[settlers_online::to_str(pair.first)] = pair.second;
+            for (const auto& pair : x) if (pair.second != z) j[detail::to_str(pair.first)] = pair.second;
         } // to_json(...)
 
         template <typename t_enum_type>
@@ -237,7 +263,7 @@ namespace ropufu
         {
             // Stored as an array [ ..., "<enum key>", ... ]
             std::vector<std::string> y { };
-            for (t_enum_type value : x) y.push_back(settlers_online::to_str(value));
+            for (t_enum_type value : x) y.push_back(detail::to_str(value));
             j = y;
         } // to_json(...)
     
@@ -250,7 +276,7 @@ namespace ropufu
             {
                 t_enum_type key = static_cast<t_enum_type>(k);
                 t_data_type value { };
-                if (quiet_json::optional(j, settlers_online::to_str(key), value)) x[key] = value;
+                if (quiet_json::optional(j, detail::to_str(key), value)) x[key] = value;
             }
         } // from_json(...)
     
@@ -264,7 +290,7 @@ namespace ropufu
             for (const std::string& z : y)
             {
                 t_enum_type key;
-                if (settlers_online::try_parse_str(z, key)) x[key] = true;
+                if (detail::try_parse_str(z, key)) x[key] = true;
                 else aftermath::quiet_error::instance().push(
                     aftermath::not_an_error::runtime_error,
                     aftermath::severity_level::negligible,
@@ -273,5 +299,15 @@ namespace ropufu
         } // from_json(...)
     } // namespace settlers_online
 } // namespace ropufu
+
+namespace std
+{
+    template <typename t_enum_type, typename t_data_type>
+    std::string to_string(const ropufu::settlers_online::enum_array<t_enum_type, t_data_type, true>& value) noexcept
+    {
+        nlohmann::json j = value;
+        return j.dump();
+    } // to_string(...)
+} // namespace std
 
 #endif // ROPUFU_SETTLERS_ONLINE_ENUM_ARRAY_HPP_INCLUDED

@@ -118,6 +118,8 @@ namespace ropufu
             void set_level(battle_skill skill, std::size_t value) noexcept { this->m_skills[skill] = value; }
             /** Reset the skills. */
             void reset_skills() noexcept { this->m_skills = enum_array<battle_skill, std::size_t>(); }
+            /** Text representation of skills. */
+            std::string skills_string() const noexcept;
 
             /** Special traits that affect the entire battle. */
             const flags_t<battle_trait>& traits() const noexcept { return this->m_traits; }
@@ -125,6 +127,8 @@ namespace ropufu
             void set_trait(battle_trait trait, bool value) noexcept { this->m_traits[trait] = value; }
             /** Checks whether this army has the specified battle trait. */
             bool has(battle_trait trait) const noexcept { return this->m_traits.has(trait); }
+            /** Text representation of skills. */
+            std::string traits_string() const noexcept;
 
             /** Unit types in each group (ordered by \c id). */
             std::vector<unit_type> types() const noexcept;
@@ -331,6 +335,28 @@ namespace ropufu
             // Sort masks.
             std::sort(this->m_metagroup_masks.begin(), this->m_metagroup_masks.end());
         } // army::army
+
+        std::string army::skills_string() const noexcept
+        {
+            if (this->m_skills.empty()) return "none";
+
+            std::vector<std::string> names { };
+            for (const auto& pair : this->m_skills)
+            {
+                if (pair.second == 0) continue;
+                names.push_back(detail::to_str(pair.first) + " (" + std::to_string(pair.second) + ")");
+            }
+            return char_string::join(names, ", ");
+        } // army::skills_string(...)
+
+        std::string army::traits_string() const noexcept
+        {
+            if (this->m_traits.empty()) return "none";
+
+            std::vector<std::string> names { };
+            for (battle_trait trait : this->m_traits) names.push_back(detail::to_str(trait));
+            return char_string::join(names, ", ");
+        } // army::traits_string(...)
 
         std::vector<unit_type> army::types() const noexcept
         {

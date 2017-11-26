@@ -9,7 +9,6 @@
 #include "unit_database.hpp"
 #include "unit_group.hpp"
 #include "unit_type.hpp"
-#include "warnings.hpp"
 
 #include <cstddef> // std::size_t
 #include <string> // std::string
@@ -110,18 +109,19 @@ namespace ropufu
                 return true;
             } // try_build(...)
             
-            army build(warnings& w, bool do_check_generals = false, bool do_coerce_factions = false, bool is_strict = false) const noexcept
+            template <typename t_logger_type>
+            army build(t_logger_type& logger, bool do_check_generals = false, bool do_coerce_factions = false, bool is_strict = false) const noexcept
             {
                 army a { };
                 if (!this->m_is_valid)
                 {
-                    w.push_back("Parsing army failed.");
+                    logger.write("Parsing army failed.");
                     return a;
                 }
 
                 if (!this->try_build(a, [] (const unit_type& /**u*/) { return true; }))
                 {
-                    w.push_back("Reconstructing army from database failed.");
+                    logger.write("Reconstructing army from database failed.");
                     return a;
                 }
 
@@ -130,7 +130,7 @@ namespace ropufu
                 // Check for missing generals.
                 if (do_check_generals)
                 {
-                    if (!a.has(unit_faction::general)) w.push_back("Army does not have any generals.");
+                    if (!a.has(unit_faction::general)) logger.write("Army does not have any generals.");
                 }
 
                 // Check for multiple factions.
@@ -145,7 +145,7 @@ namespace ropufu
                     std::size_t count_options = 0;
                     if (factions.size() > 1)
                     {
-                        w.push_back("There is more than one faction in the army.");
+                        logger.write("There is more than one faction in the army.");
                         army b { };
                         for (unit_faction f : factions)
                         {
@@ -153,13 +153,13 @@ namespace ropufu
                             if (this->try_build(b, [&](const unit_type& u) { return u.is(f) || u.is(unit_faction::general); }))
                             {
                                 ++count_options;
-                                w.push_back("Did you mean: " + b.to_string(format_compact) + "?");
+                                logger.write("Did you mean: " + b.to_string(format_compact) + "?");
                             }
                         }
                         // If there is only one alternative with single faction, take it!
                         if (count_options == 1 && !is_strict)
                         {
-                            w.push_back("Assuming yes.");
+                            logger.write("Assuming yes.");
                             a = b;
                         }
                     }

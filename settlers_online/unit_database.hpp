@@ -274,7 +274,6 @@ namespace ropufu
                     }
                     catch (const std::exception& /*e*/)
                     {
-                        //std::cout << "Failed while reading " << p.path() << ": " << e.what() << std::endl;
                         aftermath::quiet_error::instance().push(
                             aftermath::not_an_error::runtime_error,
                             aftermath::severity_level::minor,

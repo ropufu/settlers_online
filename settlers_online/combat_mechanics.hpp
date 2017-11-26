@@ -17,8 +17,6 @@
 #include "typedef.hpp"
 
 #include <cstddef> // std::size_t
-#include <iostream> // std::cout
-#include <stdexcept> // std::logic_error
 #include <vector> // std::vector
 
 namespace ropufu
@@ -32,7 +30,6 @@ namespace ropufu
         private:
             static constexpr std::size_t count_phases = enum_capacity<battle_phase>::value;
 
-            bool m_do_log = false;
             conditioned_army m_left; // Left army.
             conditioned_army m_right; // Right army.
             detail::combat_result m_outcome = { };
@@ -46,9 +43,6 @@ namespace ropufu
             {
             } // combat_mechanics(...)
 
-            bool do_log() const noexcept { return this->m_do_log; }
-            void set_do_log(bool value) noexcept { this->m_do_log = value; }
-
             const conditioned_army& left() const noexcept { return this->m_left; }
             const conditioned_army& right() const noexcept { return this->m_right; }
 
@@ -57,8 +51,8 @@ namespace ropufu
             /** @brief Runs the combat sequence. Can only be called once.
              *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if \c execute is called more than once.
              */
-            template <typename t_left_sequence_type, typename t_right_sequence_type>
-            std::size_t execute(attack_sequence<t_left_sequence_type>& left_sequencer, attack_sequence<t_right_sequence_type>& right_sequencer) noexcept
+            template <typename t_left_sequence_type, typename t_right_sequence_type, typename t_logger_type>
+            std::size_t execute(attack_sequence<t_left_sequence_type>& left_sequencer, attack_sequence<t_right_sequence_type>& right_sequencer, t_logger_type& logger) noexcept
             {
                 if (this->m_is_in_destruction_phase)
                 {
@@ -77,21 +71,21 @@ namespace ropufu
                 std::size_t count_rounds = 0;
                 while (this->m_left.underlying().count_units() > 0 && this->m_right.underlying().count_units() > 0)
                 {
-                    if (this->m_do_log) std::cout << "Begin round " << (1 + count_rounds) << "." << std::endl;
+                    logger << "Begin round " << (1 + count_rounds) << "." << nullptr;
                     for (std::size_t k = 0; k < count_phases; k++)
                     {
                         battle_phase phase = static_cast<battle_phase>(k);
-                        if (this->m_do_log) std::cout << "Begin " << std::to_string(phase) << " phase." << std::endl;
+                        logger << "Begin " << detail::to_str(phase) << " phase." << nullptr;
 
-                        this->m_left.initiate_phase(phase, this->m_right, left_frenzy_factor, left_sequencer, this->m_do_log);
-                        this->m_right.initiate_phase(phase, this->m_left, right_frenzy_factor, right_sequencer, this->m_do_log);
+                        this->m_left.initiate_phase(phase, this->m_right, left_frenzy_factor, left_sequencer, logger);
+                        this->m_right.initiate_phase(phase, this->m_left, right_frenzy_factor, right_sequencer, logger);
 
                         this->m_left.underlying().snapshot();
                         this->m_right.underlying().snapshot();
 
                         left_sequencer.next_phase();
                         right_sequencer.next_phase();
-                        if (this->m_do_log) std::cout << "End " << std::to_string(phase) << " phase." << std::endl;
+                        logger << "End " << detail::to_str(phase) << " phase." << nullptr;
                     }
 
                     left_frenzy_factor *= (1 + left_frenzy_bonus);
@@ -100,7 +94,7 @@ namespace ropufu
                     left_sequencer.next_round();
                     right_sequencer.next_round();
 
-                    if (this->m_do_log) std::cout << "End round " << (1 + count_rounds) << "." << std::endl;
+                    logger << "End round " << (1 + count_rounds) << "." << nullptr;
                     ++count_rounds;
                 }
 

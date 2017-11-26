@@ -7,7 +7,6 @@
 #include "../settlers_online/army.hpp"
 #include "../settlers_online/army_decorator.hpp"
 #include "../settlers_online/report_entry.hpp"
-#include "../settlers_online/warnings.hpp"
 
 #include <cstdint> // std::uint8_t
 #include <fstream> // std::ifstream, std::ofstream

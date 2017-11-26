@@ -11,12 +11,19 @@
         <converters:SkillMapConverter x:Key="SkillMapConverter" />
         <converters:IsNotEmptyConverter x:Key="NotEmptyConverter" />
         <BooleanToVisibilityConverter x:Key="VisibilityConverter" />
-        <Style x:Key="UnlinkIcon" TargetType="ContentControl">
+        <Style TargetType="ListView">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="False" />
+        </Style>
+        <Style x:Key="BasicIconStyle" TargetType="ContentControl">
             <Setter Property="Padding" Value="1" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style x:Key="UnlinkIcon" BasedOn='{StaticResource BasicIconStyle}' TargetType="ContentControl">
             <Setter Property="ContentTemplate">
                 <Setter.Value>
                     <DataTemplate>
@@ -190,6 +197,34 @@
                                                 <GeometryDrawing Brush="#FF414141" Geometry="F1M7,12L9,12 9,13 7,13z M7,10L9,10 9,11 7,11z M7,3L9,3 9,4 7,4z M6,14L10,14 10,2 6,2z" />
                                                 <GeometryDrawing Brush="#FF414141" Geometry="F1M2,12L4,12 4,13 2,13z M2,10L4,10 4,11 2,11z M2,4L4,4 4,6 2,6z M1,14L5,14 5,3 1,3z" />
                                                 <GeometryDrawing Brush="#FFF0EFF1" Geometry="F1M4,4L2,4 2,6 4,6z M4,10L2,10 2,11 4,11z M4,12L2,12 2,13 4,13z M9,3L7,3 7,4 9,4z M9,10L7,10 7,11 9,11z M9,12L7,12 7,13 9,13z M14,4L12,4 12,6 14,6z M14,10L12,10 12,11 14,11z M14,13L12,13 12,12 14,12z" />
+                                            </DrawingGroup.Children>
+                                        </DrawingGroup>
+                                    </DrawingBrush.Drawing>
+                                </DrawingBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="AddIcon" TargetType="ContentControl">
+            <Setter Property="Padding" Value="1" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <Rectangle Width="16" Height="16">
+                            <Rectangle.Fill>
+                                <DrawingBrush>
+                                    <DrawingBrush.Drawing>
+                                        <DrawingGroup>
+                                            <DrawingGroup.Children>
+                                                <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
+                                                <GeometryDrawing Brush="#FFF6F6F6" Geometry="F1M6.0003,-0.000199999999999534L6.0003,5.9998 0.000300000000000189,5.9998 0.000300000000000189,9.9998 6.0003,9.9998 6.0003,15.9998 10.0003,15.9998 10.0003,9.9998 16.0003,9.9998 16.0003,5.9998 10.0003,5.9998 10.0003,-0.000199999999999534z" />
+                                                <GeometryDrawing Brush="#FF388934" Geometry="F1M15,9L9,9 9,15 7,15 7,9 1,9 1,7 7,7 7,1 9,1 9,7 15,7z" />
                                             </DrawingGroup.Children>
                                         </DrawingGroup>
                                     </DrawingBrush.Drawing>

@@ -67,7 +67,7 @@ namespace std
 {
     std::string to_string(ropufu::settlers_online::battle_trait value) noexcept
     {
-        return ropufu::settlers_online::to_str(value);
+        return ropufu::settlers_online::detail::to_str(value);
     } // to_string(...)
 } // namespace std
 

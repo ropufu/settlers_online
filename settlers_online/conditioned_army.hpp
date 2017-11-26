@@ -22,8 +22,7 @@
 #include "unit_group.hpp"
 #include "unit_type.hpp"
 
-#include <cstddef> // std::size_t
-#include <iostream> // std::cout
+#include <cstddef> // std::size_t,  nullptr
 #include <set> // std::set
 #include <vector> // std::vector
 
@@ -215,8 +214,8 @@ namespace ropufu
             } // calculate_losses(...)
 
             /** Initiates and attack by this army on its opponent \c other. */
-            template <typename t_sequence_type>
-            void initiate_phase(battle_phase phase, conditioned_army& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, bool do_log) const noexcept;
+            template <typename t_sequence_type, typename t_logger_type>
+            void initiate_phase(battle_phase phase, type& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, t_logger_type& logger) const noexcept;
         }; // struct conditioned_army
 
         /** @brief Constructs a version of the army \p a conditioned for a fight against \p other.
@@ -285,8 +284,8 @@ namespace ropufu
         } // conditioned_army::conditioned_army(...)
 
         /** Initiates and attack by this army on its opponent \c other. */
-        template <typename t_sequence_type>
-        void conditioned_army::initiate_phase(battle_phase phase, conditioned_army& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, bool do_log) const noexcept
+        template <typename t_sequence_type, typename t_logger_type>
+        void conditioned_army::initiate_phase(battle_phase phase, conditioned_army& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, t_logger_type& logger) const noexcept
         {
             for (std::size_t i : this->m_group_indices[phase])
             {
@@ -311,24 +310,24 @@ namespace ropufu
                         damage_cast(attacker_t.damage().low(), damage_factor) * (count_attackers - count_high_damage) +
                         damage_cast(attacker_t.damage().high(), damage_factor) * count_high_damage;
 
-                    if (do_log)
-                    {
-                        std::cout << '\t' <<
+                    // if (t_logger_type::is_enabled)
+                    // {
+                        logger << '\t' <<
                             count_attackers << " " << attacker_t.names().front() <<
                             " dealing " << total_reduced_damage <<
                             " (" << (count_attackers - count_high_damage) << " low, " << count_high_damage << " high)" <<
-                            " splash damage..." << std::endl;
-                    }
-                    detail::uniform_splash(total_reduced_damage, other.m_army, cache.order(), do_log); // technical_combat.hpp.
+                            " splash damage..." << nullptr;
+                    // }
+                    detail::uniform_splash(total_reduced_damage, other.m_army, cache.order(), logger); // technical_combat.hpp.
                     continue; // Proceed to the next attacking group.
                 }
 
-                if (do_log)
-                {
-                    std::cout << '\t' <<
+                // if (t_logger_type::is_enabled)
+                // {
+                    logger << '\t' <<
                         count_attackers << " " << attacker_t.names().front() <<
-                        " attacking..." << std::endl;
-                }
+                        " attacking..." << nullptr;
+                // }
 
                 std::size_t attacking_unit_index = 0;
                 std::size_t pure_overshoot_damage = 0; // Pure damage spilled between consequent groups.
@@ -345,14 +344,14 @@ namespace ropufu
                     unit_group& defending_group = other.m_army[j];
 
                     // First take care of the overshoot damage.
-                    pure_overshoot_damage = detail::splash(pure_overshoot_damage, damage_factor, defending_group, do_log); // technical_combat.hpp.
+                    pure_overshoot_damage = detail::splash(pure_overshoot_damage, damage_factor, defending_group, logger); // technical_combat.hpp.
 
                     std::size_t count_alive = defending_group.count();
                     if (count_alive == 0) continue; // Defender has already been killed.
 
                     // Optimize when attacking units with low hit points: each non-splash hit will always kill exactly 1 defending unit.
-                    if (is_one_to_one) attacking_unit_index = detail::one_to_one(defending_group, attacking_group, attacking_unit_index, do_log); // technical_combat.hpp.
-                    else attacking_unit_index = detail::hit(pure_overshoot_damage, defending_group, attacking_group, attacking_unit_index, damage_factor, sequencer, do_log); // technical_combat.hpp.
+                    if (is_one_to_one) attacking_unit_index = detail::one_to_one(defending_group, attacking_group, attacking_unit_index, logger); // technical_combat.hpp.
+                    else attacking_unit_index = detail::hit(pure_overshoot_damage, defending_group, attacking_group, attacking_unit_index, damage_factor, sequencer, logger); // technical_combat.hpp.
 
                     if (attacking_unit_index == attacking_group.count_at_snapshot()) break;
                     if (attacking_unit_index > attacking_group.count_at_snapshot()) 

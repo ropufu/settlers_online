@@ -26,7 +26,7 @@
             <TextBox x:Name="armyTextBox" Text='{Binding ElementName=self, Path=ArmyString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}' Margin="5,10,10,10" />
         </DockPanel>
         <!--Visual representation-->
-        <ListView x:Name="itemView" BorderThickness="0" KeyboardNavigation.TabNavigation="Cycle" VirtualizingStackPanel.IsVirtualizing="False" d:DataContext='{d:DesignData Source=ArmyDesign.xaml}' ItemsSource='{Binding}'>
+        <ListView x:Name="itemView" KeyboardNavigation.TabNavigation="Cycle" d:DataContext='{d:DesignData Source=ArmyDesign.xaml}' ItemsSource='{Binding}'>
             <ListView.Resources>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Setter Property="IsTabStop" Value="False" />

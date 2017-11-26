@@ -9,8 +9,7 @@
 #include "unit_group.hpp"
 #include "unit_type.hpp"
 
-#include <cstddef> // std::size_t
-#include <iostream> // std::cout
+#include <cstddef> // std::size_t, nullptr
 #include <vector> // std::vector
 
 namespace ropufu
@@ -22,10 +21,10 @@ namespace ropufu
             /** @brief Initiates and attack on a group (defender) by another group (attacker).
              *  @return The attacking unit index after the attack has been completed.
              */
-            template <typename t_sequence_type>
+            template <typename t_sequence_type, typename t_logger_type>
             static std::size_t hit(std::size_t& overshoot_damage, unit_group& defending_group,
                 const unit_group& attacking_group, std::size_t attacking_unit_index, double damage_factor,
-                attack_sequence<t_sequence_type>& sequencer, bool do_log) noexcept
+                attack_sequence<t_sequence_type>& sequencer, t_logger_type& logger) noexcept
             {
                 const unit_type& attacker_t = attacking_group.unit();
                 const unit_type& defender_t = defending_group.unit();
@@ -34,12 +33,12 @@ namespace ropufu
                 if (defending_units_remaining == 0) return attacking_unit_index; // Check if the defending group is empty.
 
                 std::size_t defenders_killed = defending_units_remaining;
-                if (do_log)
-                {
-                    std::cout << '\t' << "..." <<
+                // if (t_logger_type::is_enabled)
+                // {
+                    logger << '\t' << "..." <<
                         defending_units_remaining << " " << defender_t.names().front() <<
                         " [" << defending_group.total_hit_points() << " hit points]";
-                }
+                // }
 
                 // Proceed to next attaking unit.
                 std::size_t attacking_units_remaining = attacking_group.count_at_snapshot() - attacking_unit_index;
@@ -52,7 +51,8 @@ namespace ropufu
                     // If this group has been eliminated proceed to the next group.
                     if (defending_units_remaining == 0) 
                     {
-                        if (do_log) std::cout << " killing " << defenders_killed << "." << std::endl;
+                        // if (t_logger_type::is_enabled) 
+                            logger << " killing " << defenders_killed << "." << nullptr;
                         return attacking_unit_index;
                     }
                     std::size_t hit_points = defending_group.top_hit_points(); // Hit points of the top unit.
@@ -97,7 +97,8 @@ namespace ropufu
                         // If this group has been eliminated proceed to the next group.
                         if (defending_units_remaining == 0) 
                         {
-                            if (do_log) std::cout << " killing " << defenders_killed << "." << std::endl;
+                            // if (t_logger_type::is_enabled)
+                                logger << " killing " << defenders_killed << "." << nullptr;
                             return attacking_unit_index;
                         }
 
@@ -118,14 +119,16 @@ namespace ropufu
                         }
                     }
                 }
-                if (do_log) std::cout << " killing " << (defenders_killed - defending_group.count()) << "." << std::endl;
+                // if (t_logger_type::is_enabled)
+                    logger << " killing " << (defenders_killed - defending_group.count()) << "." << nullptr;
                 return attacking_group.count_at_snapshot();
             } // hit(...)
 
             /** @brief Inflicts \p pure_damage splash onto \p defending_group, taking into account \p damage_factor damage multiplier.
              *  @return Remaining \p pure_damage.
              */
-            static std::size_t splash(std::size_t pure_damage, double damage_factor, unit_group& defending_group, bool do_log) noexcept
+            template <typename t_logger_type>
+            static std::size_t splash(std::size_t pure_damage, double damage_factor, unit_group& defending_group, t_logger_type& logger) noexcept
             {
                 if (pure_damage == 0) return 0;
                 
@@ -151,12 +154,14 @@ namespace ropufu
                     // Calculate the remaining splash damage.
                     pure_damage -= damage_required;
                 }
-                if (do_log) std::cout << '\t' << "Overshoot killing " << (defending_units_remaining - defending_group.count()) << " " << defending_group.unit().names().front() << std::endl;
+                // if (t_logger_type::is_enabled)
+                    logger << '\t' << "Overshoot killing " << (defending_units_remaining - defending_group.count()) << " " << defending_group.unit().names().front() << nullptr;
                 return pure_damage;
             } // splash(...)
 
             /** Inflicts the reduced damage, \p reduced_damage, onto \p defender, assuming the attaker always deals splash damage and there is no effective tower bonus. */
-            static void uniform_splash(std::size_t reduced_damage, army& defender, const aftermath::algebra::permutation& defender_ordering, bool do_log) noexcept
+            template <typename t_logger_type>
+            static void uniform_splash(std::size_t reduced_damage, army& defender, const aftermath::algebra::permutation& defender_ordering, t_logger_type& logger) noexcept
             {
                 //std::vector<unit_group>& defender_groups = defender.groups();
                 for (std::size_t j : defender_ordering)
@@ -166,21 +171,23 @@ namespace ropufu
                     std::size_t total_hit_points = defending_group.total_hit_points();
                     if (total_hit_points == 0) continue;
 
-                    if (do_log)
-                    {
-                        std::cout << '\t' << "...against " <<
+                    // if (t_logger_type::is_enabled)
+                    // {
+                        logger << '\t' << "...against " <<
                             defending_units_remaining << " " << defending_group.unit().names().front() <<
                             " [" << total_hit_points << " hit points]";
-                    }
+                    // }
 
                     if (total_hit_points >= reduced_damage) // All the splash damage has been accounted for.
                     {
                         defending_group.set_total_hit_points(total_hit_points - reduced_damage); // Damage the defending group.
-                        if (do_log) std::cout << " killing " << (defending_units_remaining - defending_group.count()) << "." << std::endl;
+                        // if (t_logger_type::is_enabled)
+                            logger << " killing " << (defending_units_remaining - defending_group.count()) << "." << nullptr;
                         return;
                     }
                     defending_group.kill_all();
-                    if (do_log) std::cout << " killing " << defending_units_remaining << "." << std::endl;
+                    // if (t_logger_type::is_enabled)
+                        logger << " killing " << defending_units_remaining << "." << nullptr;
                     reduced_damage -= total_hit_points;
                 }
             } // uniform_splash(...)
@@ -188,30 +195,33 @@ namespace ropufu
             /** @brief When attacking units with low hit points: each non-splash hit will always kill exactly 1 defending unit.
              *  @return The attacking unit index after the attack has been completed.
              */
-            static std::size_t one_to_one(unit_group& defending_group, const unit_group& attacking_group, std::size_t attacking_unit_index, bool do_log) noexcept
+            template <typename t_logger_type>
+            static std::size_t one_to_one(unit_group& defending_group, const unit_group& attacking_group, std::size_t attacking_unit_index, t_logger_type& logger) noexcept
             {
                 // Proceed to next attaking unit.
                 std::size_t attacking_units_remaining = attacking_group.count_at_snapshot() - attacking_unit_index;
                 std::size_t defending_units_remaining = defending_group.count();
 
-                if (do_log)
-                {
-                    std::cout << '\t' << "...against " <<
+                // if (t_logger_type::is_enabled)
+                // {
+                    logger << '\t' << "...against " <<
                         defending_units_remaining << " " << defending_group.unit().names().front() <<
                         " [" << defending_group.total_hit_points() << " hit points]";
-                }
+                // }
 
                 if (attacking_units_remaining > defending_units_remaining)
                 {
                     defending_group.kill_all(); // The entire group has been eliminated.
-                    if (do_log) std::cout << " killing " << defending_units_remaining << "." << std::endl;
+                    // if (t_logger_type::is_enabled)
+                        logger << " killing " << defending_units_remaining << "." << nullptr;
                     return attacking_unit_index + defending_units_remaining; // All defenders have been killed, and there still may be attackers left.
                 }
                 else
                 {
                     // All attacking units have made their hit, and there still may be survivors left.
                     defending_group.kill(attacking_units_remaining);
-                    if (do_log) std::cout << " killing " << attacking_units_remaining << "." << std::endl;
+                    // if (t_logger_type::is_enabled)
+                        logger << " killing " << attacking_units_remaining << "." << nullptr;
                     return attacking_group.count_at_snapshot();
                 }
             } // one_to_one(...)
