@@ -187,6 +187,12 @@ namespace ropufu
                 } // operator <<(...)
             }; // struct damage
 
+            // ~~ Json name definitions ~~
+            constexpr char damage::low_name[];
+            constexpr char damage::high_name[];
+            constexpr char damage::accuracy_name[];
+            constexpr char damage::splash_chance_name[];
+
             void to_json(nlohmann::json& j, const damage& x) noexcept
             {
                 using type = damage;

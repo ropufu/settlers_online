@@ -99,6 +99,10 @@ namespace ropufu
                 return os;
             } // operator <<(...)
         }; // struct army_decorator
+
+        // ~~ Json name definitions ~~
+        constexpr char army_decorator::camp_name[];
+        constexpr char army_decorator::skills_name[];
         
         void to_json(nlohmann::json& j, const army_decorator& x) noexcept
         {

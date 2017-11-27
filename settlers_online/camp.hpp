@@ -139,6 +139,10 @@ namespace ropufu
                     return os << j;
                 } // operator <<(...)
             }; // struct camp
+
+            // ~~ Json name definitions ~~
+            constexpr char camp::hit_points_name[];
+            constexpr char camp::damage_reduction_name[];
             
             void to_json(nlohmann::json& j, const camp& x) noexcept
             {

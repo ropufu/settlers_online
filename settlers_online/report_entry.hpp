@@ -100,6 +100,17 @@ namespace ropufu
                 return os;
             } // operator <<(...)
         }; // struct report_entry
+
+        // ~~ Json name definitions ~~
+        constexpr char report_entry::is_header_name[];
+        constexpr char report_entry::caption_name[];
+        constexpr char report_entry::details_name[];
+        constexpr char report_entry::clipboard_text_name[];
+        constexpr char report_entry::unit_name_name[];
+        constexpr char report_entry::lower_bound_name[];
+        constexpr char report_entry::upper_bound_name[];
+        constexpr char report_entry::observed_values_name[];
+        constexpr char report_entry::observed_counts_name[];
         
         void to_json(nlohmann::json& j, const report_entry& x) noexcept
         {

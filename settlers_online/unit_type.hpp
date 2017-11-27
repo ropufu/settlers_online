@@ -70,9 +70,9 @@ namespace ropufu
             unit_type(std::size_t id, const std::string& name, battle_phase initiative,
                 unit_faction faction, unit_category category, std::size_t experience, std::size_t capacity,
                 std::size_t hit_points, detail::damage damage) noexcept
-                : m_id(id), m_names({ name }), m_attack_phases({ initiative }),
-                m_faction(faction), m_category(category), m_experience(experience), m_capacity(capacity),
-                m_hit_points(hit_points), m_damage(damage)
+                : m_id(id), m_names({ name }),
+                m_faction(faction), m_category(category), m_attack_phases({ initiative }),
+                m_capacity(capacity), m_hit_points(hit_points), m_damage(damage), m_experience(experience)
             {
             } // unit_type(...)
 
@@ -192,6 +192,19 @@ namespace ropufu
                 return os << j;
             } // operator <<(...)
         }; // struct unit_type
+
+        // ~~ Json name definitions ~~
+        constexpr char unit_type::id_name[];
+        constexpr char unit_type::names_name[];
+        constexpr char unit_type::faction_name[];
+        constexpr char unit_type::category_name[];
+        constexpr char unit_type::attack_phases_name[];
+        constexpr char unit_type::capacity_name[];
+        constexpr char unit_type::hit_points_name[];
+        constexpr char unit_type::damage_name[];
+        constexpr char unit_type::experience_name[];
+        constexpr char unit_type::abilities_name[];
+        constexpr char unit_type::traits_name[];
 
         void to_json(nlohmann::json& j, const unit_type& x) noexcept
         {
