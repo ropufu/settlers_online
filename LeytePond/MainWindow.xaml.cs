@@ -16,6 +16,9 @@ namespace Ropufu
         /// </summary>
         public partial class MainWindow : Window
         {
+            const String LeftTagKey = "LeftTag";
+            const String RightTagKey = "RightTag";
+
             private Bridge.BlackMarsh blackMarsh = Bridge.BlackMarsh.Instance;
 
             public MainWindow()
@@ -25,47 +28,80 @@ namespace Ropufu
 
             private void ShowHelp() => new HelpWindow() { Owner = this }.ShowDialog();
 
-            private void AddWaveAfter(ArmyView waveView = null)
+            private void DisplayUnits()
             {
-                if (waveView.IsNull()) this.rightWavesView.Items.Add(new Object());
+                foreach (var window in App.Current.Windows)
+                {
+                    if (window is UnitsWindow)
+                    {
+                        ((Window)window).Focus();
+                        return;
+                    }
+                }
+                new UnitsWindow() { Owner = this }.Show();
+            }
+
+            private void AddWaveAfter(Object tag, ArmyView waveView = null)
+            {
+                if (tag.IsNull()) return;
+
+                var leftTag = this.Resources[MainWindow.LeftTagKey];
+                var rightTag = this.Resources[MainWindow.RightTagKey];
+
+                var listView = default(ListView);
+                if (Object.ReferenceEquals(tag, leftTag)) listView = this.leftWavesView;
+                if (Object.ReferenceEquals(tag, rightTag)) listView = this.rightWavesView;
+                if (listView.IsNull()) return;
+
+                if (waveView.IsNull()) listView.Items.Add(new Object());
                 else
                 {
                     var waveIndex = -1;
-                    var generator = this.rightWavesView.ItemContainerGenerator;
-                    foreach (var item in this.rightWavesView.Items)
+                    var generator = listView.ItemContainerGenerator;
+                    foreach (var item in listView.Items)
                     {
                         ++waveIndex;
                         var container = (ListViewItem)generator.ContainerFromItem(item);
                         var armyView = (ArmyView)container.FindVisualChild(o => o is ArmyView);
                         if (Object.ReferenceEquals(armyView, waveView)) break;
                     }
-                    this.rightWavesView.Items.Insert(waveIndex + 1, new Object());
+                    listView.Items.Insert(waveIndex + 1, new Object());
                     //newWaveView.CaptureCursor();
                 }
             }
 
-            private void DeleteWave(ArmyView waveView = null)
+            private void DeleteWave(Object tag, ArmyView waveView = null)
             {
+                if (tag.IsNull()) return;
+
+                var leftTag = this.Resources[MainWindow.LeftTagKey];
+                var rightTag = this.Resources[MainWindow.RightTagKey];
+
+                var listView = default(ListView);
+                if (Object.ReferenceEquals(tag, leftTag)) listView = this.leftWavesView;
+                if (Object.ReferenceEquals(tag, rightTag)) listView = this.rightWavesView;
+                if (listView.IsNull()) return;
+
                 if (waveView.IsNull()) return;
-                if (this.rightWavesView.Items.Count == 1) return;
+                if (listView.Items.Count == 1) return;
 
                 var waveIndex = 0;
-                var generator = this.rightWavesView.ItemContainerGenerator;
-                foreach (var item in this.rightWavesView.Items)
+                var generator = listView.ItemContainerGenerator;
+                foreach (var item in listView.Items)
                 {
                     var container = (ListViewItem)generator.ContainerFromItem(item);
                     var armyView = (ArmyView)container.FindVisualChild(o => o is ArmyView);
                     if (Object.ReferenceEquals(armyView, waveView)) break;
                     ++waveIndex;
                 }
-                if (waveIndex < this.rightWavesView.Items.Count) this.rightWavesView.Items.RemoveAt(waveIndex);
+                if (waveIndex < listView.Items.Count) listView.Items.RemoveAt(waveIndex);
             }
 
-            private String BuildWavesString()
+            private String BuildWavesString(ListView listView)
             {
-                var waveStrings = new List<String>(this.rightWavesView.Items.Count);
-                var generator = this.rightWavesView.ItemContainerGenerator;
-                foreach (var item in this.rightWavesView.Items)
+                var waveStrings = new List<String>(listView.Items.Count);
+                var generator = listView.ItemContainerGenerator;
+                foreach (var item in listView.Items)
                 {
                     var container = (ListViewItem)generator.ContainerFromItem(item);
                     var armyView = (ArmyView)container.FindVisualChild(o => o is ArmyView);
@@ -77,7 +113,7 @@ namespace Ropufu
 
             private void DownloadUpdates()
             {
-                var mapsUrl = "https://api.github.com/repos/ropufu/settlers_online/contents/maps";
+                var mapsUrl = Properties.Settings.Default.MapsUrl;
                 var maps = GitHubFileInfo.Get(mapsUrl);
 
                 var updates = default(List<GitHubFileInfo>);
@@ -128,11 +164,10 @@ namespace Ropufu
                         var isLog = (e.KeyboardDevice.Modifiers == ModifierKeys.Shift);
                         if (e.KeyboardDevice.Modifiers == ModifierKeys.None || isLog)
                         {
-                            var leftArmy = this.leftArmyView.Army;
-                            var rightWaves = this.BuildWavesString();
-                            if (leftArmy.IsEmpty) break;
+                            var leftWaves = this.BuildWavesString(this.leftWavesView);
+                            var rightWaves = this.BuildWavesString(this.rightWavesView);
 
-                            this.blackMarsh.Execute(leftArmy.ToString(), rightWaves, isLog);
+                            this.blackMarsh.Execute(leftWaves, rightWaves, isLog);
                             new ReportWindow(this.blackMarsh.Report) { Owner = this }.Show();
                             e.Handled = true;
                         }
@@ -143,11 +178,13 @@ namespace Ropufu
 
             private void WarningsHandler(Object sender, RoutedEventArgs e) => App.Warnings.Unwind(this);
 
+            private void UnitsHandler(Object sender, RoutedEventArgs e) => this.DisplayUnits();
+
             private void UpdateHandler(Object sender, RoutedEventArgs e) => this.DownloadUpdates();
 
-            private void AddWaveHandler(Object sender, RoutedEventArgs e) => this.AddWaveAfter(sender as ArmyView);
+            private void AddWaveHandler(Object sender, RoutedEventArgs e) => this.AddWaveAfter((sender as FrameworkElement)?.Tag, sender as ArmyView);
 
-            private void DeleteWaveHandler(Object sender, RoutedEventArgs e) => this.DeleteWave(sender as ArmyView);
+            private void DeleteWaveHandler(Object sender, RoutedEventArgs e) => this.DeleteWave((sender as FrameworkElement)?.Tag, sender as ArmyView);
         }
     }
 }

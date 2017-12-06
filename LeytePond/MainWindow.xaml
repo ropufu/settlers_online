@@ -9,6 +9,22 @@
         Title="Leyte Pond Simulator"
         Height="{local:SettingsBinding WindowHeight}" Width="{local:SettingsBinding WindowWidth}" 
         MinHeight="300" MinWidth="600" x:Name="self">
+    <Window.Resources>
+        <sys:Object x:Key="LeftTag" />
+        <sys:Object x:Key="RightTag" />
+        <Style x:Key="WaveListItemStyle" TargetType="ListViewItem">
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                        <ContentPresenter />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10*" />
@@ -20,31 +36,43 @@
             <RowDefinition Height="25" />
         </Grid.RowDefinitions>
 
-        <local:ArmyView Grid.Column="0" x:Name="leftArmyView" DoCheckGenerals="True" DoCoerceFactions="True" IsPlayerArmy="True" Decorator='{local:ConfigBinding Left, Mode=OneWay}' />
-        <StackPanel Grid.Column="1" Orientation="Vertical">
-            <ListView x:Name="rightWavesView" Margin="0,0,5,0">
+        <StackPanel Grid.Column="0" Orientation="Vertical">
+            <ListView x:Name="leftWavesView" Margin="0,0,5,0">
                 <ListView.Resources>
-                    <Style TargetType="{x:Type ListViewItem}">
-                        <Setter Property="IsTabStop" Value="False" />
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="Focusable" Value="False" />
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type ListViewItem}">
-                                    <ContentPresenter />
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
+                    <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource WaveListItemStyle}" />
                 </ListView.Resources>
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <local:ArmyView Decorator='{local:ConfigBinding Right, Mode=OneWay}' AddWave="AddWaveHandler" DeleteWave="DeleteWaveHandler" Margin="0,0,-10,0" />
+                        <StackPanel Orientation="Vertical" Margin="0,0,0,-10">
+                            <TextBlock FontWeight="Bold" Margin="10,10,0,0">
+                                Attacker Wave
+                            </TextBlock>
+                            <local:ArmyView DoCheckGenerals="True" DoCoerceFactions="True" IsPlayerArmy="True" Decorator='{local:ConfigBinding Left, Mode=OneWay}' AddWave="AddWaveHandler" DeleteWave="DeleteWaveHandler" Tag="{StaticResource LeftTag}" />
+                        </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
                 <sys:Object />
             </ListView>
-            <Button Style='{StaticResource AddIcon}' HorizontalAlignment="Right" ToolTip="Add wave" Margin="0,0,29,0" Click="AddWaveHandler" />
+            <Button Style='{StaticResource AddIcon}' HorizontalAlignment="Right" ToolTip="Add wave" Margin="0,0,29,0" Click="AddWaveHandler" Tag="{StaticResource LeftTag}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Vertical">
+            <ListView x:Name="rightWavesView" Margin="0,0,5,0">
+                <ListView.Resources>
+                    <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource WaveListItemStyle}" />
+                </ListView.Resources>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical" Margin="0,0,0,-10">
+                            <TextBlock FontWeight="Bold" Margin="10,10,0,0">
+                                Defender Wave
+                            </TextBlock>
+                            <local:ArmyView Decorator='{local:ConfigBinding Right, Mode=OneWay}' AddWave="AddWaveHandler" DeleteWave="DeleteWaveHandler" Tag="{StaticResource RightTag}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                <sys:Object />
+            </ListView>
+            <Button Style='{StaticResource AddIcon}' HorizontalAlignment="Right" ToolTip="Add wave" Margin="0,0,29,0" Click="AddWaveHandler" Tag="{StaticResource RightTag}" />
         </StackPanel>
 
         <DockPanel Grid.Row="1" Grid.ColumnSpan="2" LastChildFill="False">
@@ -59,9 +87,11 @@
                 <Button DockPanel.Dock="Left" Style='{StaticResource FolderWarningIcon}' Visibility='{Binding ElementName=self, Path=Warnings.IsNotEmpty, Converter={StaticResource VisibilityConverter}}' ToolTip="Warnings" Margin="5,0,10,0" Click="WarningsHandler" />
                 <!--Right-->
                 <Control DockPanel.Dock="Right" Margin="0,0,10,0" />
-                <TextBlock DockPanel.Dock="Right">
-                    Loaded <TextBlock Text='{local:UnitDatabaseBinding Count}' /> units.
-                </TextBlock>
+                <Button DockPanel.Dock="Right" Style='{StaticResource BasicIconStyle}' Click="UnitsHandler">
+                    <TextBlock>
+                        Loaded <TextBlock Text='{local:UnitDatabaseBinding Count}' /> units.
+                    </TextBlock>
+                </Button>
                 <Separator DockPanel.Dock="Right" Width="20" Margin="10,0,10,0" />
                 <Button DockPanel.Dock="Right" Style='{StaticResource DownloadIcon}' ToolTip="Check for updates" Margin="0,0,10,0" Click="UpdateHandler" />
             </DockPanel>

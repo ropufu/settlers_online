@@ -15,25 +15,28 @@
       <Value Profile="(Default)">120</Value>
     </Setting>
     <Setting Name="ReportLBColumnWidth" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">80</Value>
+      <Value Profile="(Default)">40</Value>
     </Setting>
     <Setting Name="ReportMinValueColumnWidth" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">80</Value>
+      <Value Profile="(Default)">40</Value>
     </Setting>
     <Setting Name="ReportMinProbColumnWidth" Type="System.Double" Scope="User">
       <Value Profile="(Default)">80</Value>
     </Setting>
     <Setting Name="ReportMaxValueColumnWidth" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">80</Value>
+      <Value Profile="(Default)">40</Value>
     </Setting>
     <Setting Name="ReportMaxProbColumnWidth" Type="System.Double" Scope="User">
       <Value Profile="(Default)">80</Value>
     </Setting>
     <Setting Name="ReportUBColumnWidth" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">80</Value>
+      <Value Profile="(Default)">40</Value>
     </Setting>
     <Setting Name="ReportMeanColumnWidth" Type="System.Double" Scope="User">
       <Value Profile="(Default)">80</Value>
+    </Setting>
+    <Setting Name="MapsUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://api.github.com/repos/ropufu/settlers_online/contents/maps</Value>
     </Setting>
   </Settings>
 </SettingsFile>

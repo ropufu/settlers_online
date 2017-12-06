@@ -104,6 +104,7 @@
     <Compile Include="Bijection.cs" />
     <Compile Include="Bridge\black_marsh.cs" />
     <Compile Include="Bridge\config.cs" />
+    <Compile Include="Bridge\prefix_tree.cs" />
     <Compile Include="Bridge\report.cs" />
     <Compile Include="GitHubFileInfo.cs" />
     <Compile Include="SkillsWindow.xaml.cs">
@@ -137,6 +138,9 @@
       <DependentUpon>ReportWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="SettingsBindingExtension.cs" />
+    <Compile Include="UnitsWindow.xaml.cs">
+      <DependentUpon>UnitsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Warnings.cs" />
     <DesignData Include="ArmyDesign.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -174,6 +178,10 @@
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UnitsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

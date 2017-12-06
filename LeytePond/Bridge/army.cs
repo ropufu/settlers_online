@@ -153,7 +153,7 @@ namespace Ropufu.LeytePond.Bridge
             handler(this, new PropertyChangedEventArgs(nameof(this.Capacity)));
         }
 
-        private Boolean Has(Func<UnitType, Boolean> filter)
+        public Boolean Has(Func<UnitType, Boolean> filter)
         {
             if (Object.ReferenceEquals(filter, null)) filter = u => true;
             foreach (var g in this.groups) if (filter(g.Unit)) return true;
@@ -195,6 +195,8 @@ namespace Ropufu.LeytePond.Bridge
 
         public List<BattleTrait> Traits => this.traits;
         
+        public IEnumerable<UnitGroup> Groups => from g in this.groups select g;
+
         public IEnumerable<UnitType> Types => from g in this.groups select g.Unit;
 
         public IEnumerable<Int32> CountsByType => from g in this.groups select g.Count;
@@ -231,7 +233,7 @@ namespace Ropufu.LeytePond.Bridge
 
             if (this.groups.Count == 0) return Army.EmptyArmyString;
             var groupStrings = new List<String>(this.groups.Count);
-            foreach (var g in this.groups) groupStrings.Add($"{g.Count}{format(g.Unit)}");
+            foreach (var g in this.groups) if (g.Count > 0) groupStrings.Add($"{g.Count}{format(g.Unit)}");
             return String.Join(" ", groupStrings);
         }
 

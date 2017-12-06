@@ -184,6 +184,28 @@ namespace Ropufu.LeytePond
 
         private void SkillsHandler(Object sender, RoutedEventArgs e) => this.ShowSkills();
 
+        private void DragEnterHandler(Object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(typeof(UnitType).FullName) || sender == e.Source) e.Effects = DragDropEffects.None;
+        }
+
+        private void DropHandler(Object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(UnitType).FullName))
+            {
+                var unit = e.Data.GetData(typeof(UnitType).FullName) as UnitType;
+                if (this.armySource.Has(u => u.Id == unit.Id)) return;
+                var groups = new List<UnitGroup>(this.armySource.Groups);
+                groups.Add(new UnitGroup(unit, 0));
+
+                var newArmy = new Army(groups);
+                this.Decorator?.Decorate(newArmy, new Warnings());
+                newArmy.Skills.DoSkipDefault = true;
+
+                newArmy.CopyTo(this.armySource);
+            }
+        }
+
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
             switch (e.Key)

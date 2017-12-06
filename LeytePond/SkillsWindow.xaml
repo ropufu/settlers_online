@@ -18,9 +18,8 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
         <!--Visual representation-->
-        <ListView x:Name="itemView" BorderThickness="0" KeyboardNavigation.TabNavigation="Cycle" VirtualizingStackPanel.IsVirtualizing="False">
+        <ListView x:Name="itemView" KeyboardNavigation.TabNavigation="Cycle">
             <ListView.ItemsSource>
-                <!--ItemsSource='{Binding ElementName=self, Path=Skills, Converter=SkillMapConverter, ConverterParameter={Binding ElementName=generalsBox, Path=SelectedValue}}'-->
                 <MultiBinding Converter='{StaticResource SkillMapConverter}'>
                     <Binding ElementName="self" Path="Skills" />
                     <Binding ElementName="generalsBox" Path="SelectedValue" />

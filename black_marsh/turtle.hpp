@@ -95,7 +95,7 @@ namespace ropufu
 
             private:
                 logger_type m_logger = { };
-                army m_left = { };
+                std::deque<army> m_left_sequence = { };
                 std::deque<army> m_right_sequence = { };
 
             public:
@@ -119,20 +119,24 @@ namespace ropufu
                     // ~~ Build unit database ~~
                     std::size_t count_units = db.load_from_folder(c.maps_path());
                     this->m_logger << "Loaded " << count_units << " units." << nullptr;
-                    this->m_left = { };
+                    this->m_left_sequence = { };
                     this->m_right_sequence = { };
                 } // reload(...)
 
                 const logger_type& logger() const noexcept { return this->m_logger; }
                 logger_type& logger() noexcept { return this->m_logger; }
 
-                const army& left() const noexcept { return this->m_left; }
+                const std::deque<army>& left_sequence() const noexcept { return this->m_left_sequence; }
                 const std::deque<army>& right_sequence() const noexcept { return this->m_right_sequence; }
 
-                void parse_left(const std::string& army_string) noexcept
+                void parse_left(const std::string& army_list_string) noexcept
                 {
-                    army_parser parser = army_string;
-                    this->m_left = parser.build(this->m_logger, true, true, false);
+                    this->m_left_sequence.clear();
+                    for (const std::string& army_string : char_string::split(army_list_string, "+"))
+                    {
+                        army_parser parser = army_string;
+                        this->m_left_sequence.emplace_back(parser.build(this->m_logger, true, true, false));
+                    }
                 } // parse_left(...)
 
                 void parse_right(const std::string& army_list_string) noexcept
@@ -166,21 +170,27 @@ namespace ropufu
                 {
                     // @todo Erase old .cbor output.
                     std::vector<report_entry> report { };
-                    if (this->m_left.empty() || this->m_right_sequence.empty())
+                    if (this->m_left_sequence.empty() || this->m_right_sequence.empty())
                     {
                         this->m_logger.write("Armies (left and right) have to be set prior to execution.");
                         return report;
                     }
 
-                    army next_left = this->m_left;
-                    for (army next_right : this->m_right_sequence)
+                    // Make copies of army sequences for the simulation.
+                    std::deque<army> attacker_sequence = this->m_left_sequence;
+                    std::deque<army> defender_sequence = this->m_right_sequence;
+                    for (army& next_left : attacker_sequence) left_decorator.decorate(next_left);
+                    for (army& next_right : defender_sequence) right_decorator.decorate(next_right);
+
+                    // Goal: eliminate all right (defender) waves.
+                    for (army& next_right : defender_sequence)
                     {
-                        if (next_left.count_units() == 0) break;
-
-                        left_decorator.decorate(next_left);
-                        right_decorator.decorate(next_right);
-
-                        type::run(next_left, next_right, report, simulation_count, destruction_count, logger);
+                        // As long as the defender (next_right) is alive, keep throwing attackers at them.
+                        for (army& next_left : attacker_sequence)
+                        {
+                            if (next_left.count_units() == 0) continue; // If the attacker wave has been defeated, continue to the next one.
+                            type::run(next_left, next_right, report, simulation_count, destruction_count, logger);
+                        }
                     }
 
                     config::instance().to_cbor(report);
@@ -273,6 +283,7 @@ namespace ropufu
                     if (worst_case_left.count_units() != 0) report.emplace_back("Next wave", worst_case_left.to_string(army_format), worst_case_left.to_string(compact_format));
                     if (best_case_right.count_units() != 0) report.emplace_back("Next wave", best_case_right.to_string(army_format), best_case_right.to_string(army_format));
                     left = worst_case_left;
+                    right = best_case_right;
                 } // run(...)
             }; // struct turtle
         } // namespace black_marsh

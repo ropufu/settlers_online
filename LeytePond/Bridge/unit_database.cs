@@ -6,6 +6,8 @@ using System.Text;
 
 namespace Ropufu.LeytePond.Bridge
 {
+    using CharTree = PrefixTree<Char, String>;
+
     /** Mirrors structural behavior of \c unit_database.hpp. */
     class Lookup<TKey, TSkeleton>
     {
@@ -68,6 +70,8 @@ namespace Ropufu.LeytePond.Bridge
             return key;
         }
 
+        public static String BuildPrimaryName(UnitType unit) => unit.FirstName.ToLowerInvariant();
+
         private static String RelaxToLowercase(String value) => value.ToLowerInvariant();
         private static String RelaxSpelling(String value)
         {
@@ -89,8 +93,10 @@ namespace Ropufu.LeytePond.Bridge
 
         private Dictionary<String, UnitType> database = new Dictionary<String, UnitType>();
         private HashSet<Int32> ids = new HashSet<Int32>();
+        private HashSet<String> primaryNames = new HashSet<String>();
         private Lookup<String, String> lowercaseLookup = new Lookup<String, String>();
         private Lookup<String, String> misspelledLookup = new Lookup<String, String>();
+        private CharTree primaryNameTree = new CharTree();
 
         public UnitDatabase()
         {
@@ -116,8 +122,10 @@ namespace Ropufu.LeytePond.Bridge
         {
             this.database.Clear();
             this.ids.Clear();
+            this.primaryNames.Clear();
             this.lowercaseLookup.Clear();
             this.misspelledLookup.Clear();
+            this.primaryNameTree.Clear();
         }
 
         public IEnumerable<UnitType> Generals => from pair in this.database where pair.Value.Is(UnitFaction.General) select pair.Value;
@@ -137,6 +145,10 @@ namespace Ropufu.LeytePond.Bridge
             var lowercase = UnitDatabase.RelaxToLowercase(query);
             var misspelled = UnitDatabase.RelaxSpelling(lowercase);
             var countMatches = 0;
+
+            var isSingle = false;
+            var firstPrefixMatch = this.primaryNameTree.First(lowercase, out isSingle);
+            if (isSingle) lowercase = firstPrefixMatch;
 
             countMatches = this.lowercaseLookup.TryFind(lowercase, ref key, maybe => filter(this.database[maybe]));
             if (countMatches >= 1)
@@ -180,19 +192,26 @@ namespace Ropufu.LeytePond.Bridge
                     {
                         u.Trim();
                         var key = UnitDatabase.BuildKey(u);
+                        var primaryName = UnitDatabase.BuildPrimaryName(u);
                         if (this.database.ContainsKey(key))
                         {
-                            App.Warnings.Push($"Unit with the same name ({key}) already loaded.");
+                            App.Warnings.Push($"Unit with the same key ({key}) already loaded.");
                         }
                         else if (this.ids.Contains(u.Id))
                         {
                             App.Warnings.Push($"Unit with the same id ({u.Id}) already loaded.");
                         }
+                        else if (this.primaryNames.Contains(primaryName))
+                        {
+                            App.Warnings.Push($"Unit with a similar primary name ({u.FirstName}) already loaded.");
+                        }
                         else
                         {
                             this.database.Add(key, u);
                             this.ids.Add(u.Id);
+                            this.primaryNames.Add(primaryName);
                             this.UpdateLookup(key, u);
+                            this.primaryNameTree.Add(primaryName);
                             count++;
                         }
                     }
@@ -218,6 +237,7 @@ namespace Ropufu.LeytePond.Bridge
                     App.Warnings.Push($"Authorization error reading file ({p}).");
                 }
             }
+            //this.primaryNameTree.Reduce();
             return count;
         }
     }

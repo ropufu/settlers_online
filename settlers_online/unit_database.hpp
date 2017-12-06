@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 
 #include "char_string.hpp"
+#include "prefix_tree.hpp"
 #include "unit_type.hpp"
 
 #include <cstddef> // std::size_t
@@ -93,12 +94,21 @@ namespace ropufu
                 return key;
             } // build_key(...)
 
+            static key_type build_primary_name(const unit_type& unit) noexcept
+            {
+                key_type key = unit.names().front();
+                char_string::to_lower(key);
+                return key;
+            } // build_primary_name(...)
+
         private:
             unit_type m_invalid = { };
             std::map<key_type, unit_type> m_database = { }; // Primary key: shortest name.
             std::set<std::size_t> m_ids = { }; // Keep track of id's to prevent group collision in \army.
+            std::set<key_type> m_primary_names = { }; // Keep track of primary names to allow for fast prefix search.
             lookup<key_type, key_type> m_lowercase_lookup = { }; // Lookup for lowercase names.
             lookup<key_type, key_type> m_misspelled_lookup = { }; // Lookup for misspelled names.
+            char_tree m_primary_name_tree = { }; // Fast prefix search by primary name.
 
             /** Relaxed lookup stage 1. */
             static key_type relax_to_lowercase(const key_type& query) noexcept
@@ -159,8 +169,10 @@ namespace ropufu
             {
                 this->m_database.clear();
                 this->m_ids.clear();
+                this->m_primary_names.clear();
                 this->m_lowercase_lookup.clear();
                 this->m_misspelled_lookup.clear();
+                this->m_primary_name_tree.clear();
             } // clear(...)
 
             const std::map<key_type, unit_type>& data() const noexcept { return this->m_database; }
@@ -195,6 +207,15 @@ namespace ropufu
                 key_type lowercase = unit_database::relax_to_lowercase(query);
                 key_type misspelled = unit_database::relax_spelling(lowercase);
                 std::size_t count_matches = 0;
+
+                // Stage 0: prefix search.
+                bool is_single = false;
+                key_type first_prefix_match = this->m_primary_name_tree.first(lowercase, is_single);
+                //count_matches = this->m_primary_name_tree.count(lowercase);
+                // Only one terminus matches the prefix.
+                if (is_single) lowercase = first_prefix_match; // Overwrite the search query.
+
+                // Stage 1: lowercase lookup.
                 count_matches = this->m_lowercase_lookup.try_find(lowercase, key, [&] (const key_type& maybe) { return filter(this->m_database.at(maybe)); });
                 if (count_matches >= 1)
                 {
@@ -206,6 +227,8 @@ namespace ropufu
                         "Multiple units match the specified query.", lowercase, count_matches);
                     return false;
                 }
+
+                // Stage 2: misspelled lookup.
                 count_matches = this->m_misspelled_lookup.try_find(misspelled, key, [&] (const key_type& maybe) { return filter(this->m_database.at(maybe)); });
                 if (count_matches >= 1)
                 {
@@ -247,6 +270,7 @@ namespace ropufu
                                 u.set_names(names);
 
                                 key_type key = type::build_key(u);
+                                key_type primary_name = type::build_primary_name(u);
                                 
                                 if (this->m_database.count(key) != 0)
                                 {
@@ -262,11 +286,20 @@ namespace ropufu
                                         aftermath::severity_level::negligible,
                                         std::string("Unit with id ") + std::to_string(u.id()) + std::string(" already exists."), p.path().string(), __LINE__);
                                 }
+                                else if (this->m_primary_names.count(primary_name) != 0)
+                                {
+                                    aftermath::quiet_error::instance().push(
+                                        aftermath::not_an_error::logic_error,
+                                        aftermath::severity_level::negligible,
+                                        std::string("Unit with a similar primary name ") + u.names().front() + std::string(" already exists."), p.path().string(), __LINE__);
+                                }
                                 else
                                 {
                                     this->m_database.emplace(key, u);
                                     this->m_ids.insert(u.id());
+                                    this->m_primary_names.insert(primary_name);
                                     this->update_lookup(key, u);
+                                    this->m_primary_name_tree.add(primary_name);
                                     count++;
                                 }
                             }

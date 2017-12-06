@@ -118,8 +118,7 @@ namespace Ropufu.LeytePond
 
             using (var response = (HttpWebResponse)request.GetResponse())
             {
-                using (var stream = response.GetResponseStream())
-                using (var reader = new System.IO.StreamReader(stream))
+                using (var reader = new System.IO.StreamReader(response.GetResponseStream()))
                 {
                     var json = reader.ReadToEnd();
                     files = JsonConvert.DeserializeObject<List<GitHubFileInfo>>(json);

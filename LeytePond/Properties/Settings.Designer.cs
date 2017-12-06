@@ -73,7 +73,7 @@ namespace Ropufu.LeytePond.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("80")]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
         public double ReportLBColumnWidth {
             get {
                 return ((double)(this["ReportLBColumnWidth"]));
@@ -85,7 +85,7 @@ namespace Ropufu.LeytePond.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("80")]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
         public double ReportMinValueColumnWidth {
             get {
                 return ((double)(this["ReportMinValueColumnWidth"]));
@@ -109,7 +109,7 @@ namespace Ropufu.LeytePond.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("80")]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
         public double ReportMaxValueColumnWidth {
             get {
                 return ((double)(this["ReportMaxValueColumnWidth"]));
@@ -133,7 +133,7 @@ namespace Ropufu.LeytePond.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("80")]
+        [global::System.Configuration.DefaultSettingValueAttribute("40")]
         public double ReportUBColumnWidth {
             get {
                 return ((double)(this["ReportUBColumnWidth"]));
@@ -152,6 +152,18 @@ namespace Ropufu.LeytePond.Properties {
             }
             set {
                 this["ReportMeanColumnWidth"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://api.github.com/repos/ropufu/settlers_online/contents/maps")]
+        public string MapsUrl {
+            get {
+                return ((string)(this["MapsUrl"]));
+            }
+            set {
+                this["MapsUrl"] = value;
             }
         }
     }

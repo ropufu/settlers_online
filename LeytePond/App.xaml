@@ -20,8 +20,8 @@
             <Setter Property="Padding" Value="1" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
             <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
         </Style>
         <Style x:Key="UnlinkIcon" BasedOn='{StaticResource BasicIconStyle}' TargetType="ContentControl">
             <Setter Property="ContentTemplate">
@@ -49,12 +49,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="FolderWarningIcon" TargetType="ContentControl">
-            <Setter Property="Padding" Value="1" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="BorderBrush" Value="Transparent" />
+        <Style x:Key="FolderWarningIcon" BasedOn='{StaticResource BasicIconStyle}' TargetType="ContentControl">
             <Setter Property="ContentTemplate">
                 <Setter.Value>
                     <DataTemplate>
@@ -80,12 +75,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="KeyWarningIcon" TargetType="ContentControl">
-            <Setter Property="Padding" Value="1" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="BorderBrush" Value="Transparent" />
+        <Style x:Key="KeyWarningIcon" BasedOn='{StaticResource BasicIconStyle}' TargetType="ContentControl">
             <Setter Property="ContentTemplate">
                 <Setter.Value>
                     <DataTemplate>
@@ -112,12 +102,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="DownloadIcon" TargetType="ContentControl">
-            <Setter Property="Padding" Value="1" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="BorderBrush" Value="Transparent" />
+        <Style x:Key="DownloadIcon" BasedOn='{StaticResource BasicIconStyle}' TargetType="ContentControl">
             <Setter Property="ContentTemplate">
                 <Setter.Value>
                     <DataTemplate>
@@ -141,12 +126,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="HistogramIcon" TargetType="ContentControl">
-            <Setter Property="Padding" Value="1" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="BorderBrush" Value="Transparent" />
+        <Style x:Key="HistogramIcon" BasedOn='{StaticResource BasicIconStyle}' TargetType="ContentControl">
             <Setter Property="ContentTemplate">
                 <Setter.Value>
                     <DataTemplate>
@@ -176,12 +156,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="LibraryIcon" TargetType="ContentControl">
-            <Setter Property="Padding" Value="1" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="BorderBrush" Value="Transparent" />
+        <Style x:Key="LibraryIcon" BasedOn='{StaticResource BasicIconStyle}' TargetType="ContentControl">
             <Setter Property="ContentTemplate">
                 <Setter.Value>
                     <DataTemplate>
@@ -207,12 +182,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key="AddIcon" TargetType="ContentControl">
-            <Setter Property="Padding" Value="1" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="BorderBrush" Value="Transparent" />
+        <Style x:Key="AddIcon" BasedOn='{StaticResource BasicIconStyle}' TargetType="ContentControl">
             <Setter Property="ContentTemplate">
                 <Setter.Value>
                     <DataTemplate>

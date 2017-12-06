@@ -324,7 +324,9 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
                 break;
             case command_name::left:
                 if (!argument.empty()) lucy.parse_left(argument);
-                std::cout << "Left army: " << lucy.left() << std::endl;
+                std::cout << "Left army: ";
+                print_elements(lucy.left_sequence(), " + ");
+                std::cout << std::endl;
                 break;
             case command_name::right:
                 if (!argument.empty()) lucy.parse_right(argument);
