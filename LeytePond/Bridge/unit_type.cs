@@ -7,7 +7,7 @@ namespace Ropufu.LeytePond.Bridge
 {
     /** Mirrors structural behavior of \c unit_type.hpp. */
     [JsonObject(MemberSerialization.OptIn)]
-    public class UnitType : IComparable<UnitType>
+    public class UnitType : IComparable<UnitType>, IEquatable<UnitType>
     {
         [JsonProperty("id", Required = Required.Always)]
         private Int32 id = 0;
@@ -66,7 +66,7 @@ namespace Ropufu.LeytePond.Bridge
 
         public override String ToString() => this.FirstName;
 
-        public override Int32 GetHashCode() => this.FirstName.GetHashCode();
+        public override Int32 GetHashCode() => this.id;
 
         public String NamesString => String.Join(", ", this.names);
 
@@ -76,5 +76,32 @@ namespace Ropufu.LeytePond.Bridge
         public String AttackPhasesString => String.Join(", ", from x in this.attackPhases select x.ToReadable());
         public String AbilitiesString => String.Join(", ", from x in this.abilities select x.ToReadable());
         public String TraitsString => String.Join(", ", from x in this.traits select x.ToReadable());
+
+        // @warning Does not perform null reference checks.
+        private Boolean EqualsUnchecked(UnitType other) => (this.id == other.id);
+
+        public override Boolean Equals(Object obj)
+        {
+            // Check for null and compare run-time types.
+            if (Object.ReferenceEquals(obj, null) || !this.GetType().Equals(obj.GetType())) return false;
+            else return this.EqualsUnchecked((UnitType)obj);
+        }
+
+        public Boolean Equals(UnitType other)
+        {
+            // Check for null.
+            if (Object.ReferenceEquals(other, null)) return false;
+            else return this.EqualsUnchecked(other);
+        }
+
+        public static Boolean operator ==(UnitType x, UnitType y)
+        {
+            // Check x for null.
+            if (Object.ReferenceEquals(x, null)) return Object.ReferenceEquals(y, null);
+            // Know that x is not null.
+            return x.Equals(y);
+        }
+
+        public static Boolean operator !=(UnitType x, UnitType y) => !(x == y);
     }
 }

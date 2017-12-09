@@ -15,30 +15,25 @@
         {
             "names": [ "Watchtower" ],
             "hit points": 1000,
-            "damage reduction": 0.5,
-            "special abilities": [ "overrun" ]
+            "damage reduction": 0.5
         },
         {
             "names": [ "Fortified Watchtower" ],
             "hit points": 1500,
-            "damage reduction": 0.75,
-            "special abilities": [ "overrun" ]
+            "damage reduction": 0.75
         },
         {
             "names": [ "Stone Tower" ],
             "hit points": 2000,
-            "damage reduction": 0.9,
-            "special abilities": [ "overrun" ]
+            "damage reduction": 0.9
         },
         {
             "names": [ "Witch Tower" ],
-            "hit points": 2000,
-            "special abilities": [ "overrun" ]
+            "hit points": 2000
         },
         {
             "names": [ "Bone Church" ],
-            "hit points": 2000,
-            "special abilities": [ "overrun" ]
+            "hit points": 2000
         },
         {
             "names": [ "White Castle" ],
@@ -46,8 +41,7 @@
         },
         {
             "names": [ "Dark Castle" ],
-            "hit points": 2000,
-            "special abilities": [ "overrun" ]
+            "hit points": 2000
         }
     ]
 }

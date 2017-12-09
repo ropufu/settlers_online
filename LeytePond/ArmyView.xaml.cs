@@ -85,7 +85,7 @@ namespace Ropufu.LeytePond
         public event RoutedEventHandler DeleteWave, AddWave;
 
         public Army Army => this.armySource;
-        
+
         public Boolean DoCheckGenerals
         {
             get => this.doCheckGenerals;
@@ -107,21 +107,67 @@ namespace Ropufu.LeytePond
         public Boolean IsPlayerArmy
         {
             get => this.isPlayerArmy;
-            set => this.isPlayerArmy = value;
+            set
+            {
+                this.isPlayerArmy = value;
+                this.campButton.Visibility = value ? Visibility.Collapsed : Visibility.Visible;
+            }
         }
 
         private void InitializeArmySource()
         {
             if (this.doHold) return;
-            
+
             this.warnings.Clear();
             this.groupSum.ClearChildren();
 
             var newArmy = this.parser.Build(this.warnings, this.doCheckGenerals, this.doCoerceFactions, this.isStrict);
+            if (!this.parser.IsGood) // Try interpreting the string as adventure name.
+            {
+                var units = new List<UnitType>();
+                if (UnitDatabase.Instance.TryFindAdventure(this.ArmyString, ref units))
+                {
+                    newArmy = new Army((from u in units select new UnitGroup(u, 0)).ToArray());
+                }
+            }
             this.Decorator?.Decorate(newArmy, new Warnings());
             newArmy.Skills.DoSkipDefault = true;
 
             newArmy.CopyTo(this.armySource);
+        }
+
+        public void DeleteSelected()
+        {
+            // @todo This is horrible!! Rebuild the whole thing just to delete one group?!
+            var groups = new List<UnitGroup>(this.armySource.Groups);
+            this.groupSum.ClearChildren();
+
+            var generator = this.itemView.ItemContainerGenerator;
+            foreach (UnitGroup g in this.itemView.SelectedItems) groups.Remove(g);
+
+            var newArmy = new Army(groups);
+            this.Decorator?.Decorate(newArmy, new Warnings());
+            newArmy.Skills.DoSkipDefault = true;
+
+            newArmy.CopyTo(this.armySource);
+            this.itemView.Items.Refresh();
+
+            this.doHold = true;
+            this.ArmyString = this.isPlayerArmy ? this.armySource.ToCompactString() : this.armySource.ToString();
+            this.doHold = false;
+        }
+
+        public void ToggleLink()
+        {
+            if (!this.isPlayerArmy) return;
+
+            var generator = this.itemView.ItemContainerGenerator;
+            foreach (UnitGroup g in this.itemView.SelectedItems)
+            {
+                var container = generator.ContainerFromItem(g);
+                var groupCountControl = (GroupCountUpDown)container.FindVisualChild(o => o is GroupCountUpDown);
+                if (!groupCountControl.IsNull()) groupCountControl.IsCoupled = !groupCountControl.IsCoupled;
+            }
         }
 
         public ArmyView()
@@ -159,19 +205,6 @@ namespace Ropufu.LeytePond
             //this.armyTextBox.Focus();
         }
 
-        public void ToggleLink()
-        {
-            if (!this.isPlayerArmy) return;
-
-            var generator = this.itemView.ItemContainerGenerator;
-            foreach (UnitGroup g in this.itemView.SelectedItems)
-            {
-                var container = generator.ContainerFromItem(g);
-                var groupCountControl = (GroupCountUpDown)container.FindVisualChild(o => o is GroupCountUpDown);
-                if (!Object.ReferenceEquals(groupCountControl, null)) groupCountControl.IsCoupled = !groupCountControl.IsCoupled;
-            }
-        }
-
         private void ShowSkills()
         {
             var general = default(UnitType);
@@ -183,6 +216,8 @@ namespace Ropufu.LeytePond
         private void WarningsHandler(Object sender, RoutedEventArgs e) => this.warnings.Unwind();
 
         private void SkillsHandler(Object sender, RoutedEventArgs e) => this.ShowSkills();
+
+        private void CampHandler(Object sender, RoutedEventArgs e) { }
 
         private void DragEnterHandler(Object sender, DragEventArgs e)
         {
@@ -206,7 +241,7 @@ namespace Ropufu.LeytePond
             }
         }
 
-        protected override void OnPreviewKeyDown(KeyEventArgs e)
+        private void ListItemKeyHandler(Object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
@@ -220,6 +255,23 @@ namespace Ropufu.LeytePond
                         }
                     }
                     break;
+                case Key.Delete:
+                    if (e.KeyboardDevice.Modifiers == ModifierKeys.None)
+                    {
+                        if (!(e.KeyboardDevice.FocusedElement is TextBox))
+                        {
+                            this.DeleteSelected();
+                            e.Handled = true;
+                        }
+                    }
+                    break;
+            }
+        }
+
+        protected override void OnPreviewKeyDown(KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
                 case Key.V:
                     if (e.KeyboardDevice.Modifiers == ModifierKeys.Control)
                     {

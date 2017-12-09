@@ -22,16 +22,20 @@ namespace Ropufu.LeytePond
     {
         private Boolean doTakeAll = true;
         private String[] keywords = new String[0];
+        private List<Adventure> adventures = new List<Adventure>(UnitDatabase.Instance.Adventures);
 
         private Point maybeDragStart = new Point();
 
         public UnitsWindow()
         {
+            this.adventures.Insert(0, new Adventure("All"));
             this.InitializeComponent();
 
             var view = (CollectionView)CollectionViewSource.GetDefaultView(this.itemView.ItemsSource);
             view.Filter = this.UnitFilter;
         }
+
+        public IEnumerable<Adventure> Adventures => this.adventures;
 
         private void DownHandler(Object sender, MouseButtonEventArgs e) => this.maybeDragStart = e.GetPosition(null);
 
@@ -56,9 +60,18 @@ namespace Ropufu.LeytePond
 
         private Boolean UnitFilter(Object item)
         {
+            var unit = (UnitType)item;
+
+            // Primary filter: by adventure.
+            if (this.adventuresBox.SelectedIndex != 0)
+            {
+                var adventure = (Adventure)this.adventuresBox.SelectedValue;
+                if (!adventure.Has(unit)) return false;
+            }
+
+            // Secondary filter: by text.
             if (this.doTakeAll) return true;
 
-            var unit = (UnitType)item;
             var isMatch = new Boolean[this.keywords.Length];
             foreach (var name in unit.Names)
             {
@@ -70,12 +83,19 @@ namespace Ropufu.LeytePond
             return hasPassed;
         }
 
-        private void FilterChanged(Object sender, TextChangedEventArgs e)
+        private void FilterChangedHandler(Object sender, TextChangedEventArgs e)
         {
             var filter = this.filterBox.Text.ToLowerInvariant().DeepTrim();
             this.doTakeAll = String.IsNullOrWhiteSpace(filter);
             this.keywords = filter.Split(new Char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
+            if (this.itemView.IsNull()) return;
+            CollectionViewSource.GetDefaultView(this.itemView.ItemsSource).Refresh();
+        }
+
+        private void AdventureChangedHandler(Object sender, SelectionChangedEventArgs e)
+        {
+            if (this.itemView.IsNull()) return;
             CollectionViewSource.GetDefaultView(this.itemView.ItemsSource).Refresh();
         }
 

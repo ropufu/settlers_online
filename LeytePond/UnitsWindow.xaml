@@ -7,7 +7,17 @@
         mc:Ignorable="d"
         Title="Units" Height="520" Width="380" WindowStyle="ToolWindow" x:Name="self">
     <DockPanel LastChildFill="True">
-        <TextBox DockPanel.Dock="Top" x:Name="filterBox" TextChanged="FilterChanged" Margin="10" />
+        <TextBox DockPanel.Dock="Top" x:Name="filterBox" TextChanged="FilterChangedHandler" Margin="10,10,10,5" />
+        <ComboBox DockPanel.Dock="Top" x:Name="adventuresBox" ItemsSource='{Binding ElementName=self, Path=Adventures}' SelectedIndex="0"  SelectionChanged="AdventureChangedHandler" Margin="10,5,10,10">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="5,0,5,0" MaxWidth='{Binding ElementName=adventuresBox, Path=ActualWidth}'>
+                        <TextBlock Text='{Binding Path=Name}' VerticalAlignment="Center" Height="20" />
+                        <TextBlock Text='{Binding Path=MapsString}' Foreground="Gray" VerticalAlignment="Center" Height="20" Margin="10,0,0,0" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
         <!--Visual representation-->
         <ListView x:Name="itemView" KeyboardNavigation.TabNavigation="Cycle" VirtualizingStackPanel.IsVirtualizing="True" ItemsSource='{local:UnitDatabaseBinding Units}' Margin="0,0,0,5">
             <ListView.Resources>

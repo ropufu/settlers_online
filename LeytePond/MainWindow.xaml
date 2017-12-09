@@ -36,44 +36,58 @@
             <RowDefinition Height="25" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Column="0" Orientation="Vertical">
-            <ListView x:Name="leftWavesView" Margin="0,0,5,0">
-                <ListView.Resources>
-                    <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource WaveListItemStyle}" />
-                </ListView.Resources>
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Vertical" Margin="0,0,0,-10">
-                            <TextBlock FontWeight="Bold" Margin="10,10,0,0">
-                                Attacker Wave
-                            </TextBlock>
-                            <local:ArmyView DoCheckGenerals="True" DoCoerceFactions="True" IsPlayerArmy="True" Decorator='{local:ConfigBinding Left, Mode=OneWay}' AddWave="AddWaveHandler" DeleteWave="DeleteWaveHandler" Tag="{StaticResource LeftTag}" />
+        <ListView x:Name="leftWavesView" Grid.Column="0" Margin="0,0,5,0">
+            <ListView.Resources>
+                <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource WaveListItemStyle}" />
+            </ListView.Resources>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Vertical" Margin="0,0,0,-10">
+                        <TextBlock FontWeight="Bold" Margin="10,10,0,0">
+                            Attacker Wave
+                        </TextBlock>
+                        <local:ArmyView DoCheckGenerals="True" DoCoerceFactions="True" IsPlayerArmy="True" Decorator='{local:ConfigBinding Left, Mode=OneWay}' AddWave="AddWaveHandler" DeleteWave="DeleteWaveHandler" Tag="{StaticResource LeftTag}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+            <ListView.Template>
+                <ControlTemplate>
+                    <ScrollViewer CanContentScroll="False">
+                        <StackPanel Orientation="Vertical">
+                            <ItemsPresenter />
+                            <Button Style='{StaticResource AddIcon}' HorizontalAlignment="Right" ToolTip="Add wave" Margin="0,0,29,0" Click="AddWaveHandler" Tag="{StaticResource LeftTag}" />
                         </StackPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-                <sys:Object />
-            </ListView>
-            <Button Style='{StaticResource AddIcon}' HorizontalAlignment="Right" ToolTip="Add wave" Margin="0,0,29,0" Click="AddWaveHandler" Tag="{StaticResource LeftTag}" />
-        </StackPanel>
-        <StackPanel Grid.Column="1" Orientation="Vertical">
-            <ListView x:Name="rightWavesView" Margin="0,0,5,0">
-                <ListView.Resources>
-                    <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource WaveListItemStyle}" />
-                </ListView.Resources>
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Vertical" Margin="0,0,0,-10">
-                            <TextBlock FontWeight="Bold" Margin="10,10,0,0">
-                                Defender Wave
-                            </TextBlock>
-                            <local:ArmyView Decorator='{local:ConfigBinding Right, Mode=OneWay}' AddWave="AddWaveHandler" DeleteWave="DeleteWaveHandler" Tag="{StaticResource RightTag}" />
+                    </ScrollViewer>
+                </ControlTemplate>
+            </ListView.Template>
+            <sys:Object />
+        </ListView>
+        <ListView x:Name="rightWavesView" Grid.Column="1" Margin="0,0,5,0">
+            <ListView.Resources>
+                <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource WaveListItemStyle}" />
+            </ListView.Resources>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Vertical" Margin="0,0,0,-10">
+                        <TextBlock FontWeight="Bold" Margin="10,10,0,0">
+                            Defender Wave
+                        </TextBlock>
+                        <local:ArmyView Decorator='{local:ConfigBinding Right, Mode=OneWay}' AddWave="AddWaveHandler" DeleteWave="DeleteWaveHandler" Tag="{StaticResource RightTag}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+            <ListView.Template>
+                <ControlTemplate>
+                    <ScrollViewer CanContentScroll="False">
+                        <StackPanel Orientation="Vertical">
+                            <ItemsPresenter />
+                            <Button Style='{StaticResource AddIcon}' HorizontalAlignment="Right" ToolTip="Add wave" Margin="0,0,29,0" Click="AddWaveHandler" Tag="{StaticResource RightTag}" />
                         </StackPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-                <sys:Object />
-            </ListView>
-            <Button Style='{StaticResource AddIcon}' HorizontalAlignment="Right" ToolTip="Add wave" Margin="0,0,29,0" Click="AddWaveHandler" Tag="{StaticResource RightTag}" />
-        </StackPanel>
+                    </ScrollViewer>
+                </ControlTemplate>
+            </ListView.Template>
+            <sys:Object />
+        </ListView>
 
         <DockPanel Grid.Row="1" Grid.ColumnSpan="2" LastChildFill="False">
             <TextBlock DockPanel.Dock="Left" Text="Simulations: " Margin="10,1,10,1" VerticalAlignment="Center" />

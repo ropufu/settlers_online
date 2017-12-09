@@ -27,7 +27,8 @@ namespace Ropufu.LeytePond
         public void AddChild(GroupCountUpDown item)
         {
             if (Object.ReferenceEquals(item, null)) throw new ArgumentNullException(nameof(item));
-            
+
+            item.IsCoupled = false;
             this.children.Add(item);
             this.InvalidateConstraint();
         }

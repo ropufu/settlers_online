@@ -8,6 +8,7 @@ namespace Ropufu.LeytePond.Bridge
     {
         public static String DeepTrim(this String value)
         {
+            if (value.IsNull()) return String.Empty;
             var builder = new StringBuilder();
             var wasSpace = false;
             foreach (var c in value)
