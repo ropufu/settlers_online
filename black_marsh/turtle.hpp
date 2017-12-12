@@ -91,6 +91,8 @@ namespace ropufu
                         worst_case[k].kill(losses[k].max());
                         best_case[k].kill(losses[k].min());
                     }
+                    worst_case.snapshot();
+                    best_case.snapshot();
                 } // present_losses(...)
 
             private:
@@ -117,7 +119,7 @@ namespace ropufu
                     }
 
                     // ~~ Build unit database ~~
-                    std::size_t count_units = db.load_from_folder(c.maps_path());
+                    std::size_t count_units = db.load_from_folder(c.maps_path(), this->m_logger);
                     this->m_logger << "Loaded " << count_units << " units." << nullptr;
                     this->m_left_sequence = { };
                     this->m_right_sequence = { };
@@ -164,6 +166,7 @@ namespace ropufu
                     no_logger_type logger { };
                     return this->run(c.left(), c.right(), c.simulation_count(), c.destruction_count(), logger);
                 }
+                
             private:
                 template <typename t_logger_type>
                 std::vector<report_entry> run(const army_decorator& left_decorator, const army_decorator& right_decorator, std::size_t simulation_count, std::size_t destruction_count, t_logger_type& logger) noexcept
@@ -210,7 +213,7 @@ namespace ropufu
                     sequencer_type::pool_type::instance().cache(combat.right().underlying());
 
                     auto army_format = [] (const unit_type& u) { return " " + u.names().front(); };
-                    auto compact_format = [] (const unit_type& u) { return unit_database::build_key(u); };
+                    auto compact_format = [] (const unit_type& u) { return prefix_builder<unit_type>::build_key(u); };
                     std::string left_army_compact_string = left.to_string(compact_format);
                     std::string left_army_string = left.to_string(army_format);
                     std::string right_army_string = right.to_string(army_format);

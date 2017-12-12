@@ -136,7 +136,7 @@ namespace ropufu
                 // Check for multiple factions.
                 if (do_coerce_factions)
                 {
-                    const auto& format_compact = [] (const unit_type& u) { return unit_database::build_key(u); };
+                    const auto& format_compact = [] (const unit_type& u) { return prefix_builder<unit_type>::build_key(u); };
 
                     std::set<unit_faction> factions { };
                     for (const auto& g : a.groups()) factions.insert(g.unit().faction());

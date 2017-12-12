@@ -106,6 +106,7 @@
     <Compile Include="Bridge\config.cs" />
     <Compile Include="Bridge\prefix_tree.cs" />
     <Compile Include="Bridge\report.cs" />
+    <Compile Include="Bridge\prefix_database.cs" />
     <Compile Include="GitHubFileInfo.cs" />
     <Compile Include="SkillsWindow.xaml.cs">
       <DependentUpon>SkillsWindow.xaml</DependentUpon>
