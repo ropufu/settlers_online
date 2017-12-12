@@ -83,23 +83,14 @@ namespace ropufu
             using value_type = t_value_type;
             using key_type = std::string;
 
-            static key_type build_key(const value_type& unit) noexcept
-            {
-                static_assert(false, "<prefix_builder> not specialized.");
-            } // build_key(...)
+            static key_type build_key(const value_type& unit) noexcept;
 
-            static key_type build_primary_name(const value_type& unit) noexcept
-            {
-                static_assert(false, "<prefix_builder> not specialized.");
-            } // build_primary_name(...)
+            static key_type build_primary_name(const value_type& unit) noexcept;
 
             /** @brief Collection of names associated with the \p unit.
              *  @remark Return type has to support range-based loops.
              */
-            static std::vector<key_type> names(const value_type& unit) noexcept
-            {
-                static_assert(false, "<prefix_builder> not specialized.");
-            } // names(...)
+            static std::vector<key_type> names(const value_type& unit) noexcept;
         }; // struct prefix_builder
 
         /** @brief Class for accessing known units.
@@ -263,8 +254,8 @@ namespace ropufu
 
                 // Primary search failed. Secondary search: all lowercase!
                 key_type key { };
-                key_type lowercase = unit_database::relax_to_lowercase(query);
-                key_type misspelled = unit_database::relax_spelling(lowercase);
+                key_type lowercase = type::relax_to_lowercase(query);
+                key_type misspelled = type::relax_spelling(lowercase);
                 std::size_t count_matches = 0;
 
                 // Stage 0: prefix tree search.
