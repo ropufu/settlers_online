@@ -101,20 +101,24 @@
     <Compile Include="Bridge\army.cs" />
     <Compile Include="Bridge\army_decorator.cs" />
     <Compile Include="Bridge\army_parser.cs" />
-    <Compile Include="Bijection.cs" />
+    <Compile Include="Core\SortedBijection.cs" />
+    <Compile Include="Core\ReferenceBijection.cs" />
     <Compile Include="Bridge\black_marsh.cs" />
     <Compile Include="Bridge\config.cs" />
     <Compile Include="Bridge\prefix_tree.cs" />
     <Compile Include="Bridge\report.cs" />
     <Compile Include="Bridge\prefix_database.cs" />
-    <Compile Include="GitHubFileInfo.cs" />
+    <Compile Include="Core\GitHubFileInfo.cs" />
+    <Compile Include="Core\IBijection.cs" />
+    <Compile Include="Core\ShouldNotHappenException.cs" />
+    <Compile Include="Core\SystemExtensions.cs" />
     <Compile Include="SkillsWindow.xaml.cs">
       <DependentUpon>SkillsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UnitDatabaseBindingExtension.cs" />
+    <Compile Include="Bindings\UnitDatabaseBindingExtension.cs" />
     <Compile Include="Converters\EnumConverter.cs" />
     <Compile Include="Converters\BattleSkillsConverter.cs" />
-    <Compile Include="EmpiricalMeasure.cs" />
+    <Compile Include="Core\EmpiricalMeasure.cs" />
     <Compile Include="Bridge\enum_array.cs" />
     <Compile Include="Bridge\JsonConverters.cs" />
     <Compile Include="Bridge\Map.cs" />
@@ -128,17 +132,17 @@
     <Compile Include="Converters\BooleanSwitchConverter.cs" />
     <Compile Include="Converters\IsNotEmptyConverter.cs" />
     <Compile Include="Converters\UnitImageConverter.cs" />
-    <Compile Include="GroupCountUpDown.cs" />
-    <Compile Include="GroupSum.cs" />
+    <Compile Include="Chrome\GroupCountUpDown.cs" />
+    <Compile Include="Chrome\GroupSum.cs" />
     <Compile Include="HelpWindow.xaml.cs">
       <DependentUpon>HelpWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ConfigBindingExtension.cs" />
-    <Compile Include="HistogramView.cs" />
+    <Compile Include="Bindings\ConfigBindingExtension.cs" />
+    <Compile Include="Chrome\HistogramView.cs" />
     <Compile Include="ReportWindow.xaml.cs">
       <DependentUpon>ReportWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SettingsBindingExtension.cs" />
+    <Compile Include="Bindings\SettingsBindingExtension.cs" />
     <Compile Include="UnitsWindow.xaml.cs">
       <DependentUpon>UnitsWindow.xaml</DependentUpon>
     </Compile>

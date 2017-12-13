@@ -1,4 +1,5 @@
-﻿using Ropufu.LeytePond.Bridge;
+﻿using Ropufu.Aftermath;
+using Ropufu.LeytePond.Bridge;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -13,7 +14,7 @@ namespace Ropufu.LeytePond
     /// </summary>
     public partial class ReportWindow : Window
     {
-        private Bijection<EmpiricalMeasure<Int32>, TabItem> histogramTabs = new Bijection<EmpiricalMeasure<Int32>, TabItem>();
+        private IBijection<EmpiricalMeasure<Int32>, TabItem> histogramTabs = new ReferenceBijection<EmpiricalMeasure<Int32>, TabItem>();
 
         public ReportWindow()
         {

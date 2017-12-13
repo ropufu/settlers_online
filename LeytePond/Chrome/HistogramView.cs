@@ -1,4 +1,5 @@
-﻿using Ropufu.LeytePond.Bridge;
+﻿using Ropufu.Aftermath;
+using Ropufu.LeytePond.Bridge;
 using System;
 using System.Collections.Generic;
 using System.Windows;

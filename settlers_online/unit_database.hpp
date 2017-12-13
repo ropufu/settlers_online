@@ -108,6 +108,7 @@ namespace ropufu
                     std::ifstream i(p.path()); // Try to open the file for reading.
                     if (!i.good()) continue; // Skip on failure.
 
+                    // @todo Get rid of the try/catch statement.
                     try
                     {
                         nlohmann::json map { };// = nlohmann::json::parse(i);

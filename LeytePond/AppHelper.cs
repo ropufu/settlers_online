@@ -10,9 +10,6 @@ namespace Ropufu.LeytePond
 {
     static class AppHelper
     {
-        public static Boolean IsNull<T>(this T item) => Object.ReferenceEquals(item, null);
-        //public static Boolean Is<T>(this T item, Type type) => Object.ReferenceEquals(item.GetType(), type);
-
         public static DependencyObject FindVisualChild(this DependencyObject item, Predicate<DependencyObject> predicate)
         {
             if (Object.ReferenceEquals(item, null)) return null;
