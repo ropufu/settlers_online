@@ -136,13 +136,21 @@ namespace Ropufu.LeytePond
             newArmy.CopyTo(this.armySource);
         }
 
+        private void InitializeArmyString()
+        {
+            this.doHold = true;
+            this.ArmyString = this.isPlayerArmy ? this.armySource.ToCompactString() : this.armySource.ToString();
+            this.Decorator?.Decorate(this.armySource, new Warnings());
+            this.doHold = false;
+        }
+
         public void DeleteSelected()
         {
             // @todo This is horrible!! Rebuild the whole thing just to delete one group?!
             var groups = new List<UnitGroup>(this.armySource.Groups);
             this.groupSum.ClearChildren();
 
-            var generator = this.itemView.ItemContainerGenerator;
+            //var generator = this.itemView.ItemContainerGenerator;
             foreach (UnitGroup g in this.itemView.SelectedItems) groups.Remove(g);
 
             var newArmy = new Army(groups);
@@ -152,9 +160,7 @@ namespace Ropufu.LeytePond
             newArmy.CopyTo(this.armySource);
             this.itemView.Items.Refresh();
 
-            this.doHold = true;
-            this.ArmyString = this.isPlayerArmy ? this.armySource.ToCompactString() : this.armySource.ToString();
-            this.doHold = false;
+            this.InitializeArmyString();
         }
 
         public void ToggleLink()
@@ -182,9 +188,7 @@ namespace Ropufu.LeytePond
             {
                 if (e.PropertyName == nameof(GroupSum.Children))
                 {
-                    this.doHold = true;
-                    this.ArmyString = this.isPlayerArmy ? this.armySource.ToCompactString() : this.armySource.ToString();
-                    this.doHold = false;
+                    this.InitializeArmyString();
                 }
             };
 
@@ -221,17 +225,25 @@ namespace Ropufu.LeytePond
 
         private void DragEnterHandler(Object sender, DragEventArgs e)
         {
-            if (!e.Data.GetDataPresent(typeof(UnitType).FullName) || sender == e.Source) e.Effects = DragDropEffects.None;
+            if (!e.Data.GetDataPresent(typeof(List<UnitType>).FullName) || sender == e.Source) e.Effects = DragDropEffects.None;
         }
 
         private void DropHandler(Object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(typeof(UnitType).FullName))
+            if (e.Data.GetDataPresent(typeof(List<UnitType>).FullName))
             {
-                var unit = e.Data.GetData(typeof(UnitType).FullName) as UnitType;
-                if (this.armySource.Has(u => u.Id == unit.Id)) return;
+                var isTrivial = true;
                 var groups = new List<UnitGroup>(this.armySource.Groups);
-                groups.Add(new UnitGroup(unit, 0));
+                var units = e.Data.GetData(typeof(List<UnitType>).FullName) as List<UnitType>;
+                if (units.IsNull()) return;
+
+                foreach (var unit in units)
+                {
+                    if (this.armySource.Has(u => u.Id == unit.Id)) continue;
+                    groups.Add(new UnitGroup(unit, 0));
+                    isTrivial = false;
+                }
+                if (isTrivial) return;
 
                 var newArmy = new Army(groups);
                 this.Decorator?.Decorate(newArmy, new Warnings());

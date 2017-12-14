@@ -84,7 +84,7 @@ namespace Ropufu.LeytePond.Bridge
         public void Decorate(Army a, Warnings warnings)
         {
             a.Camp = this.camp; // Overwrite camp.
-            a.Skills.Initialize(); // Reset skills.
+            a.Skills.Clear(); // Reset skills.
 
             var prefix = System.Environment.NewLine + "\t  |---- ";
             foreach (var pair in this.skills)

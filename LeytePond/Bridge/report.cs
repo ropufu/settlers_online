@@ -1,13 +1,19 @@
 ﻿using Newtonsoft.Json;
 using Ropufu.Aftermath;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Windows;
 
 namespace Ropufu.LeytePond.Bridge
 {
+    public class ReportList : List<ReportEntry>
+    {
+
+    }
+
     [JsonObject(MemberSerialization.OptIn)]
-    public class Report
+    public class Report : IEnumerable<ReportEntry>
     {
         [JsonProperty("report", Required = Required.Always)]
         private List<ReportEntry> entries = new List<ReportEntry>();
@@ -60,6 +66,10 @@ namespace Ropufu.LeytePond.Bridge
             }
             return null;
         }
+        
+        public IEnumerator<ReportEntry> GetEnumerator() => this.entries.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
 
     /** Mirrors structural behavior of \c damage.hpp. */
@@ -98,7 +108,7 @@ namespace Ropufu.LeytePond.Bridge
             if (hasValues ^ hasCounts) throw new ArgumentNullException(hasValues ? nameof(this.counts) : nameof(this.values));
             if (hasValues)
             {
-                if (this.values.Count != this.counts.Count) throw new ArgumentOutOfRangeException();
+                if (this.values.Count != this.counts.Count) throw new ShouldNotHappenException();
             }
         }
 
@@ -117,6 +127,41 @@ namespace Ropufu.LeytePond.Bridge
         public Double ChancesOfMax => Object.ReferenceEquals(this.histogram, null) ? 0.0 : (100 * this.histogram[this.histogram.Max]);
 
         public String ImageUri => this.unitName;
+
+        public Boolean IsDesigner
+        {
+            get => false;
+            set
+            {
+                if (value == false) return;
+                //var random = new Random();
+                //var count = random.Next(1, 5);
+                //this.values = new List<Int32>(count);
+                //this.counts = new List<Int32>(count);
+
+                //var from = random.Next(10, 20);
+                //for (var i = 0; i < count; ++i)
+                //{
+                //    this.values.Add(from + i);
+                //    this.counts.Add(random.Next(1, 100));
+                //}
+                this.values = new List<Int32>() { 4, 5, 6, 8 };
+                this.counts = new List<Int32>() { 2, 5, 5, 4 };
+                this.BuildHistogram();
+            }
+        }
+
+        public List<Int32> DesignerValues
+        {
+            get => this.values;
+            set => this.values = value;
+        }
+
+        public List<Int32> DesignerCounts
+        {
+            get => this.counts;
+            set => this.counts = value;
+        }
 
         public void BuildHistogram()
         {

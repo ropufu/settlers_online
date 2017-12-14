@@ -7,29 +7,41 @@ namespace Ropufu.Aftermath
 {
     public static class EmpiricalMeasureExtension
     {
+        /// <exception cref="ArgumentNullException"></exception>
         public static Double Mean(this EmpiricalMeasure<Int32> value)
         {
+            if (value.IsNull()) throw new ArgumentNullException(nameof(value));
+
             var sum = default(Double);
             foreach (var item in value) sum += item.Key * item.Value;
             return sum / value.CountObservations;
         }
 
+        /// <exception cref="ArgumentNullException"></exception>
         public static Double Mean(this EmpiricalMeasure<Int64> value)
         {
+            if (value.IsNull()) throw new ArgumentNullException(nameof(value));
+
             var sum = default(Double);
             foreach (var item in value) sum += item.Key * item.Value;
             return sum / value.CountObservations;
         }
 
+        /// <exception cref="ArgumentNullException"></exception>
         public static Double Mean(this EmpiricalMeasure<Single> value)
         {
+            if (value.IsNull()) throw new ArgumentNullException(nameof(value));
+
             var sum = default(Double);
             foreach (var item in value) sum += item.Key * item.Value;
             return sum / value.CountObservations;
         }
 
+        /// <exception cref="ArgumentNullException"></exception>
         public static Double Mean(this EmpiricalMeasure<Double> value)
         {
+            if (value.IsNull()) throw new ArgumentNullException(nameof(value));
+
             var sum = default(Double);
             foreach (var item in value) sum += item.Key * item.Value;
             return sum / value.CountObservations;
@@ -52,6 +64,8 @@ namespace Ropufu.Aftermath
             this.data = new SortedDictionary<TKey, Double>();
         }
 
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public EmpiricalMeasure(TKey[] keys, Double[] probabilities)
         {
             if (keys.IsNull()) throw new ArgumentNullException(nameof(keys));
@@ -64,6 +78,7 @@ namespace Ropufu.Aftermath
             this.RebuildStatistics();
         }
 
+        /// <exception cref="ArgumentNullException"></exception>
         public EmpiricalMeasure(IDictionary<TKey, Double> data)
         {
             if (data.IsNull()) throw new ArgumentNullException(nameof(data));
@@ -129,6 +144,7 @@ namespace Ropufu.Aftermath
             return p / this.count;
         }
 
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public TKey Percentile(Double probability)
         {
             if (probability < 0 || probability > 1) throw new ArgumentOutOfRangeException(nameof(probability));
@@ -147,7 +163,7 @@ namespace Ropufu.Aftermath
 
         public IEnumerator<KeyValuePair<TKey, Double>> GetEnumerator() => this.data.GetEnumerator();
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.data.GetEnumerator();
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         public Double CountObservations => this.count;
 

@@ -23,6 +23,7 @@ namespace Ropufu.LeytePond
         private Boolean doTakeAll = true;
         private String[] keywords = new String[0];
         private List<Adventure> adventures = new List<Adventure>(UnitDatabase.Instance.Adventures);
+        private List<UnitType> oldSelection = null;
 
         private Point maybeDragStart = new Point();
 
@@ -37,7 +38,12 @@ namespace Ropufu.LeytePond
 
         public IEnumerable<Adventure> Adventures => this.adventures;
 
-        private void DownHandler(Object sender, MouseButtonEventArgs e) => this.maybeDragStart = e.GetPosition(null);
+        private void PreviewDownHandler(Object sender, MouseButtonEventArgs e)
+        {
+            this.oldSelection = new List<UnitType>(this.itemView.SelectedItems.Count);
+            foreach (UnitType u in this.itemView.SelectedItems) this.oldSelection.Add(u);
+            this.maybeDragStart = e.GetPosition(null);
+        }
 
         private void MaybeDragHandler(Object sender, MouseEventArgs e)
         {
@@ -51,8 +57,7 @@ namespace Ropufu.LeytePond
             if (doDrag)
             {
                 var viewItem = sender as ListViewItem;
-                var unit = (UnitType)this.itemView.ItemContainerGenerator.ItemFromContainer(viewItem);
-                var data = new DataObject(typeof(UnitType).FullName, unit);
+                var data = new DataObject(typeof(List<UnitType>).FullName, this.oldSelection);
                 DragDrop.DoDragDrop(viewItem, data, DragDropEffects.Move);
             }
 

@@ -24,8 +24,7 @@
                 <Style TargetType="{x:Type ListViewItem}">
                     <Setter Property="IsTabStop" Value="False" />
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="IsTabStop" Value="False" />
-                    <EventSetter Event="PreviewMouseLeftButtonDown" Handler="DownHandler" />
+                    <EventSetter Event="PreviewMouseLeftButtonDown" Handler="PreviewDownHandler" />
                     <EventSetter Event="PreviewMouseMove" Handler="MaybeDragHandler" />
                     <Setter Property="ToolTip">
                         <Setter.Value>

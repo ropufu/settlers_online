@@ -29,7 +29,7 @@ namespace Ropufu.LeytePond
 
         public void Prepare(Report report, Stopwatch timer = null)
         {
-            if (Object.ReferenceEquals(report, null)) throw new ArgumentNullException(nameof(report));
+            if (report.IsNull()) throw new ArgumentNullException(nameof(report));
 
             this.reportView.Items.Clear();
             //this.Title = $"Report: {leftName} vs. {rightName}";
@@ -39,9 +39,9 @@ namespace Ropufu.LeytePond
                 entry.BuildHistogram();
                 if (entry.IsHeader)
                 {
-                    var entryElement = new TextBlock();
-                    if (!String.IsNullOrEmpty(entry.Caption)) entryElement.Inlines.Add(new TextBlock() { Text = entry.Caption, FontWeight = FontWeights.Bold, Margin = new Thickness(5.0) });
-                    if (!String.IsNullOrEmpty(entry.Details)) entryElement.Inlines.Add(new TextBlock() { Text = entry.Details, Margin = new Thickness(5.0) });
+                    var entryElement = new TextBlock() { VerticalAlignment = VerticalAlignment.Center };
+                    if (!String.IsNullOrEmpty(entry.Caption)) entryElement.Inlines.Add(new TextBlock() { Text = entry.Caption, FontWeight = FontWeights.Bold, Margin = new Thickness(5.0), VerticalAlignment = VerticalAlignment.Center });
+                    if (!String.IsNullOrEmpty(entry.Details)) entryElement.Inlines.Add(new TextBlock() { Text = entry.Details, Margin = new Thickness(5.0), VerticalAlignment = VerticalAlignment.Center });
                     entry.CustomUI = entryElement;
                 }
                 this.reportView.Items.Add(entry);

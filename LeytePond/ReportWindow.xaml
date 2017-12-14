@@ -17,11 +17,14 @@
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="BorderThickness" Value="1.0" />
         </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
     </Window.Resources>
 
     <TabControl x:Name="reportTabs" BorderThickness="0">
         <TabItem Header="Summary" x:Name="summaryTab">
-            <ListView x:Name="reportView" Margin="10" VerticalContentAlignment="Center">
+            <ListView x:Name="reportView" Margin="10" VerticalContentAlignment="Center" d:DataContext='{d:DesignData Source=Design/ReportDesign.xaml}' ItemsSource='{Binding}'>
                 <ListView.Background>
                     <ImageBrush ImageSource="pack://application:,,,/Images/lucy_sketch.png" Stretch="None" Opacity="0.2" />
                 </ListView.Background>
@@ -78,7 +81,7 @@
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
-                    <ControlTemplate x:Key="degenerateItem" TargetType="{x:Type ListViewItem}">
+                    <ControlTemplate x:Key="DegenerateItem" TargetType="{x:Type ListViewItem}">
                         <Border x:Name="rowBorder" Style="{StaticResource InactiveGridViewBorderStyle}">
                             <GridViewRowPresenter Margin="5">
                                 <GridViewRowPresenter.Columns>
@@ -87,8 +90,8 @@
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Horizontal">
-                                                        <Image Source='{Binding Path=ImageUri, Converter={StaticResource FaceConverter}}' Height="25" Margin="0, 0, 10, 4" />
-                                                        <TextBlock Text='{Binding Path=Caption}' Margin="0, 5, 0, 0" />
+                                                        <Image Source='{Binding Path=ImageUri, Converter={StaticResource FaceConverter}}' Height="25" Margin="0,0,10,4" />
+                                                        <TextBlock Text='{Binding Path=Caption}' VerticalAlignment="Center" />
                                                     </StackPanel>
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
@@ -96,10 +99,10 @@
                                         <GridViewColumn>
                                             <GridViewColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                        <TextBlock Text="Always" Margin="0, 5, 20, 0" />
-                                                        <TextBlock Text='{Binding Path=LowerBound}' FontWeight="Bold" Margin="0, 5, 0, 0" />
-                                                    </StackPanel>
+                                                    <TextBlock>
+                                                        <TextBlock Text="Always" Margin="0,0,20,0" />
+                                                        <TextBlock Text='{Binding Path=LowerBound}' FontWeight="Bold" />
+                                                    </TextBlock>
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>
@@ -134,7 +137,7 @@
                             </DataTrigger>
                             <DataTrigger Binding='{Binding Path=IsDegenerate}' Value="True">
                                 <Setter Property="ContextMenu" Value="{x:Null}" />
-                                <Setter Property="Template" Value="{StaticResource degenerateItem}"/>
+                                <Setter Property="Template" Value="{StaticResource DegenerateItem}"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -147,7 +150,7 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source='{Binding Path=ImageUri, Converter={StaticResource FaceConverter}}' Height="25" Margin="0, 0, 10, 4" />
-                                        <TextBlock Text='{Binding Path=Caption}' Margin="0, 5, 0, 0" />
+                                        <TextBlock Text='{Binding Path=Caption}' VerticalAlignment="Center" />
                                     </StackPanel>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
@@ -160,9 +163,7 @@
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text='{Binding Path=LowerBound}' Margin="0, 5, 0, 0" />
-                                    </StackPanel>
+                                    <TextBlock Text='{Binding Path=LowerBound}' />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
@@ -174,9 +175,7 @@
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text='{Binding Path=Histogram.Min}' Margin="0, 5, 0, 0" />
-                                    </StackPanel>
+                                    <TextBlock Text='{Binding Path=Histogram.Min}' />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
@@ -188,9 +187,7 @@
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text='{Binding Path=ChancesOfMin}' Margin="0, 5, 0, 0" />
-                                    </StackPanel>
+                                    <TextBlock Text='{Binding Path=ChancesOfMin}' />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
@@ -202,9 +199,7 @@
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text='{Binding Path=Histogram.Max}' Margin="0, 5, 0, 0" />
-                                    </StackPanel>
+                                    <TextBlock Text='{Binding Path=Histogram.Max}' />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
@@ -216,9 +211,7 @@
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text='{Binding Path=ChancesOfMax}' Margin="0, 5, 0, 0" />
-                                    </StackPanel>
+                                    <TextBlock Text='{Binding Path=ChancesOfMax}' />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
@@ -230,18 +223,14 @@
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text='{Binding Path=UpperBound}' Margin="0, 5, 0, 0" />
-                                    </StackPanel>
+                                    <TextBlock Text='{Binding Path=UpperBound}' />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
                         <GridViewColumn Width="{local:SettingsBinding ReportMeanColumnWidth}" Header="Mean">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text='{Binding Path=Mean}' Margin="0, 5, 0, 0" />
-                                    </StackPanel>
+                                    <TextBlock Text='{Binding Path=Mean}' />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>

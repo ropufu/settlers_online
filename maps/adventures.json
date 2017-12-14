@@ -1,38 +1,48 @@
 {
     "adventures": [
         {
+            "name": "Common",
+            "maps": [],
+            "units": [ "Recruit", "Militia", "Soldier", "Elite Soldier", "Cavalry", "Bowman", "Longbowman", "Crossbowman", "Cannoneer", "((g))", "((m))", "((cxv))", "((a))", "((v))", "((n))" ]
+        },
+        {
+            "name": "Elite",
+            "maps": [],
+            "units": [ "Swordsman", "Mounted Swordsman", "Knight", "Marksman", "Armored Marksman", "Mounted Marksman", "Besieger", "((g))", "((m))", "((cxv))", "((a))", "((v))", "((n))" ]
+        },
+        {
             "name": "Bandits",
-            "maps": ["Bandit Nest", "Bounty Hunter", "Outlaws", "Pirate Life", "Return to the Bandit's Nest", "Sons of the Veld", "Victor the Vicious", "The Whirlwind", "Wild Mary"],
+            "maps": [ "Bandit Nest", "Bounty Hunter", "Outlaws", "Pirate Life", "Return to the Bandit's Nest", "Sons of the Veld", "Victor the Vicious", "The Whirlwind", "Wild Mary" ],
             "units": [ "Wild Mary", "Chuck", "Metal Tooth", "Scavenger", "Thug", "Guard Dog", "Roughneck", "Stone Thrower", "Ranger", "Skunk", "One-Eyed Bert", "Grey Wolf" ]
         },
         {
             "name": "Nords",
-            "maps": ["Arctic Explosion", "The Invasion of the Nords", "Raid of the Nords", "Surprise Attack"],
+            "maps": [ "Arctic Explosion", "The Invasion of the Nords", "Raid of the Nords", "Surprise Attack" ],
             "units": [ "Jomsviking", "HouseCarl", "Karl", "Thrall", "Valkyrie", "Berserk", "Grey Wolf" ]
         },
         {
             "name": "Cult",
-            "maps": ["The Dark Brotherhood", "Lakeside Treasure", "Old Friends", "The Sleeping Volcano", "Tomb Raiders", "Witch of the Swamp"],
+            "maps": [ "The Dark Brotherhood", "Lakeside Treasure", "Old Friends", "The Sleeping Volcano", "Tomb Raiders", "Witch of the Swamp" ],
             "units": [ "Spawn of Hell", "Cultist", "Witch of the Swamp", "Shadowsneaker", "Fanatic", "Dark Priest", "Firedancer", "Dancing Dervish", "Dark High Priest", "Preacher of Flames" ]
         },
         {
             "name": "Raiders",
-            "maps": ["Horseback", "Raiding the Raiders", "Tikki Island"],
+            "maps": [ "Horseback", "Raiding the Raiders", "Tikki Island" ],
             "units": [ "Nomad", "Lance Rider", "Riding Bowman", "Riding Amazonian Guard", "Cataphract", "Uproarious Bull", "Composite Bowman" ]
         },
         {
             "name": "Pirates",
-            "maps": ["The Island of the Pirates", "The Lost Skull"],
+            "maps": [ "The Island of the Pirates", "The Lost Skull" ],
             "units": [ "Deckscrubber", "Sabrerattler", "Crazy Cook", "Gunman", "Knifethrower", "Petty Officer" ]
         },
         {
             "name": "Kingdom",
-            "maps": ["Sleepy Reef", "Stealing from the Rich", "Traitors"],
+            "maps": [ "Sleepy Reef", "Stealing from the Rich", "Traitors" ],
             "units": [ "Recruit Deserter", "Militia Deserter", "Cavalry Deserter", "Soldier Deserter", "Elite Deserter", "Bowman Deserter", "Longbowman Deserter", "Crossbowman Deserter", "Cannoneer Deserter", "Sir Robin", "Big Bertha", "Grey Wolf" ]
         },
         {
             "name": "Ali Baba",
-            "maps": ["Ali Baba the Young Woodcutter", "Ali Baba and the First Thief"],
+            "maps": [ "Ali Baba the Young Woodcutter", "Ali Baba and the First Thief" ],
             "units": [ "Sword Clasher", "Sword Wielder", "Sword Master", "Horseman", "Dune Marksman", "Desert Marksman", "Mounted Bowman", "Stone Cannon", "Shrewd Thief", "Scarred Thief", "Smart Thief", "Snooty Thief", "Silly Thief", "Greedy Thief", "Mysterious Thief", "Grayed Thief", "Treacherous Thief", "Sneaking Thief", "Bandit Lord" ]
         }
     ]

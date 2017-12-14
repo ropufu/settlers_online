@@ -119,7 +119,8 @@ namespace Ropufu
                 var updates = default(List<GitHubFileInfo>);
                 App.Current.SyncMaps(maps, out updates);
 
-                if (updates.Count > 0)
+                if (updates.Count == 0) MessageBox.Show(this, "All maps are up to date.", "No Updates Available", MessageBoxButton.OK, MessageBoxImage.Information);
+                else
                 {
                     var builder = new StringBuilder();
                     builder.AppendLine("The following updates are available:");

@@ -147,7 +147,7 @@
       <DependentUpon>UnitsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Warnings.cs" />
-    <DesignData Include="ArmyDesign.xaml">
+    <DesignData Include="Design\ArmyDesign.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </DesignData>
@@ -155,6 +155,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <DesignData Include="Design\ReportDesign.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </DesignData>
     <Page Include="HelpWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

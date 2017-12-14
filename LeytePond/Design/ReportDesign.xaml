@@ -1,0 +1,12 @@
+﻿<ReportList xmlns="clr-namespace:Ropufu.LeytePond.Bridge">
+    <ReportEntry IsHeader="True" Caption="Number One" />
+    <ReportEntry IsHeader="True" Caption="Number Two" Details="More" />
+    <ReportEntry IsHeader="False" Caption="Not a Header X" UnitName="Recruit" IsDesigner="True" />
+    <ReportEntry IsHeader="False" Caption="Not a Header Y" UnitName="Elite" DesignerValues="2,3,4,6" DesignerCounts="2,7,7,5" />
+    <ReportEntry LowerBound="2" UpperBound="2" Caption="Moderately long caption" />
+    <ReportEntry IsHeader="True" Details="Last Header">
+        <ReportEntry.CustomUI>
+            <TextBlock xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Text="Custom UI" />
+        </ReportEntry.CustomUI>
+    </ReportEntry>
+</ReportList>

@@ -112,7 +112,7 @@ namespace Ropufu.LeytePond.Bridge
         {
             if (!typeof(TEnum).IsEnum) throw new TypeInitializationException(typeof(TEnum).FullName, null);
             
-            this.values.Initialize();
+            this.values.Clear();
         }
 
         public EnumArray(EnumArray<TEnum, TValue> other)
@@ -138,7 +138,7 @@ namespace Ropufu.LeytePond.Bridge
             if (!typeof(TEnum).IsEnum) throw new TypeInitializationException(typeof(TEnum).FullName, null);
 
             if (Object.ReferenceEquals(map, null)) throw new ArgumentNullException(nameof(map));
-            this.values.Initialize();
+            this.values.Clear();
             for (var i = 0; i < keys.Length; i++)
             {
                 var maybe = default(TValue);
@@ -188,9 +188,9 @@ namespace Ropufu.LeytePond.Bridge
             }
         }
 
-        public void Initialize()
+        public void Clear()
         {
-            this.values.Initialize();
+            this.values.Clear();
             this.NotifyReset();
         }
 
