@@ -17,9 +17,9 @@ namespace Ropufu
         /// </summary>
         public partial class App : Application
         {
-            private Warnings warnings = new Warnings();
+            private Logger warnings = new Logger();
 
-            public static Warnings Warnings => App.Current.warnings;
+            public static Logger Warnings => App.Current.warnings;
 
             public static new App Current => (App)Application.Current;
 
@@ -32,7 +32,7 @@ namespace Ropufu
                 Bridge.BlackMarsh.Instance.ProcessPath = blackMarshExe;
                 Bridge.BlackMarsh.Instance.CborPath = blackMarshCbor;
                 Bridge.Config.Read(blackMarshConfig);
-                Bridge.UnitDatabase.Instance.LoadFromFolder(Bridge.Config.Instance.MapsPath);
+                Bridge.Map.LoadFromFolder(Bridge.Config.Instance.MapsPath);
 
                 this.CheckImages();
                 base.OnStartup(e);

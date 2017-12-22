@@ -2,11 +2,13 @@
     "adventures": [
         {
             "name": "Common",
+            "is player": true,
             "maps": [],
             "units": [ "Recruit", "Militia", "Soldier", "Elite Soldier", "Cavalry", "Bowman", "Longbowman", "Crossbowman", "Cannoneer", "((g))", "((m))", "((cxv))", "((a))", "((v))", "((n))" ]
         },
         {
             "name": "Elite",
+            "is player": true,
             "maps": [],
             "units": [ "Swordsman", "Mounted Swordsman", "Knight", "Marksman", "Armored Marksman", "Mounted Marksman", "Besieger", "((g))", "((m))", "((cxv))", "((a))", "((v))", "((n))" ]
         },

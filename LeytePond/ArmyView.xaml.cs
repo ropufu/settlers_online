@@ -22,14 +22,64 @@ namespace Ropufu.LeytePond
     /// </summary>
     public partial class ArmyView : UserControl
     {
+        const String ArmySeparator = "+";
+        const Int32 SuggestionsCapacity = 5;
         const String GroupSumKey = "GroupSum";
         const String WarningsKey = "Warnings";
         const String ArmySourceKey = "ArmySource";
+        const String SuggestionsSourceKey = "SuggestionsSource";
+
+        #region Dependency Property: IsPlayerArmy, IsNonPlayerArmy
+
+        public static DependencyProperty IsPlayerArmyProperty = DependencyProperty.Register(nameof(ArmyView.IsPlayerArmy), typeof(Boolean), typeof(ArmyView),
+            new PropertyMetadata(false, new PropertyChangedCallback(ArmyView.OnIsPlayerArmyChanged)));
+
+        private static readonly DependencyPropertyKey IsNonPlayerArmyKey = DependencyProperty.RegisterReadOnly(nameof(ArmyView.IsNonPlayerArmy), typeof(Boolean), typeof(ArmyView),
+            new PropertyMetadata(true));
+
+        public static readonly DependencyProperty IsNonPlayerArmyProperty = ArmyView.IsNonPlayerArmyKey.DependencyProperty;
+
+        // @todo Add adventures marked as IsSuggestedAsPlayer to suggestion list.
+        private static void OnIsPlayerArmyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var sender = (ArmyView)d;
+            var newValue = (Boolean)e.NewValue;
+            sender.IsNonPlayerArmy = !newValue;
+        }
+
+        public Boolean IsPlayerArmy
+        {
+            get => (Boolean)this.GetValue(ArmyView.IsPlayerArmyProperty);
+            set => this.SetValue(ArmyView.IsPlayerArmyProperty, value);
+        }
+
+        public Boolean IsNonPlayerArmy
+        {
+            get => (Boolean)this.GetValue(ArmyView.IsNonPlayerArmyProperty);
+            protected set => this.SetValue(ArmyView.IsNonPlayerArmyKey, value);
+        }
+
+        #endregion
 
         #region Dependency Property: Decorator
 
         public static DependencyProperty DecoratorProperty = DependencyProperty.Register(nameof(ArmyView.Decorator), typeof(ArmyDecorator), typeof(ArmyView),
-            new PropertyMetadata(new ArmyDecorator()));
+            new PropertyMetadata(new ArmyDecorator(), new PropertyChangedCallback(ArmyView.OnDecoratorChanged), new CoerceValueCallback(ArmyView.CoerceDecorator)));
+
+        private static void OnDecoratorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            //var sender = (ArmyView)d;
+            //var newValue = (ArmyDecorator)e.NewValue;
+        }
+
+        private static Object CoerceDecorator(DependencyObject d, Object baseValue)
+        {
+            var sender = (ArmyView)d;
+            var value = (ArmyDecorator)baseValue;
+
+            if (value.IsNull()) value = new ArmyDecorator();
+            return value;
+        }
 
         public ArmyDecorator Decorator
         {
@@ -49,8 +99,11 @@ namespace Ropufu.LeytePond
             var sender = (ArmyView)d;
             var newValue = (String)e.NewValue;
 
+            sender.parsers.Clear();
+            var armyStrings = newValue.Split(new String[] { ArmyView.ArmySeparator }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var item in armyStrings) sender.parsers.Add(new ArmyParser(item));
+
             sender.warnings.Clear();
-            sender.parser = new ArmyParser(newValue);
             sender.InitializeArmySource();
         }
 
@@ -59,7 +112,7 @@ namespace Ropufu.LeytePond
             var sender = (ArmyView)d;
             var value = (String)baseValue;
 
-            if (Object.ReferenceEquals(value, null)) value = String.Empty;
+            if (value.IsNull()) value = String.Empty;
             return value;
         }
 
@@ -72,14 +125,14 @@ namespace Ropufu.LeytePond
         #endregion
 
         private readonly GroupSum groupSum = null;
-        private readonly Warnings warnings = null;
+        private readonly Logger warnings = null;
         private readonly Army armySource = null;
+        private readonly StringCollection suggestionsSource = null;
 
         private Boolean doCheckGenerals = false;
         private Boolean doCoerceFactions = false;
         private Boolean isStrict = false;
-        private Boolean isPlayerArmy = false;
-        private ArmyParser parser = new ArmyParser(String.Empty);
+        private List<ArmyParser> parsers = new List<ArmyParser>();
         private Boolean doHold = false;
 
         public event RoutedEventHandler DeleteWave, AddWave;
@@ -104,13 +157,16 @@ namespace Ropufu.LeytePond
             set => this.isStrict = value;
         }
 
-        public Boolean IsPlayerArmy
+        private void ResetSuggestions()
         {
-            get => this.isPlayerArmy;
-            set
+            // ~~ Update suggestions ~~
+            this.suggestionsSource.Clear();
+            var countSuggestions = 0;
+            foreach (var s in UnitDatabase.Instance.Suggestions)
             {
-                this.isPlayerArmy = value;
-                this.campButton.Visibility = value ? Visibility.Collapsed : Visibility.Visible;
+                this.suggestionsSource.Add(s);
+                ++countSuggestions;
+                if (countSuggestions == ArmyView.SuggestionsCapacity) break;
             }
         }
 
@@ -121,16 +177,44 @@ namespace Ropufu.LeytePond
             this.warnings.Clear();
             this.groupSum.ClearChildren();
 
-            var newArmy = this.parser.Build(this.warnings, this.doCheckGenerals, this.doCoerceFactions, this.isStrict);
-            if (!this.parser.IsGood) // Try interpreting the string as adventure name.
+            var groups = new List<UnitGroup>();
+            foreach (var parser in this.parsers)
             {
-                var units = new List<UnitType>();
-                if (UnitDatabase.Instance.TryFindAdventure(this.ArmyString, ref units))
+                // @todo Change the handling of warnings, e.g., missing general check for multiple armies.
+                var warnings = new Logger();
+                var army = parser.Build(warnings, this.doCheckGenerals, this.doCoerceFactions, this.isStrict);
+                if (!parser.IsGood) // Try interpreting the string as adventure name.
                 {
-                    newArmy = new Army((from u in units select new UnitGroup(u, 0)).ToArray());
+                    var adventure = default(Adventure);
+                    if (AdventureDatabase.Instance.TryFind(parser.Value, ref adventure))
+                    {
+                        warnings.Clear();
+                        army = new Army((from u in adventure.Units select new UnitGroup(u, 0)).ToArray());
+                    }
+                }
+                this.warnings.Append(warnings);
+
+                foreach (var g in army)
+                {
+                    var t = g.Unit;
+                    // Try to find the same unit type in existing groups.
+                    var hasFound = false;
+                    foreach (var x in groups)
+                        if (x.Unit == t)
+                        {
+                            hasFound = true;
+                            // Match found: update the count.
+                            x.Count += g.Count;
+                            break;
+                        }
+
+                    // If none exist, add the new group to the list.
+                    if (!hasFound) groups.Add(g);
                 }
             }
-            this.Decorator?.Decorate(newArmy, new Warnings());
+
+            var newArmy = new Army(groups);
+            this.Decorator?.Decorate(newArmy, new Logger());
             newArmy.Skills.DoSkipDefault = true;
 
             newArmy.CopyTo(this.armySource);
@@ -139,8 +223,9 @@ namespace Ropufu.LeytePond
         private void InitializeArmyString()
         {
             this.doHold = true;
-            this.ArmyString = this.isPlayerArmy ? this.armySource.ToCompactString() : this.armySource.ToString();
-            this.Decorator?.Decorate(this.armySource, new Warnings());
+            this.ArmyString = this.IsPlayerArmy ? this.armySource.ToCompactString() : this.armySource.ToString();
+            this.Decorator?.Decorate(this.armySource, new Logger());
+            this.suggestionsSource.Clear();
             this.doHold = false;
         }
 
@@ -154,7 +239,7 @@ namespace Ropufu.LeytePond
             foreach (UnitGroup g in this.itemView.SelectedItems) groups.Remove(g);
 
             var newArmy = new Army(groups);
-            this.Decorator?.Decorate(newArmy, new Warnings());
+            this.Decorator?.Decorate(newArmy, new Logger());
             newArmy.Skills.DoSkipDefault = true;
 
             newArmy.CopyTo(this.armySource);
@@ -165,7 +250,7 @@ namespace Ropufu.LeytePond
 
         public void ToggleLink()
         {
-            if (!this.isPlayerArmy) return;
+            if (this.IsNonPlayerArmy) return;
 
             var generator = this.itemView.ItemContainerGenerator;
             foreach (UnitGroup g in this.itemView.SelectedItems)
@@ -180,9 +265,10 @@ namespace Ropufu.LeytePond
         {
             this.InitializeComponent();
 
-            this.armySource = (Army)this.Resources[ArmyView.ArmySourceKey];
-            this.warnings = (Warnings)this.Resources[ArmyView.WarningsKey];
             this.groupSum = (GroupSum)this.Resources[ArmyView.GroupSumKey];
+            this.warnings = (Logger)this.Resources[ArmyView.WarningsKey];
+            this.armySource = (Army)this.Resources[ArmyView.ArmySourceKey];
+            this.suggestionsSource = (StringCollection)this.Resources[ArmyView.SuggestionsSourceKey];
 
             this.groupSum.PropertyChanged += (s, e) =>
             {
@@ -194,19 +280,22 @@ namespace Ropufu.LeytePond
 
             this.itemView.Items.Clear();
             this.itemView.ItemsSource = this.armySource;
+
+            //this.armyStringBox.Items.Clear();
+            //this.armyStringBox.ItemsSource = this.suggestionsSource;
         }
 
         public void CaptureCursor()
         {
             Keyboard.ClearFocus();
 
-            var scope = FocusManager.GetFocusScope(this.armyTextBox);
-            FocusManager.SetFocusedElement(scope, this.armyTextBox);
-            Mouse.Capture(this.armyTextBox);
-            Keyboard.Focus(this.armyTextBox);
+            var scope = FocusManager.GetFocusScope(this.armyStringBox);
+            FocusManager.SetFocusedElement(scope, this.armyStringBox);
+            Mouse.Capture(this.armyStringBox);
+            Keyboard.Focus(this.armyStringBox);
 
             //this.Focus();
-            //this.armyTextBox.Focus();
+            //this.armyStringBox.Focus();
         }
 
         private void ShowSkills()
@@ -220,8 +309,6 @@ namespace Ropufu.LeytePond
         private void WarningsHandler(Object sender, RoutedEventArgs e) => this.warnings.Unwind();
 
         private void SkillsHandler(Object sender, RoutedEventArgs e) => this.ShowSkills();
-
-        private void CampHandler(Object sender, RoutedEventArgs e) { }
 
         private void DragEnterHandler(Object sender, DragEventArgs e)
         {
@@ -246,7 +333,7 @@ namespace Ropufu.LeytePond
                 if (isTrivial) return;
 
                 var newArmy = new Army(groups);
-                this.Decorator?.Decorate(newArmy, new Warnings());
+                this.Decorator?.Decorate(newArmy, new Logger());
                 newArmy.Skills.DoSkipDefault = true;
 
                 newArmy.CopyTo(this.armySource);
@@ -277,6 +364,25 @@ namespace Ropufu.LeytePond
                         }
                     }
                     break;
+            }
+        }
+
+        private void CampBoxChangedHandler(Object sender, SelectionChangedEventArgs e)
+        {
+            var campBox = sender as CampBox;
+            if (campBox.IsNull()) return;
+
+            var selected = campBox.SelectedItem as Camp;
+            var generator = campBox.ItemContainerGenerator;
+
+            // @todo Rewrite using MultipleBinding on EqualityConverter and BooleanSwitchConverter.
+            for (var i = 0; i < campBox.Items.Count; ++i)
+            {
+                var item = campBox.Items[i] as Camp;
+                var container = generator.ContainerFromIndex(i);
+                var isSame = (item == selected);
+                var textBlock = container.FindVisualChild(x => x is TextBlock) as TextBlock;
+                if (!textBlock.IsNull()) textBlock.FontWeight = isSame ? FontWeights.Bold : FontWeights.Normal;
             }
         }
 

@@ -22,7 +22,7 @@ namespace Ropufu.LeytePond
     {
         private Boolean doTakeAll = true;
         private String[] keywords = new String[0];
-        private List<Adventure> adventures = new List<Adventure>(UnitDatabase.Instance.Adventures);
+        private List<Adventure> adventures = new List<Adventure>(AdventureDatabase.Instance.Adventures);
         private List<UnitType> oldSelection = null;
 
         private Point maybeDragStart = new Point();

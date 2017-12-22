@@ -6,6 +6,7 @@ namespace Ropufu.LeytePond.Bridge
     /** Mirrors structural behavior of \c army_parser.hpp. */
     public class ArmyParser
     {
+        private String value = String.Empty;
         private Boolean isValid = false;
         private List<KeyValuePair<String, Int32>> armyBlueprint = new List<KeyValuePair<String, Int32>>();
 
@@ -55,10 +56,12 @@ namespace Ropufu.LeytePond.Bridge
         
         public ArmyParser(String value)
         {
-            this.ParseBlueprint(value.DeepTrim());
+            this.value = value.DeepTrim();
+            this.ParseBlueprint(this.value);
             if (!this.isValid) this.armyBlueprint.Clear();
         }
 
+        public String Value => this.value;
         public Boolean IsGood => this.isValid;
         public Int32 Count => this.armyBlueprint.Count;
 
@@ -80,7 +83,7 @@ namespace Ropufu.LeytePond.Bridge
             return true;
         }
 
-        public Army Build(Warnings warnings, Boolean doCheckGenerals = false, Boolean doCoerceFactions = false, Boolean isStrct = false)
+        public Army Build(Logger warnings, Boolean doCheckGenerals = false, Boolean doCoerceFactions = false, Boolean isStrct = false)
         {
             var army = new Army();
             if (!this.isValid)

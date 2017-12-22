@@ -11,10 +11,14 @@
              AllowDrop="True" DragEnter="DragEnterHandler" Drop="DropHandler">
     <UserControl.Resources>
         <local:GroupSum x:Key="GroupSum" />
-        <local:Warnings x:Key="Warnings" />
+        <local:Logger x:Key="Warnings" />
+        <local:StringCollection x:Key="SuggestionsSource" />
         <bridge:Army x:Key="ArmySource" DoSkipEmptySkills="True" />
         <Style TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style TargetType="VirtualizingStackPanel">
+            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="False" />
         </Style>
     </UserControl.Resources>
 
@@ -22,10 +26,44 @@
         <!--Text representation-->
         <DockPanel LastChildFill="True">
             <Button DockPanel.Dock="Left" Style='{StaticResource LibraryIcon}' ToolTip="Skills" Click="SkillsHandler" Margin="5,0,0,0" Padding="5" />
-            <Button DockPanel.Dock="Right" Style='{StaticResource FirewallIcon}' ToolTip="Camp" x:Name="campButton" Click="CampHandler" Margin="0,0,5,0" Padding="5" />
+            <local:CampBox DockPanel.Dock="Right" ItemsSource="{local:CampDatabaseBinding Path=Camps}" SelectionChanged="CampBoxChangedHandler" Margin="0" Padding="0"
+                      SelectedItem="{Binding ElementName=self, Path=Decorator.Camp}"
+                      Visibility="{Binding ElementName=self, Path=IsNonPlayerArmy, Converter={StaticResource VisibilityConverter}}">
+                <local:CampBox.ToggleButtonStyle>
+                    <Style TargetType="ToggleButton" BasedOn="{StaticResource FirewallIcon}">
+                        <Setter Property="ToolTip" Value="Camp" />
+                        <Setter Property="Margin" Value="0,0,5,0" />
+                        <Setter Property="Padding" Value="5" />
+                    </Style>
+                </local:CampBox.ToggleButtonStyle>
+                <local:CampBox.Resources>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="ToolTip">
+                            <Setter.Value>
+                                <ToolTip>
+                                    <StackPanel Orientation="Vertical" Margin="5,0,5,0">
+                                        <TextBlock>Hit points: <TextBlock Text="{Binding Path=HitPoints}" /></TextBlock>
+                                        <TextBlock>Damage reduction: <TextBlock Text="{Binding Path=DamageReduction}" /></TextBlock>
+                                    </StackPanel>
+                                </ToolTip>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </local:CampBox.Resources>
+                <local:CampBox.ItemContainerStyle>
+                    <Style TargetType="ComboBoxItem">
+                        <Setter Property="Margin" Value="2,0,2,0" />
+                    </Style>
+                </local:CampBox.ItemContainerStyle>
+                <local:CampBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Path=FirstName}" Margin="10,2,10,2" />
+                    </DataTemplate>
+                </local:CampBox.ItemTemplate>
+            </local:CampBox>
             <Button DockPanel.Dock="Right" Style='{StaticResource KeyWarningIcon}' Visibility='{Binding Source={StaticResource Warnings}, Path=IsNotEmpty, Converter={StaticResource VisibilityConverter}}' Margin="0,10,10,10" Click="WarningsHandler" />
             <!--Penultimate child: want to make sure long text does not affect width measurement-->
-            <TextBox DockPanel.Dock="Top" x:Name="armyTextBox" Text='{Binding ElementName=self, Path=ArmyString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}' Margin="5,10,5,10" TextWrapping="Wrap" Width="{Binding ElementName=modestBorder, Path=ActualWidth}" />
+            <TextBox DockPanel.Dock="Top" x:Name="armyStringBox" Text='{Binding ElementName=self, Path=ArmyString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}' TextWrapping="Wrap" Margin="5,10,5,10" Width="{Binding ElementName=modestBorder, Path=ActualWidth}" />
             <!--Last child-->
             <Border x:Name="modestBorder" Margin="10,0,10,0" />
         </DockPanel>

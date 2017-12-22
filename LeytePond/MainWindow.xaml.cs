@@ -145,7 +145,7 @@ namespace Ropufu
                 }
             }
 
-            public Warnings Warnings => App.Warnings;
+            public Logger Warnings => App.Warnings;
 
             protected override void OnClosing(CancelEventArgs e)
             {

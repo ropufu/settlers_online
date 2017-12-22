@@ -25,11 +25,12 @@ namespace ropufu
             using type = army_parser;
 
         private:
+            std::string m_value = "";
             bool m_is_valid = false;
             std::vector<std::pair<std::size_t, std::string>> m_army_blueprint = { };
 
             /** Parses the provided \p value. It is assumed that the string has already been trimmed, and all spaces replaced with whitespaces. */
-            void parse_blueprint(std::string&& value) noexcept
+            void parse_blueprint(const std::string& value) noexcept
             {
                 constexpr std::size_t zero = static_cast<std::size_t>('0');
                 this->m_is_valid = false;
@@ -73,12 +74,14 @@ namespace ropufu
             } // parse_blueprint(...)
 
         public:
-            /** Clears the contents of the database. */
             army_parser(const std::string& value) noexcept
+                : m_value(char_string::deep_trim_copy(value))
             {
-                this->parse_blueprint(char_string::deep_trim_copy(value));
+                this->parse_blueprint(this->m_value);
                 if (!this->m_is_valid) this->m_army_blueprint.clear();
             } // army_parser(...)
+
+            const std::string& value() const noexcept { return this->m_value; }
 
             bool good() const noexcept { return this->m_is_valid; }
 

@@ -98,9 +98,17 @@
     <Compile Include="ArmyView.xaml.cs">
       <DependentUpon>ArmyView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Bindings\AdventureDatabaseBindingExtension.cs" />
+    <Compile Include="Bindings\CampDatabaseBindingExtension.cs" />
+    <Compile Include="Bridge\adventure.cs" />
     <Compile Include="Bridge\army.cs" />
     <Compile Include="Bridge\army_decorator.cs" />
     <Compile Include="Bridge\army_parser.cs" />
+    <Compile Include="Bridge\adventure_database.cs" />
+    <Compile Include="Bridge\camp_database.cs" />
+    <Compile Include="Chrome\CampBox.cs" />
+    <Compile Include="Converters\EqualityConverter.cs" />
+    <Compile Include="Core\Collections.cs" />
     <Compile Include="Core\SortedBijection.cs" />
     <Compile Include="Core\ReferenceBijection.cs" />
     <Compile Include="Bridge\black_marsh.cs" />
@@ -111,6 +119,7 @@
     <Compile Include="Core\GitHubFileInfo.cs" />
     <Compile Include="Core\IBijection.cs" />
     <Compile Include="Core\ShouldNotHappenException.cs" />
+    <Compile Include="Core\StringExtensions.cs" />
     <Compile Include="Core\SystemExtensions.cs" />
     <Compile Include="SkillsWindow.xaml.cs">
       <DependentUpon>SkillsWindow.xaml</DependentUpon>
@@ -124,7 +133,6 @@
     <Compile Include="Bridge\Map.cs" />
     <Compile Include="Bridge\damage_and_camp.cs" />
     <Compile Include="Bridge\enum_struct.cs" />
-    <Compile Include="Bridge\char_string.cs" />
     <Compile Include="Bridge\unit_database.cs" />
     <Compile Include="Bridge\unit_group.cs" />
     <Compile Include="Converters\BooleanNotConverter.cs" />
@@ -146,7 +154,7 @@
     <Compile Include="UnitsWindow.xaml.cs">
       <DependentUpon>UnitsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Warnings.cs" />
+    <Compile Include="Logger.cs" />
     <DesignData Include="Design\ArmyDesign.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

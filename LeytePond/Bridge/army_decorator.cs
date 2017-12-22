@@ -74,6 +74,7 @@ namespace Ropufu.LeytePond.Bridge
             get => this.camp;
             set
             {
+                if (Object.ReferenceEquals(this.camp, value)) return;
                 this.camp = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Camp)));
             }
@@ -81,7 +82,7 @@ namespace Ropufu.LeytePond.Bridge
 
         public SkillMap Skills => this.skills;
 
-        public void Decorate(Army a, Warnings warnings)
+        public void Decorate(Army a, Logger warnings)
         {
             a.Camp = this.camp; // Overwrite camp.
             a.Skills.Clear(); // Reset skills.

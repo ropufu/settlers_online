@@ -16,11 +16,18 @@
         <StackPanel Orientation="Vertical" Margin="10,10,0,0">
             <TextBlock Text="~~ Main Window ~~" HorizontalAlignment="Center" FontWeight="Bold" />
             <TextBlock xml:space="preserve">
-F1               -- shows this window.
-Enter            -- start simulation.
-Shift + Enter    -- log simulation.
-Ctrl + Enter     -- add wave.
-Ctrl + Delete    -- delete wave.
+F1                 -- shows this window.
+Enter              -- start simulation.
+Shift + Enter      -- log simulation.
+Ctrl + Enter       -- add wave.
+Ctrl + Delete      -- delete wave.
+            </TextBlock>
+            <TextBlock Text="~~ Main Window: Text Input ~~" HorizontalAlignment="Center" FontWeight="Bold" />
+            <TextBlock xml:space="preserve">
+&lt;army string&gt;      -- For example, "19r 1e 200c 1((cxv))".
+&lt;adventure string&gt; -- For example, "cult" or "kingdom".
+&lt;...&gt; + &lt;...&gt;      -- Combination of any number of strings,
+                      for example, "100r + cult".
             </TextBlock>
             <TextBlock Text="~~ Main Window: Unit Group ~~" HorizontalAlignment="Center" FontWeight="Bold" />
             <TextBlock xml:space="preserve">

@@ -65,31 +65,13 @@ namespace Ropufu.LeytePond.Bridge
 
         protected abstract IEnumerable<String> OverrideNames(T unit);
 
-        protected static String RelaxToLowercase(String value) => value.ToLowerInvariant();
-
-        protected static String RelaxSpelling(String value)
-        {
-            var relaxed = value.Replace("men", "man");
-            if (relaxed.EndsWith("es")) relaxed = relaxed.Substring(0, relaxed.Length - 2);
-            else if (relaxed.EndsWith("s")) relaxed = relaxed.Substring(0, relaxed.Length - 1);
-
-            if (relaxed.Length > 4)
-            {
-                var builder = new StringBuilder();
-                var previous = relaxed[0];
-                builder.Append(previous);
-                foreach (var c in relaxed) if (c != previous) { builder.Append(c); previous = c; }
-                relaxed = builder.ToString();
-            }
-
-            return relaxed;
-        }
-
         private Dictionary<String, T> database = new Dictionary<String, T>();
         private HashSet<String> primaryNames = new HashSet<String>();
         private CharTree primaryNameTree = new CharTree();
         private Lookup<String, String> lowercaseLookup = new Lookup<String, String>();
         private Lookup<String, String> misspelledLookup = new Lookup<String, String>();
+
+        private IEnumerable<String> suggestions = null;
 
         public PrefixDatabase()
         {
@@ -102,8 +84,8 @@ namespace Ropufu.LeytePond.Bridge
             var misspelledNames = new HashSet<String>();
             foreach (var name in this.OverrideNames(unit))
             {
-                var stage1 = UnitDatabase.RelaxToLowercase(name);
-                var stage2 = UnitDatabase.RelaxSpelling(stage1);
+                var stage1 = name.RelaxCase();
+                var stage2 = stage1.RelaxSpelling();
                 relaxedNames.Add(stage1);
                 misspelledNames.Add(stage2);
             }
@@ -125,6 +107,8 @@ namespace Ropufu.LeytePond.Bridge
 
         protected IDictionary<String, T> Database => this.database;
 
+        public IEnumerable<String> Suggestions => this.suggestions;
+
         public Int32 Count => this.database.Count;
 
         public IEnumerable<T> Units => this.database.Values;
@@ -138,13 +122,16 @@ namespace Ropufu.LeytePond.Bridge
 
             // Primary search failed. Secondary search: all lowercase!
             var key = String.Empty;
-            var lowercase = UnitDatabase.RelaxToLowercase(query);
-            var misspelled = UnitDatabase.RelaxSpelling(lowercase);
+            var lowercase = query.RelaxCase();
+            var misspelled = lowercase.RelaxSpelling();
             var countMatches = 0;
 
             // Stage 0: prefix tree search.
-            var isSingle = false;
-            var firstPrefixMatch = this.primaryNameTree.First(lowercase, out isSingle);
+            //var isSingle = false;
+            //var firstPrefixMatch = this.primaryNameTree.First(lowercase, out isSingle);
+            var firstPrefixMatch = default(String);
+            this.suggestions = this.primaryNameTree.Find(lowercase, out countMatches, ref firstPrefixMatch);
+            var isSingle = (countMatches == 1);
             // Only one terminus matches the prefix.
             if (isSingle) lowercase = firstPrefixMatch;
 
@@ -171,14 +158,14 @@ namespace Ropufu.LeytePond.Bridge
             return false;
         } // TryFind(...)
 
-        protected virtual void OnLoading(T unit, out Boolean doCancel) { doCancel = false; }
+        protected virtual void OnLoading(ref T unit, out Boolean doCancel) { doCancel = false; }
 
-        protected virtual void OnLoaded(T unit) { }
+        protected virtual void OnLoaded(ref T unit) { }
 
         public Boolean Add(T unit)
         {
             var doCancel = false;
-            this.OnLoading(unit, out doCancel);
+            this.OnLoading(ref unit, out doCancel);
             if (doCancel) return false;
 
             var key = this.OverrideBuildKey(unit);
@@ -199,7 +186,7 @@ namespace Ropufu.LeytePond.Bridge
                 this.primaryNames.Add(primaryName);
                 this.primaryNameTree.Add(primaryName);
                 this.UpdateLookup(key, unit);
-                this.OnLoaded(unit);
+                this.OnLoaded(ref unit);
                 return true;
             }
         }

@@ -105,6 +105,7 @@ namespace Ropufu.LeytePond.Bridge
         public Int32 HitPoints { get => this.hitPoints; set => this.Validate(this.hitPoints = value); }
         public Double DamageReduction { get => this.damageReduction; set => this.Validate(this.damageReduction = value); }
         public IList<String> Names => this.names.AsReadOnly();
+        public String FirstName => this.names.Count == 0 ? String.Empty : this.names[0];
 
         // @warning Does not perform null reference checks.
         private Boolean EqualsUnchecked(Camp other) => (this.hitPoints == other.hitPoints) && (this.damageReduction == other.damageReduction);

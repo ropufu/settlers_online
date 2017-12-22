@@ -6,13 +6,13 @@ using System.Windows;
 
 namespace Ropufu.LeytePond
 {
-    public class Warnings : INotifyPropertyChanged
+    public class Logger : INotifyPropertyChanged
     {
-        private Queue<String> stack = new Queue<String>();
+        private Queue<String> messages = new Queue<String>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public Warnings()
+        public Logger()
         {
 
         }
@@ -26,24 +26,39 @@ namespace Ropufu.LeytePond
             MessageBox.Show(owner, builder.ToString(), "~~ Oh no! ~~", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
-        public Int32 Count => this.stack.Count;
-        public Boolean IsEmpty => this.stack.Count == 0;
-        public Boolean IsNotEmpty => this.stack.Count != 0;
+        public Int32 Count => this.messages.Count;
+        public Boolean IsEmpty => this.messages.Count == 0;
+        public Boolean IsNotEmpty => this.messages.Count != 0;
 
         public void Clear()
         {
-            if (this.stack.Count == 0) return;
-            this.stack.Clear();
+            if (this.messages.Count == 0) return;
+            this.messages.Clear();
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Count)));
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsEmpty)));
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsNotEmpty)));
         }
 
+        public void Append(Logger other)
+        {
+            if (other.IsEmpty) return;
+            var wasEmpty = this.IsEmpty;
+
+            foreach (var item in other.messages) this.messages.Enqueue(item);
+
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Count)));
+            if (wasEmpty)
+            {
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsEmpty)));
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsNotEmpty)));
+            }
+        }
+
         public void Push(String message)
         {
-            this.stack.Enqueue(message ?? String.Empty);
+            this.messages.Enqueue(message ?? String.Empty);
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Count)));
-            if (this.stack.Count == 1)
+            if (this.messages.Count == 1)
             {
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsEmpty)));
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsNotEmpty)));
@@ -52,11 +67,11 @@ namespace Ropufu.LeytePond
 
         public String Pop()
         {
-            if (this.stack.Count == 0) return null;
+            if (this.messages.Count == 0) return null;
 
-            var message = this.stack.Dequeue();
+            var message = this.messages.Dequeue();
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Count)));
-            if (this.stack.Count == 0)
+            if (this.messages.Count == 0)
             {
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsEmpty)));
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsNotEmpty)));
@@ -65,6 +80,6 @@ namespace Ropufu.LeytePond
             return message;
         }
 
-        public String Top => this.stack.Count == 0 ? null : this.stack.Peek();
+        public String Top => this.messages.Count == 0 ? null : this.messages.Peek();
     }
 }

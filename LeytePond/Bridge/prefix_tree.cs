@@ -158,6 +158,16 @@ namespace Ropufu.LeytePond.Bridge
             return match.FirstTerminus();
         }
 
+        public IEnumerable<U> Find(U query, out Int32 count, ref U first)
+        {
+            count = 0;
+            var match = this.MatchNode(query);
+            if (match.IsNull()) return new List<U>();
+            count = (match.Termini.Count);
+            if (count == 1) first = match.FirstTerminus();
+            return match.BuildTermini();
+        }
+
         public IEnumerable<U> this[U query] => this.MatchNode(query)?.BuildTermini() ?? new List<U>();
 
         public Int32 Count(U query) => this.MatchNode(query)?.Termini.Count ?? 0;
