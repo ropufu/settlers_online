@@ -46,7 +46,7 @@ namespace Ropufu.LeytePond
             var fileString = System.IO.File.ReadAllText(filePath).Replace("\r\n", "\n");
             var gitString = $"blob {fileString.Length}\0{fileString}";
 
-            var sha = new System.Security.Cryptography.SHA1Cng();
+            var sha = new System.Security.Cryptography.SHA1Managed();
             var buff = Encoding.ASCII.GetBytes(gitString);
             return sha.ComputeHash(buff);
         }

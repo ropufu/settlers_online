@@ -106,8 +106,8 @@
     <Compile Include="Bridge\army_parser.cs" />
     <Compile Include="Bridge\adventure_database.cs" />
     <Compile Include="Bridge\camp_database.cs" />
-    <Compile Include="Chrome\CampBox.cs" />
     <Compile Include="Converters\EqualityConverter.cs" />
+    <Compile Include="Converters\CompositeConverter.cs" />
     <Compile Include="Core\Collections.cs" />
     <Compile Include="Core\SortedBijection.cs" />
     <Compile Include="Core\ReferenceBijection.cs" />

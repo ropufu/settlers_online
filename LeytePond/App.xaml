@@ -11,6 +11,8 @@
         <converters:SkillMapConverter x:Key="SkillMapConverter" />
         <converters:IsNotEmptyConverter x:Key="NotEmptyConverter" />
         <converters:EqualityConverter x:Key="EqualityConverter" />
+        <converters:BooleanOperationConverter x:Key="BooleanOpConverter" />
+        <converters:BooleanSwitchConverter x:Key="BooleanSwitchConverter" />
         <BooleanToVisibilityConverter x:Key="VisibilityConverter" />
         <Style TargetType="ListView">
             <Setter Property="BorderThickness" Value="0" />

@@ -23,7 +23,7 @@ namespace Ropufu.LeytePond
         private Boolean doTakeAll = true;
         private String[] keywords = new String[0];
         private List<Adventure> adventures = new List<Adventure>(AdventureDatabase.Instance.Adventures);
-        private List<UnitType> oldSelection = null;
+        private List<UnitType> oldSelection = new List<UnitType>();
 
         private Point maybeDragStart = new Point();
 
@@ -38,10 +38,33 @@ namespace Ropufu.LeytePond
 
         public IEnumerable<Adventure> Adventures => this.adventures;
 
-        private void PreviewDownHandler(Object sender, MouseButtonEventArgs e)
+        private void CacheSelection()
         {
             this.oldSelection = new List<UnitType>(this.itemView.SelectedItems.Count);
             foreach (UnitType u in this.itemView.SelectedItems) this.oldSelection.Add(u);
+        }
+
+        private Boolean WasSelected(Object item)
+        {
+            if (item.IsNull()) return false;
+            if (this.itemView.SelectedItems.IsNull()) return false;
+
+            foreach (var u in this.itemView.SelectedItems) if (Object.ReferenceEquals(item, u)) return true;
+            return false;
+        }
+
+        private void PreviewDownHandler(Object sender, MouseButtonEventArgs e)
+        {
+            var generator = this.itemView.ItemContainerGenerator;
+            var container = sender as DependencyObject;
+            if (generator.IsNull() || container.IsNull()) return;
+
+            var unit = generator.ItemFromContainer(container);
+
+            // If the item clicked on was already selected, then cache the existing selection, because it will be deselected by the time drag kicks in.
+            if (this.WasSelected(unit)) this.CacheSelection();
+            else this.oldSelection.Clear(); // It the item clicked on was not selected, the deselection is intentional, and the cache should be cleared.
+
             this.maybeDragStart = e.GetPosition(null);
         }
 
@@ -49,14 +72,16 @@ namespace Ropufu.LeytePond
         {
             if (e.LeftButton != MouseButtonState.Pressed) return;
 
-            // Get the current mouse position
+            // Get the current mouse position.
             var position = e.GetPosition(null);
             var shift = position - this.maybeDragStart;
             var doDrag = (Math.Abs(shift.X) > SystemParameters.MinimumHorizontalDragDistance) || (Math.Abs(shift.Y) > SystemParameters.MinimumVerticalDragDistance);
 
             if (doDrag)
             {
+                if (this.oldSelection.IsNull()) throw new ShouldNotHappenException();
                 var viewItem = sender as ListViewItem;
+                if (this.oldSelection.Count == 0) this.CacheSelection(); // If the cache is empty, rebuild it with the current selection.
                 var data = new DataObject(typeof(List<UnitType>).FullName, this.oldSelection);
                 DragDrop.DoDragDrop(viewItem, data, DragDropEffects.Move);
             }

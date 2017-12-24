@@ -4,13 +4,6 @@ using System.Windows.Data;
 
 namespace Ropufu.LeytePond.Converters
 {
-    public enum BooleanOperation
-    {
-        And,
-        Or,
-        Xor
-    }
-
     public class BooleanOperationConverter : IMultiValueConverter
     {
         public Object Convert(Object[] values, Type targetType, Object parameter, System.Globalization.CultureInfo culture)

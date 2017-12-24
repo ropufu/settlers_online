@@ -306,9 +306,32 @@ namespace Ropufu.LeytePond
             new SkillsWindow(this.Decorator, general) { Owner = App.Current.MainWindow }.ShowDialog();
         }
 
+        private void ShowCamps() => this.campsList.IsDropDownOpen = true;
+
+        private void ShowAdventureList() => this.adventureList.IsDropDownOpen = true;
+
+        private void HideAdventureList() => this.adventureList.IsDropDownOpen = false;
+
+        private void ReloadAdventure()
+        {
+            var adventure = this.adventureList.SelectedItem as Adventure;
+            if (adventure.IsNull()) return;
+
+            this.ArmyString = adventure.Name;
+        }
+
         private void WarningsHandler(Object sender, RoutedEventArgs e) => this.warnings.Unwind();
 
         private void SkillsHandler(Object sender, RoutedEventArgs e) => this.ShowSkills();
+
+        private void CampsHandler(Object sender, RoutedEventArgs e) => this.ShowCamps();
+
+        private void AdventureSelectedHandler(Object sender, SelectionChangedEventArgs e) => this.ReloadAdventure();
+
+        private void ArmyBoxDoubleClickHandler(Object sender, MouseButtonEventArgs e)
+        {
+            if (String.IsNullOrWhiteSpace(this.ArmyString)) this.ShowAdventureList();
+        }
 
         private void DragEnterHandler(Object sender, DragEventArgs e)
         {
@@ -367,25 +390,6 @@ namespace Ropufu.LeytePond
             }
         }
 
-        private void CampBoxChangedHandler(Object sender, SelectionChangedEventArgs e)
-        {
-            var campBox = sender as CampBox;
-            if (campBox.IsNull()) return;
-
-            var selected = campBox.SelectedItem as Camp;
-            var generator = campBox.ItemContainerGenerator;
-
-            // @todo Rewrite using MultipleBinding on EqualityConverter and BooleanSwitchConverter.
-            for (var i = 0; i < campBox.Items.Count; ++i)
-            {
-                var item = campBox.Items[i] as Camp;
-                var container = generator.ContainerFromIndex(i);
-                var isSame = (item == selected);
-                var textBlock = container.FindVisualChild(x => x is TextBlock) as TextBlock;
-                if (!textBlock.IsNull()) textBlock.FontWeight = isSame ? FontWeights.Bold : FontWeights.Normal;
-            }
-        }
-
         protected override void OnPreviewKeyDown(KeyEventArgs e)
         {
             switch (e.Key)
@@ -410,6 +414,16 @@ namespace Ropufu.LeytePond
                         this.AddWave?.Invoke(this, new RoutedEventArgs());
                         e.Handled = true;
                     }
+                    break;
+                case Key.Down:
+                    if (e.OriginalSource == this.armyStringBox)
+                    {
+                        this.adventureList.IsDropDownOpen = true;
+                        e.Handled = true;
+                    }
+                    break;
+                case Key.Escape:
+                    this.adventureList.IsDropDownOpen = false;
                     break;
             }
             base.OnPreviewKeyDown(e);
