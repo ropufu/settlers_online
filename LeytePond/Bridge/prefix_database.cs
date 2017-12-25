@@ -71,7 +71,7 @@ namespace Ropufu.LeytePond.Bridge
         private Lookup<String, String> lowercaseLookup = new Lookup<String, String>();
         private Lookup<String, String> misspelledLookup = new Lookup<String, String>();
 
-        private IEnumerable<String> suggestions = null;
+        private IEnumerable<String> suggestions = new List<String>();
 
         public PrefixDatabase()
         {
@@ -117,6 +117,7 @@ namespace Ropufu.LeytePond.Bridge
 
         public Boolean TryFind(String query, ref T unit, Func<T, Boolean> filter = null)
         {
+            this.suggestions = new List<String>();
             if (filter.IsNull()) filter = u => true;
             if (this.database.TryGetValue(query, out unit)) if (filter(unit)) return true;
 

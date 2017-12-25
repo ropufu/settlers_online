@@ -242,6 +242,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\gray_standing.png" />
     <Resource Include="Images\lucy_sketch.png" />
     <Resource Include="Images\lucy_standing.png" />
     <Resource Include="LeytePond.ico" />

@@ -42,7 +42,7 @@
         <DockPanel LastChildFill="True">
             <Button DockPanel.Dock="Left" Style='{StaticResource LibraryIcon}' ToolTip="Skills" Click="SkillsHandler" Margin="5,0,0,0" Padding="5" />
             <Button DockPanel.Dock="Right" Style='{StaticResource FirewallIcon}' ToolTip="Camp" Click="CampsHandler" Margin="0,0,5,0" Padding="5" />
-            <ComboBox DockPanel.Dock="Right" x:Name="campsList" ItemsSource="{local:CampDatabaseBinding Path=Camps}" Margin="0" Padding="0" Width="0"
+            <ComboBox DockPanel.Dock="Right" x:Name="campList" ItemsSource="{local:CampDatabaseBinding Path=Camps}" Margin="0" Padding="0" Width="0"
                       SelectedItem="{Binding ElementName=self, Path=Decorator.Camp}"
                       Visibility="{Binding ElementName=self, Path=IsNonPlayerArmy, Converter={StaticResource VisibilityConverter}}">
                 <ComboBox.ItemContainerStyle>
@@ -58,18 +58,19 @@
                                 </ToolTip>
                             </Setter.Value>
                         </Setter>
-                    </Style>
-                </ComboBox.ItemContainerStyle>
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Path=FirstName}" Margin="10,2,10,2">
-                            <TextBlock.FontWeight>
+                        <Setter Property="FontWeight">
+                            <Setter.Value>
                                 <MultiBinding Converter="{StaticResource CampFontConverter}">
                                     <Binding />
                                     <Binding ElementName="self" Path="Decorator.Camp" />
                                 </MultiBinding>
-                            </TextBlock.FontWeight>
-                        </TextBlock>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ComboBox.ItemContainerStyle>
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Path=FirstName}" Margin="10,2,10,2" />
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
@@ -77,6 +78,14 @@
             <!--Penultimate child: want to make sure long text does not affect width measurement-->
             <StackPanel Orientation="Vertical" DockPanel.Dock="Top">
                 <TextBox x:Name="armyStringBox" Text='{Binding ElementName=self, Path=ArmyString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}' TextWrapping="Wrap" Margin="5,10,5,10" Width="{Binding ElementName=modestBorder, Path=ActualWidth}" MouseDoubleClick="ArmyBoxDoubleClickHandler" />
+                <ComboBox x:Name="suggestionList" ItemsSource="{StaticResource SuggestionsSource}" Margin="0,-10,0,0" IsHitTestVisible="False" Height="0" Width="{Binding ElementName=modestBorder, Path=ActualWidth}" SelectionChanged="AdventureSelectedHandler">
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="IsHitTestVisible" Value="False" />
+                            <Setter Property="Foreground" Value="Gray" />
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                </ComboBox>
                 <ComboBox x:Name="adventureList" ItemsSource="{local:AdventureDatabaseBinding Adventures}" Margin="0,-10,0,0" IsHitTestVisible="False" Height="0" Width="{Binding ElementName=modestBorder, Path=ActualWidth}" SelectionChanged="AdventureSelectedHandler">
                     <ComboBox.ItemContainerStyle>
                         <Style TargetType="ComboBoxItem">
@@ -88,6 +97,7 @@
                                     </MultiBinding>
                                 </Setter.Value>
                             </Setter>
+                            <Setter Property="ToolTip" Value="{Binding Path=MapsString}" />
                         </Style>
                     </ComboBox.ItemContainerStyle>
                     <ComboBox.ItemTemplate>

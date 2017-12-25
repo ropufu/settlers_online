@@ -157,12 +157,11 @@ namespace Ropufu.LeytePond
             set => this.isStrict = value;
         }
 
-        private void ResetSuggestions()
+        private void AppendSuggestions<T>(PrefixDatabase<T> source)
         {
             // ~~ Update suggestions ~~
-            this.suggestionsSource.Clear();
             var countSuggestions = 0;
-            foreach (var s in UnitDatabase.Instance.Suggestions)
+            foreach (var s in source.Suggestions)
             {
                 this.suggestionsSource.Add(s);
                 ++countSuggestions;
@@ -176,14 +175,20 @@ namespace Ropufu.LeytePond
 
             this.warnings.Clear();
             this.groupSum.ClearChildren();
+            this.suggestionsSource.Clear();
 
             var groups = new List<UnitGroup>();
             foreach (var parser in this.parsers)
             {
-                // @todo Change the handling of warnings, e.g., missing general check for multiple armies.
                 var warnings = new Logger();
                 var army = parser.Build(warnings, this.doCheckGenerals, this.doCoerceFactions, this.isStrict);
-                if (!parser.IsGood) // Try interpreting the string as adventure name.
+
+                if (parser.IsGood) // Take suggestions if string format is that of an army.
+                {
+                    // ...unless the army has been reconstructed successfully and(!) there is only one (obvious) suggestion.
+                    if (army.IsEmpty || UnitDatabase.Instance.Suggestions.Count() > 1) this.AppendSuggestions(UnitDatabase.Instance); 
+                }
+                else // Otherwise try interpreting the string as adventure name.
                 {
                     var adventure = default(Adventure);
                     if (AdventureDatabase.Instance.TryFind(parser.Value, ref adventure))
@@ -191,7 +196,9 @@ namespace Ropufu.LeytePond
                         warnings.Clear();
                         army = new Army((from u in adventure.Units select new UnitGroup(u, 0)).ToArray());
                     }
+                    this.AppendSuggestions(AdventureDatabase.Instance);
                 }
+                // @todo Change the handling of warnings, e.g., missing general check for multiple armies.
                 this.warnings.Append(warnings);
 
                 foreach (var g in army)
@@ -218,6 +225,9 @@ namespace Ropufu.LeytePond
             newArmy.Skills.DoSkipDefault = true;
 
             newArmy.CopyTo(this.armySource);
+
+            if (this.suggestionsSource.Count == 0) this.HideSuggestionList();
+            else this.ShowSuggestionList();
         }
 
         private void InitializeArmyString()
@@ -226,6 +236,7 @@ namespace Ropufu.LeytePond
             this.ArmyString = this.IsPlayerArmy ? this.armySource.ToCompactString() : this.armySource.ToString();
             this.Decorator?.Decorate(this.armySource, new Logger());
             this.suggestionsSource.Clear();
+            this.HideSuggestionList();
             this.doHold = false;
         }
 
@@ -280,9 +291,6 @@ namespace Ropufu.LeytePond
 
             this.itemView.Items.Clear();
             this.itemView.ItemsSource = this.armySource;
-
-            //this.armyStringBox.Items.Clear();
-            //this.armyStringBox.ItemsSource = this.suggestionsSource;
         }
 
         public void CaptureCursor()
@@ -306,7 +314,11 @@ namespace Ropufu.LeytePond
             new SkillsWindow(this.Decorator, general) { Owner = App.Current.MainWindow }.ShowDialog();
         }
 
-        private void ShowCamps() => this.campsList.IsDropDownOpen = true;
+        private void ShowCamps() => this.campList.IsDropDownOpen = true;
+
+        private void ShowSuggestionList() => this.suggestionList.IsDropDownOpen = true;
+
+        private void HideSuggestionList() => this.suggestionList.IsDropDownOpen = false;
 
         private void ShowAdventureList() => this.adventureList.IsDropDownOpen = true;
 
@@ -418,12 +430,13 @@ namespace Ropufu.LeytePond
                 case Key.Down:
                     if (e.OriginalSource == this.armyStringBox)
                     {
-                        this.adventureList.IsDropDownOpen = true;
+                        this.ShowAdventureList();
                         e.Handled = true;
                     }
                     break;
                 case Key.Escape:
-                    this.adventureList.IsDropDownOpen = false;
+                    this.HideAdventureList();
+                    this.HideSuggestionList();
                     break;
             }
             base.OnPreviewKeyDown(e);

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace Ropufu.LeytePond.Bridge
 {
+    // @todo Mirror in c++.
     [JsonObject(MemberSerialization.OptIn)]
     class Map
     {
