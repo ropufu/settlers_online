@@ -106,7 +106,11 @@ namespace Ropufu.LeytePond
         private void LaunchUpdaterApp(List<GitHubFileInfo> updates)
         {
             if (updates.IsNull()) throw new ArgumentNullException(nameof(updates));
-            if (updates.Count == 0) return;
+            if (updates.Count == 0)
+            {
+                this.OnUpToDate();
+                return;
+            }
 
             if (!this.OnUpdatesAvailable($"{updates.Count} updates found.{Environment.NewLine}Proceed with download?")) return;
 
@@ -135,7 +139,6 @@ namespace Ropufu.LeytePond
         private void LaunchLocal(List<GitHubFileInfo> updates)
         {
             if (updates.IsNull()) throw new ArgumentNullException(nameof(updates));
-            if (updates.Count == 0) return;
 
             try
             {
