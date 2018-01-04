@@ -1,6 +1,16 @@
 {
     "units": [
         {
+            "id": 30,
+            "names": [ "Caltrop" ],
+            "category": "unknown",
+            "phases": [ "first strike" ],
+            "hit points": 4,
+            "damage": { "low": 0, "high": 20, "accuracy": 0.33 },
+            "experience when killed": 1,
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
             "id": 31,
             "names": [ "Deckscrubber" ],
             "category": "unknown",

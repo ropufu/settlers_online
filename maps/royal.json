@@ -19,6 +19,15 @@
             "experience when killed": 17
         },
         {
+            "id": 512,
+            "names": [ "Royal Elite Soldier", "Royal Elite" ],
+            "category": "melee",
+            "phases": [ "normal" ],
+            "hit points": 300,
+            "damage": { "low": 90, "high": 115, "accuracy": 0.90, "splash chance": 1 },
+            "experience when killed": 23
+        },
+        {
             "id": 514,
             "names": [ "Royal Bowman" ],
             "category": "ranged",
@@ -65,6 +74,16 @@
             "phases": [ "last strike" ],
             "hit points": 45000,
             "damage": { "low": 200, "high": 700, "accuracy": 0.9, "splash chance": 1 },
+            "special abilities": [ "overrun" ]
+        },
+        {
+            "id": 1445,
+            "names": [ "Royal Captain" ],
+            "category": "melee",
+            "phases": [ "normal" ],
+            "hit points": 45000,
+            "damage": { "low": 300, "high": 500, "accuracy": 0.8, "splash chance": 1 },
+            "experience when killed": 1500,
             "special abilities": [ "overrun" ]
         },
         {

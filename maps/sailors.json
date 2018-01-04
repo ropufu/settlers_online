@@ -57,16 +57,6 @@
             "experience when killed": 27
         },
         {
-            "id": 868,
-            "names": [ "Bandit Lord" ],
-            "category": "unknown",
-            "phases": [ "normal" ],
-            "hit points": 30000,
-            "damage": { "low": 3500, "high": 7000, "accuracy": 0.9, "splash chance": 1 },
-            "experience when killed": 1400,
-            "special abilities": [ "attack weakest target", "overrun" ]
-        },
-        {
             "id": 894,
             "names": [ "Steersman" ],
             "category": "unknown",
@@ -95,16 +85,6 @@
             "damage": { "low": 4000, "high": 8000, "accuracy": 0.8, "splash chance": 1 },
             "experience when killed": 560,
             "special abilities": [ "overrun" ]
-        },
-        {
-            "id": 878,
-            "names": [ "Grumpy Parrot" ],
-            "category": "unknown",
-            "phases": [ "first strike" ],
-            "hit points": 25000,
-            "damage": { "low": 2000, "high": 4000, "accuracy": 0.95, "splash chance": 1 },
-            "experience when killed": 1100,
-            "special abilities": [ "attack weakest target", "overrun" ]
         }
     ]
 }

@@ -39,7 +39,7 @@
         },
         {
             "id": 44,
-            "names": [ "Elite Deserter" ],
+            "names": [ "Elite Soldier Deserter", "Elite Deserter" ],
             "category": "unknown",
             "phases": [ "normal" ],
             "hit points": 120,
@@ -94,6 +94,16 @@
             "hit points": 12000,
             "damage": { "low": 200, "high": 600, "accuracy": 0.8, "splash chance": 1 },
             "experience when killed": 200,
+            "special abilities": [ "attack weakest target", "overrun" ]
+        },
+        {
+            "id": 50,
+            "names": [ "Big Bertha" ],
+            "category": "unknown",
+            "phases": [ "last strike" ],
+            "hit points": 40000,
+            "damage": { "low": 50, "high": 150, "accuracy": 0.75, "splash chance": 1 },
+            "experience when killed": 350,
             "special abilities": [ "attack weakest target", "overrun" ]
         }
     ]

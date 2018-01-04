@@ -1,0 +1,183 @@
+{
+    "units": [
+        {
+            "id": 521,
+            "names": [ "Iron Fist" ],
+            "category": "melee",
+            "phases": [ "first strike" ],
+            "hit points": 45000,
+            "damage": { "low": 200, "high": 250, "accuracy": 0.85, "splash chance": 1 },
+            "experience when killed": 300,
+            "special abilities": [ "overrun" ]
+        },
+        {
+            "id": 522,
+            "names": [ "Giant Bogor" ],
+            "category": "melee",
+            "phases": [ "last strike" ],
+            "hit points": 90000,
+            "damage": { "low": 100, "high": 300, "accuracy": 0.6, "splash chance": 1 },
+            "experience when killed": 400,
+            "special abilities": [ "overrun" ]
+        },
+        {
+            "id": 523,
+            "names": [ "Giant Gogor" ],
+            "category": "melee",
+            "phases": [ "last strike" ],
+            "hit points": 70000,
+            "damage": { "low": 100, "high": 250, "accuracy": 0.8, "splash chance": 1 },
+            "experience when killed": 350,
+            "special abilities": [ "overrun" ]
+        },
+        {
+            "id": 539,
+            "names": [ "Cudgel Claus" ],
+            "category": "melee",
+            "phases": [ "normal" ],
+            "hit points": 40000,
+            "damage": { "low": 200, "high": 300, "accuracy": 0.8, "splash chance": 1 },
+            "experience when killed": 250,
+            "special abilities": [ "overrun" ]
+        },
+        {
+            "id": 540,
+            "names": [ "Evil King" ],
+            "category": "melee",
+            "phases": [ "normal" ],
+            "hit points": 30000,
+            "damage": { "low": 200, "high": 300, "accuracy": 0.8, "splash chance": 1 },
+            "experience when killed": 800,
+            "special abilities": [ "overrun" ]
+        },
+        {
+            "id": 541,
+            "names": [ "Assassin" ],
+            "category": "melee",
+            "phases": [ "first strike" ],
+            "hit points": 30000,
+            "damage": { "low": 200, "high": 300, "accuracy": 0.8, "splash chance": 1 },
+            "experience when killed": 350,
+            "special abilities": [ "attack weakest target", "overrun" ]
+        },
+        {
+            "id": 542,
+            "names": [ "Greedy Inn-Keeper" ],
+            "category": "melee",
+            "phases": [ "last strike" ],
+            "hit points": 50000,
+            "damage": { "low": 1500, "high": 2000, "accuracy": 0.8, "splash chance": 1 },
+            "experience when killed": 950,
+            "special abilities": [ "attack weakest target", "overrun" ]
+        },
+        {
+            "id": 543,
+            "names": [ "Rivaling Tailor" ],
+            "category": "melee",
+            "phases": [ "last strike" ],
+            "hit points": 40000,
+            "damage": { "low": 150, "high": 250, "accuracy": 0.75, "splash chance": 1 },
+            "experience when killed": 350,
+            "special abilities": [ "attack weakest target", "overrun" ]
+        },
+        {
+            "id": 544,
+            "names": [ "Dark Magician" ],
+            "category": "melee",
+            "phases": [ "normal" ],
+            "hit points": 30000,
+            "damage": { "low": 2000, "high": 2500, "accuracy": 0.8, "splash chance": 1 },
+            "experience when killed": 1000,
+            "special abilities": [ "overrun" ]
+        },
+        {
+            "id": 1545,
+            "names": [ "Evil Queen", "Ilsebille" ],
+            "category": "melee",
+            "phases": [ "normal" ],
+            "hit points": 95000,
+            "damage": { "low": 400, "high": 600, "accuracy": 0.8, "splash chance": 1 },
+            "experience when killed": 3200,
+            "special abilities": [ "overrun" ]
+        },
+        {
+            "id": 1546,
+            "names": [ "Evil Stepmother" ],
+            "category": "melee",
+            "phases": [ "normal" ],
+            "hit points": 95000,
+            "damage": { "low": 400, "high": 600, "accuracy": 0.8, "splash chance": 1 },
+            "experience when killed": 3200,
+            "special abilities": [ "overrun" ]
+        },
+        {
+            "id": 1547,
+            "names": [ "Mayor" ],
+            "category": "melee",
+            "phases": [ "normal" ],
+            "hit points": 95000,
+            "damage": { "low": 400, "high": 600, "accuracy": 0.8, "splash chance": 1 },
+            "experience when killed": 3200,
+            "special abilities": [ "overrun" ]
+        },
+        {
+            "id": 1551,
+            "names": [ "Pied Piper", "Pied Piper of Hamelin" ],
+            "category": "melee",
+            "phases": [ "first strike" ],
+            "hit points": 55000,
+            "damage": { "low": 200, "high": 450, "accuracy": 0.9, "splash chance": 1 },
+            "experience when killed": 1900,
+            "special abilities": [ "attack weakest target", "overrun" ]
+        },
+        {
+            "id": 1552,
+            "names": [ "King of Rats" ],
+            "category": "melee",
+            "phases": [ "last strike" ],
+            "hit points": 40000,
+            "damage": { "low": 200, "high": 800, "accuracy": 0.6, "splash chance": 1 },
+            "experience when killed": 1300,
+            "special abilities": [ "overrun" ]
+        },
+        {
+            "id": 1562,
+            "names": [ "Big Bad Wolf" ],
+            "category": "melee",
+            "phases": [ "first strike" ],
+            "hit points": 50000,
+            "damage": { "low": 250, "high": 400, "accuracy": 0.8, "splash chance": 1 },
+            "experience when killed": 1700,
+            "special abilities": [ "attack weakest target", "overrun" ]
+        },
+        {
+            "id": 1572,
+            "names": [ "El Chupacabra" ],
+            "category": "melee",
+            "phases": [ "last strike" ],
+            "hit points": 50000,
+            "damage": { "low": 350, "high": 500, "accuracy": 0.9 },
+            "experience when killed": 700,
+            "special abilities": [ "attack weakest target", "overrun" ]
+        },
+        {
+            "id": 1582,
+            "names": [ "Ancient Dragon" ],
+            "category": "melee",
+            "phases": [ "first strike" ],
+            "hit points": 50000,
+            "damage": { "low": 500, "high": 750, "accuracy": 0.5, "splash chance": 1 },
+            "experience when killed": 400,
+            "special abilities": [ "overrun" ]
+        },
+        {
+            "id": 1592,
+            "names": [ "Treasure" ],
+            "category": "melee",
+            "phases": [ "normal" ],
+            "hit points": 1,
+            "damage": { "low": 0, "high": 0, "accuracy": 0.0 },
+            "experience when killed": 250
+        }
+    ]
+}

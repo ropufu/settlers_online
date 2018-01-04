@@ -56,6 +56,15 @@
             "special abilities": [ "attack weakest target" ]
         },
         {
+            "id": 520,
+            "names": [ "Giant" ],
+            "category": "melee",
+            "phases": [ "last strike" ],
+            "hit points": 160,
+            "damage": { "low": 60, "high": 90, "accuracy": 0.95, "splash chance": 1 },
+            "experience when killed": 26
+        },
+        {
             "id": 705,
             "names": [ "Deer" ],
             "category": "melee",
@@ -112,43 +121,6 @@
             "damage": { "low": 100, "high": 150, "accuracy": 0.85, "splash chance": 1 },
             "experience when killed": 100,
             "special abilities": [ "attack weakest target", "overrun" ]
-        },
-        {
-            "id": 820,
-            "names": [ "Stick-wielding Ape" ],
-            "category": "unknown",
-            "phases": [ "normal" ],
-            "hit points": 150,
-            "damage": { "low": 90, "high": 180, "accuracy": 0.95, "splash chance": 1 },
-            "experience when killed": 37
-        },
-        {
-            "id": 821,
-            "names": [ "Stone-throwing Ape" ],
-            "category": "unknown",
-            "phases": [ "first strike" ],
-            "hit points": 70,
-            "damage": { "low": 125, "high": 250, "accuracy": 0.95, "splash chance": 1 },
-            "experience when killed": 67,
-            "special abilities": [ "attack weakest target" ]
-        },
-        {
-            "id": 822,
-            "names": [ "Alpha Ape" ],
-            "category": "unknown",
-            "phases": [ "last strike" ],
-            "hit points": 500,
-            "damage": { "low": 35, "high": 70, "accuracy": 0.95, "splash chance": 1 },
-            "experience when killed": 56
-        },
-        {
-            "id": 823,
-            "names": [ "Nervous Ape" ],
-            "category": "unknown",
-            "phases": [ "first strike" ],
-            "hit points": 100,
-            "damage": { "low": 80, "high": 160, "accuracy": 0.95, "splash chance": 1 },
-            "experience when killed": 40
         }
     ]
 }
