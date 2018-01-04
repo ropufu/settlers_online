@@ -246,6 +246,10 @@
       <Link>black_marsh.config</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="..\..\bin\black_marsh.out">
+      <Link>black_marsh.out</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="app.manifest" />
     <None Include="LeytePond.snk" />
     <None Include="packages.config" />
