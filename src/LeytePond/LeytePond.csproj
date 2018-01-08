@@ -246,10 +246,14 @@
       <Link>black_marsh.config</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="..\..\bin\black_marsh.out">
+    <None Include="..\..\bin\black_marsh.out">
       <Link>black_marsh.out</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
+    <None Include="..\..\bin\black_marsh.x">
+      <Link>black_marsh.x</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="app.manifest" />
     <None Include="LeytePond.snk" />
     <None Include="packages.config" />
@@ -281,10 +285,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\bin\black_marsh.exe">
+    <None Include="..\..\bin\black_marsh.exe">
       <Link>black_marsh.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

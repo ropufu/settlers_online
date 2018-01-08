@@ -41,13 +41,13 @@ namespace ropufu
             }; // struct json_type_check
 
             template <>
-            struct json_type_check<std::int_fast32_t>
+            struct json_type_check<std::int32_t>
             {
                 static bool is(const nlohmann::json& entry) noexcept { return entry.is_number_integer(); }
             }; // struct json_type_check
 
             template <>
-            struct json_type_check<std::int_fast64_t>
+            struct json_type_check<std::int64_t>
             {
                 static bool is(const nlohmann::json& entry) noexcept { return entry.is_number_integer(); }
             }; // struct json_type_check
