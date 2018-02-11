@@ -4,6 +4,7 @@
 *.aux
 *.out
 *.synctex
+*.synctex.gz
 
 # ~~ macOS.gitignore ~~
 # General

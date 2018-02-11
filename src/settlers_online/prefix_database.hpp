@@ -169,7 +169,7 @@ namespace ropufu
             /** @brief Happens when \c clear() is called. */
             void on_clear() noexcept
             {
-                constexpr bool is_overwritten = std::is_same<
+                constexpr bool is_overwritten = !std::is_same<
                     decltype(&derived_type::on_clear), 
                     decltype(&type::on_clear)>::value;
                 if (!is_overwritten) return; // Do nothing if the function has not been overridden.
@@ -183,7 +183,7 @@ namespace ropufu
             void on_loading(const value_type& unit, bool& do_cancel, t_logger_type& logger) const noexcept
             {
                 do_cancel = false;
-                constexpr bool is_overwritten = std::is_same<
+                constexpr bool is_overwritten = !std::is_same<
                     decltype(&derived_type::template on_loading<t_logger_type>), 
                     decltype(&type::template on_loading<t_logger_type>)>::value;
                 if (!is_overwritten) return; // Do nothing if the function has not been overridden.
@@ -195,7 +195,7 @@ namespace ropufu
             /** @brief Happens when a unit has been loaded. */
             void on_loaded(const value_type& unit) noexcept
             {
-                constexpr bool is_overwritten = std::is_same<
+                constexpr bool is_overwritten = !std::is_same<
                     decltype(&derived_type::on_loaded), 
                     decltype(&type::on_loaded)>::value;
                 if (!is_overwritten) return; // Do nothing if the function has not been overridden.

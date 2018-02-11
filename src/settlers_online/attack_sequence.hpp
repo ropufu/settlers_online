@@ -82,10 +82,10 @@ namespace ropufu
              */
             bool peek_do_high_damage(const unit_type& unit) noexcept
             {
-                constexpr bool is_overwritten = std::is_same<
+                constexpr bool is_overwritten = !std::is_same<
                     decltype(&derived_type::peek_do_high_damage), 
                     decltype(&type::peek_do_high_damage)>::value;
-                static_assert(!is_overwritten, "static polymorphic function <peek_do_high_damage> was not overwritten.");
+                static_assert(is_overwritten, "static polymorphic function <peek_do_high_damage> was not overwritten.");
                 derived_type* that = static_cast<derived_type*>(this);
                 return that->peek_do_high_damage(unit);
             } // peek_do_high_damage(...)
@@ -96,10 +96,10 @@ namespace ropufu
              */
             std::size_t peek_count_high_damage(const unit_type& unit, std::size_t count_units) noexcept
             {
-                constexpr bool is_overwritten = std::is_same<
+                constexpr bool is_overwritten = !std::is_same<
                     decltype(&derived_type::peek_count_high_damage), 
                     decltype(&type::peek_count_high_damage)>::value;
-                static_assert(!is_overwritten, "static polymorphic function <peek_count_high_damage> was not overwritten.");
+                static_assert(is_overwritten, "static polymorphic function <peek_count_high_damage> was not overwritten.");
                 derived_type* that = static_cast<derived_type*>(this);
                 return that->peek_count_high_damage(unit, count_units);
             } // peek_count_high_damage(...)
@@ -109,10 +109,10 @@ namespace ropufu
              */
             bool peek_do_splash(const unit_type& unit) noexcept
             {
-                constexpr bool is_overwritten = std::is_same<
+                constexpr bool is_overwritten = !std::is_same<
                     decltype(&derived_type::peek_do_splash), 
                     decltype(&type::peek_do_splash)>::value;
-                static_assert(!is_overwritten, "static polymorphic function <peek_do_splash> was not overwritten.");
+                static_assert(is_overwritten, "static polymorphic function <peek_do_splash> was not overwritten.");
                 derived_type* that = static_cast<derived_type*>(this);
                 return that->peek_do_splash(unit);
             } // peek_do_splash(...)
@@ -122,10 +122,10 @@ namespace ropufu
              */
             bool did_last_splash(const unit_type& unit) noexcept
             {
-                constexpr bool is_overwritten = std::is_same<
+                constexpr bool is_overwritten = !std::is_same<
                     decltype(&derived_type::did_last_splash), 
                     decltype(&type::did_last_splash)>::value;
-                static_assert(!is_overwritten, "static polymorphic function <did_last_splash> was not overwritten.");
+                static_assert(is_overwritten, "static polymorphic function <did_last_splash> was not overwritten.");
                 derived_type* that = static_cast<derived_type*>(this);
                 return that->did_last_splash(unit);
             } // did_last_splash(...)
