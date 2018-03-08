@@ -5,6 +5,7 @@
 #include "../settlers_online/army.hpp"
 #include "../settlers_online/combat_result.hpp"
 #include "../settlers_online/combat_mechanics.hpp"
+#include "../settlers_online/logger.hpp"
 #include "../settlers_online/trivial_attack_sequence.hpp"
 #include "../settlers_online/unit_group.hpp"
 #include "../settlers_online/unit_type.hpp"
@@ -38,11 +39,12 @@ namespace ropufu
 				sequencer_type right_seq = { };
 
 				tested_type combat(left_army, right_army);
-				settlers_online::combat_result result = combat.execute(left_seq, right_seq);
+                settlers_online::detail::no_logger logger { };
+				std::size_t battle_rounds = combat.execute(left_seq, right_seq, logger);
 				std::size_t destruction_rounds = 0;
 				for (std::size_t i = 0; i < 100; i++) destruction_rounds += combat.destruct(left_seq, right_seq);
 				destruction_rounds /= 100;
-                return (destruction_rounds + result.number_of_rounds()) > 2;
+                return (destruction_rounds + battle_rounds) > 2;
             }
         };
     }

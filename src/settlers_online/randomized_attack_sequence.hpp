@@ -6,17 +6,17 @@
 #include "binomial_pool.hpp"
 #include "unit_type.hpp"
 
-#include <chrono> // std::chrono::high_resolution_clock
+#include <chrono>  // std::chrono::high_resolution_clock
 #include <cstddef> // std::size_t
 #include <cstdint> // std::int_fast32_t
-#include <random> // std::default_random_engine, std::seed_seq
+#include <random>  // std::mt19937, std::seed_seq
 
 namespace ropufu
 {
     namespace settlers_online
     {
         /** Attack sequence where each attack always results in the same low or high value.  */
-        template <typename t_engine_type = std::default_random_engine>
+        template <typename t_engine_type = std::mt19937>
         struct randomized_attack_sequence : public attack_sequence<randomized_attack_sequence<t_engine_type>>
         {
             using type = randomized_attack_sequence<t_engine_type>;
@@ -26,7 +26,7 @@ namespace ropufu
 
         private:
             pool_type& m_pool = pool_type::instance();
-            engine_type m_engine = { };
+            engine_type m_engine = engine_type(); // Uniform PRNG.
             bool m_did_last_splash = false;
 
         public:

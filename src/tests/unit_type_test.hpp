@@ -34,7 +34,7 @@ namespace ropufu
                 std::size_t hit_points = 1985;
                 tested_type u1 = gen.next_type(name, hit_points);
                 tested_type u2 = u1;
-                u2.names() = { "baka", "dummy" };
+                u2.set_names({ "baka", "dummy" });
                 if (u1 != u2) return false;
 
                 std::size_t low_damage = u1.damage().low();

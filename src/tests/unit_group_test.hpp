@@ -93,7 +93,7 @@ namespace ropufu
             static bool is_match(const tested_type& g,
                 const settlers_online::unit_type& u, std::size_t count, std::size_t damage_taken, std::int_fast32_t metagroup_id)
             {
-                if (g.type() != u) return false;
+                if (g.unit() != u) return false;
                 if (g.count() != count) return false;
                 if (g.damage_taken() != damage_taken) return false;
                 if (g.metagroup_id() != metagroup_id) return false;

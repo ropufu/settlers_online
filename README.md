@@ -1,6 +1,6 @@
 # settlers_online
 
-This is a collection of tools for simulating combat in The Settlers Online.
+This is a collection of tools for simulating combat in [The Settlers Online](https://www.thesettlersonline.com).
 Currently, it consists of three major components:
 
 - C++ header library describing combat mechanics (`settlers_online`).

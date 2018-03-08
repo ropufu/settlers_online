@@ -12,7 +12,7 @@
 
 #include <cstddef> // std::size_t
 #include <map> // std::map
-#include <random> // std::default_random_engine
+#include <random> // std::mt19937
 
 namespace ropufu
 {
@@ -21,13 +21,13 @@ namespace ropufu
         /** @brief Class for generating bernoulli and binomial variates.
          *  @remark Singleton structure taken from https://stackoverflow.com/questions/11711920
          */
-        template <typename t_engine_type = std::default_random_engine>
+        template <typename t_engine_type = std::mt19937>
         struct binomial_pool
         {
             using type = binomial_pool<t_engine_type>;
             using engine_type = t_engine_type;
             using uniform_type = typename engine_type::result_type;
-            using binomial_distribution_type = aftermath::probability::dist_binomial;
+            using binomial_distribution_type = aftermath::probability::dist_binomial<std::size_t, double>;
             using bernoulli_sampler_type = aftermath::random::default_sampler_bernoulli_t<t_engine_type>;
             using binomial_lookup_sampler_type = aftermath::random::default_sampler_binomial_lookup_t<t_engine_type>;
 
