@@ -2,7 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_TEST_UNIT_TYPE_TEST_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_TEST_UNIT_TYPE_TEST_HPP_INCLUDED
 
-#include "../settlers_online/unit_category.hpp"
+#include "../settlers_online/enums.hpp"
 #include "../settlers_online/unit_type.hpp"
 
 #include "generator.hpp"

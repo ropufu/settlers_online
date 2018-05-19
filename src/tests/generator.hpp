@@ -3,11 +3,8 @@
 #define ROPUFU_SETTLERS_ONLINE_TEST_GENERATOR_HPP_INCLUDED
 
 #include "../settlers_online/army.hpp"
-#include "../settlers_online/battle_phase.hpp"
-#include "../settlers_online/battle_trait.hpp"
+#include "../settlers_online/enums.hpp"
 #include "../settlers_online/damage.hpp"
-#include "../settlers_online/unit_category.hpp"
-#include "../settlers_online/unit_faction.hpp"
 #include "../settlers_online/unit_group.hpp"
 #include "../settlers_online/unit_type.hpp"
 

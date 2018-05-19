@@ -3,17 +3,16 @@
 #define ROPUFU_SETTLERS_ONLINE_COMBAT_MECHANICS_HPP_INCLUDED
 
 #include <aftermath/algebra.hpp> // aftermath::algebra::permutation
+#include <aftermath/enum_array.hpp>
 #include <aftermath/not_an_error.hpp>
 
-// ~~ Enumerations ~~
-#include "battle_phase.hpp"
 // ~~ Basic structures ~~
 #include "combat_result.hpp"
+#include "enums.hpp"
 // ~~ Misc ~~
 #include "army.hpp"
 #include "attack_sequence.hpp"
 #include "conditioned_army.hpp"
-#include "enum_array.hpp"
 #include "typedef.hpp"
 
 #include <cstddef> // std::size_t
@@ -28,15 +27,14 @@ namespace ropufu
             using type = combat_mechanics;
 
         private:
-            static constexpr std::size_t count_phases = enum_capacity<battle_phase>::value;
-
+            //static constexpr std::size_t count_phases = enum_capacity<battle_phase>::value;
+            aftermath::enum_array<battle_phase, void> m_phases = { };
             conditioned_army m_left; // Left army.
             conditioned_army m_right; // Right army.
             detail::combat_result m_outcome = { };
             bool m_is_in_destruction_phase = false;
 
         public:
-
             /** Prepares two armies for combat. */
             combat_mechanics(army& left, army& right)
                 : m_left(left, right), m_right(right, left)
@@ -72,10 +70,9 @@ namespace ropufu
                 while (this->m_left.underlying().count_units() > 0 && this->m_right.underlying().count_units() > 0)
                 {
                     logger << "Begin round " << (1 + count_rounds) << "." << nullptr;
-                    for (std::size_t k = 0; k < count_phases; k++)
+                    for (battle_phase phase : this->m_phases)
                     {
-                        battle_phase phase = static_cast<battle_phase>(k);
-                        logger << "Begin " << detail::to_str(phase) << " phase." << nullptr;
+                        logger << "Begin " << std::to_string(phase) << " phase." << nullptr;
 
                         this->m_left.initiate_phase(phase, this->m_right, left_frenzy_factor, left_sequencer, logger);
                         this->m_right.initiate_phase(phase, this->m_left, right_frenzy_factor, right_sequencer, logger);
@@ -85,7 +82,7 @@ namespace ropufu
 
                         left_sequencer.next_phase();
                         right_sequencer.next_phase();
-                        logger << "End " << detail::to_str(phase) << " phase." << nullptr;
+                        logger << "End " << std::to_string(phase) << " phase." << nullptr;
                     }
 
                     left_frenzy_factor *= (1 + left_frenzy_bonus);

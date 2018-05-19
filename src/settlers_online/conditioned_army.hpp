@@ -3,20 +3,16 @@
 #define ROPUFU_SETTLERS_ONLINE_CONDITIONED_ARMY_HPP_INCLUDED
 
 #include <aftermath/algebra.hpp> // aftermath::algebra::permutation
+#include <aftermath/enum_array.hpp>
 #include <aftermath/not_an_error.hpp>
 
-// ~~ Enumerations ~~
-#include "battle_phase.hpp"
-#include "battle_trait.hpp"
-#include "special_ability.hpp"
-#include "unit_category.hpp"
 // ~~ Basic structures ~~
 #include "damage.hpp"
+#include "enums.hpp"
 // ~~ Misc ~~
 #include "army.hpp"
 #include "attack_sequence.hpp"
 #include "combat_result.hpp"
-#include "enum_array.hpp"
 #include "technical_combat.hpp"
 #include "typedef.hpp"
 #include "unit_group.hpp"
@@ -101,7 +97,7 @@ namespace ropufu
         {
             using type = conditioned_army;
             template <typename t_data_type>
-            using phase_array = enum_array<battle_phase, t_data_type>;
+            using phase_array = aftermath::enum_array<battle_phase, t_data_type>;
 
         private:
             army m_army = { }; // The army itself.
@@ -234,11 +230,11 @@ namespace ropufu
                 // First go through skills.
                 for (const auto& pair : this->m_army.skills())
                 {
-                    type::apply_friendly_skill(t, pair.first, pair.second);
+                    type::apply_friendly_skill(t, pair.key(), pair.value());
                     // Increases the attack damage of this army by 10/20/30% for every combat round past the first.
-                    if (pair.first == battle_skill::battle_frenzy) this->m_army.set_frenzy_bonus(0.1 * pair.second);
+                    if (pair.key() == battle_skill::battle_frenzy) this->m_army.set_frenzy_bonus(0.1 * pair.value());
                 }
-                for (const auto& pair : other.skills()) type::apply_enemy_skill(t, pair.first, pair.second);
+                for (const auto& pair : other.skills()) type::apply_enemy_skill(t, pair.key(), pair.value());
 
                 // Take the damage to modify.
                 detail::damage damage = t.damage();

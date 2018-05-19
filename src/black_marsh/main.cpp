@@ -5,8 +5,8 @@
 #include "turtle.hpp"
 #include "../settlers_online/army.hpp"
 #include "../settlers_online/char_string.hpp"
+#include "../settlers_online/enums.hpp"
 #include "../settlers_online/report_entry.hpp"
-#include "../settlers_online/unit_faction.hpp"
 #include "../settlers_online/unit_type.hpp"
 
 #include <chrono> // std::chrono::steady_clock, std::chrono::duration_cast
@@ -191,14 +191,15 @@ command_name parse_command(const std::string& expression, std::string& argument)
 void help(const std::string& argument) noexcept
 {
     std::string dummy { };
+    ropufu::aftermath::enum_array<unit_faction, void> faction_list { };
     command_name command = parse_command(argument, dummy);
     switch (command)
     {
         case command_name::units:
             std::cout << "You can either type \"units\" to display all units, or \"units <faction name>\"," << std::endl << "where faction is one of:" << std::endl;
-            for (std::size_t i = 0; i < ropufu::settlers_online::enum_capacity<unit_faction>::value; i++)
+            for (unit_faction faction : faction_list)
             {
-                std::string faction_name = std::to_string(static_cast<unit_faction>(i));
+                std::string faction_name = std::to_string(faction);
                 if (faction_name.length() > 2) std::cout << '\t' << faction_name << std::endl;
             }
             break;
@@ -243,7 +244,7 @@ will automatically execute "log" for /l, or "run" for 'r', and then quit.
 void display_units(const std::string& faction_name) noexcept
 {
     unit_faction faction = unit_faction::general;
-    bool do_take_all = !ropufu::settlers_online::detail::try_parse_str(faction_name, faction);
+    bool do_take_all = !ropufu::aftermath::detail::try_parse_enum(faction_name, faction);
     for (const auto& pair : unit_database::instance().data())
     {
         const ropufu::settlers_online::unit_type& u = pair.second;

@@ -13,7 +13,7 @@
         },
         {
             "id": 9002,
-            "names": [ "General", "((g))" ],
+            "names": [ "General", "((g))", "((log))", "((vet))" ],
             "faction": "general",
             "category": "unknown",
             "phases": [ "normal" ],
@@ -35,7 +35,7 @@
         },
         {
             "id": 9004,
-            "names": [ "Master of Martial Arts", "((cxv))" ],
+            "names": [ "Master of Martial Arts", "((cxv))", "((mma))" ],
             "faction": "general",
             "category": "unknown",
             "phases": [ "first strike" ],
@@ -46,7 +46,7 @@
         },
         {
             "id": 9005,
-            "names": [ "Master of Defense", "((w))" ],
+            "names": [ "Master of Defense", "((w))", "((wh))", "((md))" ],
             "faction": "general",
             "category": "unknown",
             "phases": [ "normal" ],
