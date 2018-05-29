@@ -4,94 +4,163 @@
 
 #include <aftermath/algebra.hpp> // ropufu::aftermath::algebra::matrix
 
-#include "island_building.hpp"
-#include "island_cell.hpp"
+#include "blueprint.hpp"
+#include "building.hpp"
+#include "island_vertex.hpp"
+#include "island_path.hpp"
 
-#include <cstddef> // std::size_t
-#include <cstdint> // std::int_fast32_t
-#include <vector>  // std::vector
+#include <cstddef>  // std::size_t
+#include <cstdint>  // std::int_fast32_t
+#include <optional> // std::optional
+#include <vector>   // std::vector
 
 namespace ropufu::settlers_online
 {
-    /** Structure describing cells and paths on a rectangular island map.
-     *  Any "cell" element is always adorned by "paths". The figure below
-     *  outlines the structure; '#' represents a cell, 'o'-s represent paths.
-     * 
-     *     o---o---o
-     *     | # | # |
-     *     o---o---o
-     *     | # | # |
-     *     o---o---o
-     *
-     *  @remark If a map consists of m-by-n cells, this structure can be
-     *          represented by a (2m + 1)-by-(2n + 1) matrix.
-     */
-    struct island_map
+    struct island_map : public blueprint<island_map, std::optional<std::size_t>, island_vertex>
     {
         using type = island_map;
+        using index_type = ropufu::aftermath::algebra::matrix_index;
+        using mask_type = ropufu::aftermath::algebra::matrix<bool>;
 
     private:
-        ropufu::aftermath::algebra::matrix<island_cell> m_cells{0, 0}; // Cells of the map.
-        ropufu::aftermath::algebra::matrix<bool> m_paths{1, 1}; // Paths of the map.
-        std::vector<island_building> m_buildings{ }; // Buildings.
-        island_cell m_invalid_cell{ };
-        island_building m_invalid_building{ };
-
-        // void translate() noexcept
-        // {
-            // // Translate coordinates.
-            // row_index -= this->m_corner_row_coordinate;
-            // column_index -= this->m_corner_column_coordinate;
-            // bool is_row_inside = (row_index >= 0) && (row_index < this->m_blocks.height());
-            // bool is_column_inside = (column_index >= 0) && (column_index < this->m_blocks.width());
-        // } // translate(...)
+        island_vertex m_invalid_vertex = {};
+        building m_invalid_building = {};
+        island_path m_invalid_path = {};
+        std::vector<building> m_buildings = {}; // Buildings.
+        std::vector<island_path> m_paths = {}; // Paths.
+        // ~~ Cached values ~~
+        mask_type m_walkable = {};
 
     public:
         island_map() noexcept { }
 
         /** @brief Creates an empty island map where each cell is surrounded by walkable paths. */
         island_map(std::size_t height, std::size_t width) noexcept
-            : m_cells(height, width), m_paths(height + 1, width + 1, true)
+            : blueprint(height, width), m_walkable(height + 1, width + 1, true)
         {
+            //this->m_faces.fill(nullptr); // Unnecessary: nullptr corresponds to 0-ed out memory region.
+            //this->m_vertices.fill(island_vertex{}); // Unnecessary: default vertex corresponds to 0-ed out memory region.
         } // island_map(...)
 
-        std::size_t height() const noexcept { return this->m_cells.height(); }
-        std::size_t width() const noexcept { return this->m_cells.width(); }
+        std::size_t height() const noexcept { return this->m_faces.height(); }
+        std::size_t width() const noexcept { return this->m_faces.width(); }
 
-        const island_cell& cell(std::size_t row_index, std::size_t column_index) const noexcept
+        const std::vector<building>& buildings() const noexcept { return this->m_buildings; }
+        const building& buildings(std::size_t index) const noexcept { return index < this->m_buildings.size() ? this->m_buildings[index] : this->m_invalid_building; }
+
+        const std::vector<island_path>& paths() const noexcept { return this->m_paths; }
+        const island_path& paths(std::size_t index) const noexcept { return index < this->m_paths.size() ? this->m_paths[index] : this->m_invalid_path; }
+
+        const mask_type& walkable() const noexcept { return this->m_walkable; }
+
+        auto begin() const noexcept { return this->m_buildings.begin(); }
+        auto end() const noexcept { return this->m_buildings.end(); }
+        auto cbegin() const noexcept { return this->m_buildings.cbegin(); }
+        auto cend() const noexcept { return this->m_buildings.cend(); }
+
+        void invalidate_paths() noexcept
         {
-            if (row_index >= this->m_cells.height()) return this->m_invalid_cell;
-            if (column_index >= this->m_cells.width()) return this->m_invalid_cell;
-            return this->m_cells.unchecked_at(row_index, column_index);
-        } // at(...)
+            const std::size_t m = this->m_vertices.height();
+            const std::size_t n = this->m_vertices.width();
 
-        bool build_solid(std::size_t row_index, std::size_t column_index, std::size_t solid_height, std::size_t solid_width) noexcept
+            for (std::size_t i = 0; i < m; ++i)
+                for (std::size_t j = 0; j < n; ++j)
+                    this->m_walkable.unchecked_at(i, j) = this->m_vertices.unchecked_at(i, j).walkable();
+        
+            for (island_path& path : this->m_paths) path.develop(this->m_walkable);
+        } // invalidate_paths(...)
+
+        /** Develops a path as if it belonged to the \c paths collection. */
+        void develop(island_path& path) const noexcept
         {
-            if (solid_height == 0 || solid_width == 0) return true;
+            path.develop(this->m_walkable);
+        } // develop(...)
 
-            std::size_t past_the_last_row_index = row_index + solid_height;
-            std::size_t past_the_last_column_index = column_index + solid_width;
-
-            if (past_the_last_row_index >= this->m_cells.height()) past_the_last_row_index = this->m_cells.height();
-            if (past_the_last_column_index >= this->m_cells.width()) past_the_last_column_index = this->m_cells.width();
-
-            // Check cells.
-            for (std::size_t i = row_index; i < past_the_last_row_index; ++i)
-                for (std::size_t j = column_index; j < past_the_last_column_index; ++j)
-                    if (!this->m_cells.unchecked_at(i, j).is_available()) return false;
-
-            this->m_buildings.emplace_back(solid_height, solid_width);
-            // Fill cells.
-            for (std::size_t i = row_index; i < past_the_last_row_index; ++i)
-                for (std::size_t j = column_index; j < past_the_last_column_index; ++j)
-                    this->m_cells.unchecked_at(i, j).m_building_pointer = &this->m_buildings.back();
-            // Fill paths.
-            for (std::size_t i = row_index + 1; i < past_the_last_row_index; ++i)
-                for (std::size_t j = column_index + 1; j < past_the_last_column_index; ++j)
-                    this->m_paths.unchecked_at(i, j) = false;
-
+        /** @brief Adds a path to the \c paths collection without developing. */
+        bool try_anchor(const island_path& path) noexcept
+        {
+            if (!path.validate(this->m_buildings)) return false;
+            this->m_paths.push_back(path);
             return true;
-        } // build_solid(...)
+        } // sketch_path
+
+        bool can_be_built(std::size_t row_index, std::size_t column_index, const building& blueprint) const noexcept
+        {
+            // Check faces.
+            for (std::size_t i = 0; i < blueprint.faces().height(); ++i)
+            {
+                std::size_t global_i = row_index + i;
+                for (std::size_t j = 0; j < blueprint.faces().width(); ++j)
+                {
+                    std::size_t global_j = column_index + j;
+                    // Unset blueprint faces don't prevent building.
+                    if (blueprint.faces().unchecked_at(i, j) == false) continue;
+                    // Check map bounds.
+                    if (global_i >= this->m_faces.height() || global_j >= this->m_faces.width()) return false;
+                    // Disallow overlapping faces.
+                    if (this->m_faces.unchecked_at(global_i, global_j).has_value()) return false;
+                } // for (...)
+            } // for (...)
+
+            // Check vertices.
+            for (std::size_t i = 0; i < blueprint.vertices().height(); ++i)
+            {
+                std::size_t global_i = row_index + i;
+                for (std::size_t j = 0; j < blueprint.vertices().width(); ++j)
+                {
+                    std::size_t global_j = column_index + j;
+                    // Walkable blueprint vertices don't prevent building.
+                    if (blueprint.vertices().unchecked_at(i, j).walkable()) continue;
+                    // Check map bounds.
+                    if (global_i >= this->m_vertices.height() || global_j >= this->m_vertices.width()) return false;
+                    // Unset vertices on the map don't prevent building.
+                    const island_vertex& map_vertex = this->m_vertices.unchecked_at(global_i, global_j);
+                    if (map_vertex.not_walkable()) return false;
+                    if (map_vertex.prevents_building()) return false;
+                } // for (...)
+            } // for (...)
+            
+            return true;
+        } // can_be_built(...)
+
+        bool try_build(std::size_t row_index, std::size_t column_index, const building& blueprint) noexcept
+        {
+            if (!this->can_be_built(row_index, column_index, blueprint)) return false;
+
+            std::size_t collection_index = this->m_buildings.size();
+            this->m_buildings.push_back(blueprint);
+            building& just_built = this->m_buildings.back();
+            just_built.attach(collection_index, row_index, column_index);
+            std::optional<std::size_t> face_value{ collection_index };
+
+            // Set faces.
+            for (std::size_t i = 0; i < blueprint.faces().height(); ++i)
+            {
+                for (std::size_t j = 0; j < blueprint.faces().width(); ++j)
+                {
+                    if (blueprint.faces().unchecked_at(i, j) == true)
+                    {
+                        this->m_faces.unchecked_at(row_index + i, column_index + j) = face_value;
+                    }; // if (...)
+                } // for (...)
+            } // for (...)
+
+            // Set vertices.
+            for (std::size_t i = 0; i < blueprint.vertices().height(); ++i)
+            {
+                for (std::size_t j = 0; j < blueprint.vertices().width(); ++j)
+                {
+                    const island_vertex& blueprint_vertex = blueprint.vertices().unchecked_at(i, j);
+                    if (!blueprint_vertex.empty()) // If the blueprint vertex has not been set, continue.
+                    {
+                        this->m_vertices.unchecked_at(row_index + i, column_index + j) = blueprint_vertex;
+                    }; // if (...)
+                } // for (...)
+            } // for (...)
+
+            this->invalidate_paths();
+            return true;
+        } // try_build(...)
     }; // struct island_map
 } // namespace ropufu::settlers_online
 

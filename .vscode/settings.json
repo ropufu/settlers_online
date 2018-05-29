@@ -74,6 +74,7 @@
         "cwctype": "cpp",
         "numeric": "cpp",
         "string_view": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "unordered_set": "cpp"
     }
 }

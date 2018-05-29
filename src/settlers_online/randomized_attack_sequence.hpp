@@ -34,7 +34,7 @@ namespace ropufu
                 : m_engine()
             {
                 auto now = std::chrono::high_resolution_clock::now();
-                std::seed_seq ss = { 875, 393, 19, static_cast<std::int32_t>(now.time_since_epoch().count()) };
+                std::seed_seq ss { 875, 393, 19, static_cast<std::int32_t>(now.time_since_epoch().count()) };
                 this->m_engine.seed(ss);
             } // randomized_attack_sequence(...)
 
