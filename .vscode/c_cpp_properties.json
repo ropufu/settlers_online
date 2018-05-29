@@ -3,7 +3,7 @@
         {
             "name": "Mac",
             "includePath": [
-                "/usr/local/Cellar/gcc/7.2.0/include/c++/7.2.0",
+                "/usr/local/Cellar/gcc/8.1.0/include/c++/8.1.0",
                 "/usr/include/c++/4.2.1",
                 "/usr/local/include",
                 "/usr/include",
@@ -15,7 +15,7 @@
             "intelliSenseMode": "clang-x64",
             "browse": {
                 "path": [
-                    "/usr/local/Cellar/gcc/7.2.0/include/c++/7.2.0",
+                    "/usr/local/Cellar/gcc/8.1.0/include/c++/8.1.0",
                     "/usr/include/c++/4.2.1",
                     "/usr/local/include",
                     "/usr/include",

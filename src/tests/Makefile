@@ -1,11 +1,11 @@
 
 PNAME = tests.out
 
-CC = g++-7
+CC = g++
 
-CFLAGS = -std=c++14 -Wall
+CFLAGS = -std=c++17 -Wall
 
-PATHINC = -I./../../aftermath -I./../../opensource -I./..
+PATHINC = -I./../../../aftermath -I./../../../opensource -I./..
 
 PATHLIB =
 
