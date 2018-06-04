@@ -2,7 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_BLUEPRINT_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_BLUEPRINT_HPP_INCLUDED
 
-#include <aftermath/algebra.hpp> // ropufu::aftermath::algebra::matrix
+#include <ropufu/algebra.hpp> // ropufu::aftermath::algebra::matrix
 
 #include <cstddef> // std::size_t
 #include <cstdint> // std::int_fast32_t

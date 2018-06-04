@@ -2,8 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_TECHNICAL_COMBAT_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_TECHNICAL_COMBAT_HPP_INCLUDED
 
-#include <aftermath/algebra.hpp> // aftermath::algebra::permutation
-#include <aftermath/not_an_error.hpp>
+#include <ropufu/algebra.hpp> // aftermath::algebra::permutation
 
 #include "attack_sequence.hpp"
 #include "unit_group.hpp"
@@ -161,7 +160,7 @@ namespace ropufu
 
             /** Inflicts the reduced damage, \p reduced_damage, onto \p defender, assuming the attaker always deals splash damage and there is no effective tower bonus. */
             template <typename t_logger_type>
-            static void uniform_splash(std::size_t reduced_damage, army& defender, const aftermath::algebra::permutation& defender_ordering, t_logger_type& logger) noexcept
+            static void uniform_splash(std::size_t reduced_damage, army& defender, const aftermath::algebra::permutation<std::size_t>& defender_ordering, t_logger_type& logger) noexcept
             {
                 //std::vector<unit_group>& defender_groups = defender.groups();
                 for (std::size_t j : defender_ordering)

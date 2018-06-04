@@ -3,10 +3,9 @@
 #define ROPUFU_SETTLERS_ONLINE_UNIT_TYPE_HPP_INCLUDED
 
 #include <nlohmann/json.hpp>
-#include <aftermath/quiet_json.hpp>
-#include <aftermath/not_an_error.hpp>
+#include <ropufu/json_traits.hpp>
 
-#include <aftermath/enum_array.hpp>
+#include <ropufu/enum_array.hpp>
 
 #include "enums.hpp"
 #include "damage.hpp"
@@ -14,6 +13,7 @@
 #include <cstddef> // std::size_t
 #include <functional> // std::hash
 #include <ostream> // std::ostream
+#include <stdexcept>  // std::runtime_error
 #include <string> // std::string, std::to_string
 #include <vector> // std::vector
 
@@ -226,9 +226,8 @@ namespace ropufu::settlers_online
         if (!traits.empty()) j[type::jstr_traits] = traits;
     } // to_json(...)
 
-    void from_json(const nlohmann::json& j, unit_type& x) noexcept
+    void from_json(const nlohmann::json& j, unit_type& x)
     {
-        ropufu::aftermath::quiet_json q(j);
         using type = unit_type;
 
         // Populate default values.
@@ -248,45 +247,23 @@ namespace ropufu::settlers_online
         std::string category_str = std::to_string(category);
 
         // Parse json entries.
-        q.required(type::jstr_id, id);
-        q.required(type::jstr_names, names);
-        q.optional(type::jstr_faction, faction_str);
-        q.optional(type::jstr_category, category_str);
-        q.optional(type::jstr_capacity, capacity);
-        q.required(type::jstr_hit_points, hit_points);
-        q.required(type::jstr_damage, damage);
-        q.optional(type::jstr_experience, experience);
-        q.required(type::jstr_attack_phases, attack_phases);
-        q.optional(type::jstr_abilities, abilities);
-        q.optional(type::jstr_traits, traits);
+        id = j[type::jstr_id];
+        names = j[type::jstr_names].get<std::vector<std::string>>();
+        if (j.count(type::jstr_faction) > 0) faction_str = j[type::jstr_faction];
+        if (j.count(type::jstr_category) > 0) category_str = j[type::jstr_category];
+        if (j.count(type::jstr_capacity) > 0) capacity = j[type::jstr_capacity];
+        hit_points = j[type::jstr_hit_points];
+        damage = j[type::jstr_damage];
+        if (j.count(type::jstr_experience) > 0) experience = j[type::jstr_experience];
+        attack_phases = j[type::jstr_attack_phases];
+        if (j.count(type::jstr_abilities) > 0) abilities = j[type::jstr_abilities];
+        if (j.count(type::jstr_traits) > 0) traits = j[type::jstr_traits];
 
         // Enum structures.
-        if (!aftermath::detail::try_parse_enum(faction_str, faction))
-        {
-            aftermath::quiet_error::instance().push(
-                aftermath::not_an_error::runtime_error,
-                aftermath::severity_level::major,
-                std::string("Faction unrecognized: ") + faction_str + std::string("."), __FUNCTION__, __LINE__);
-            return;
-        } // if (...)
-        if (!aftermath::detail::try_parse_enum(category_str, category))
-        {
-            aftermath::quiet_error::instance().push(
-                aftermath::not_an_error::runtime_error,
-                aftermath::severity_level::major,
-                std::string("Category unrecognized: ") + category_str + std::string("."), __FUNCTION__, __LINE__);
-            return;
-        } // if (...)
+        if (!aftermath::detail::try_parse_enum(faction_str, faction)) throw std::runtime_error(std::string("Faction unrecognized: ") + faction_str + std::string("."));
+        if (!aftermath::detail::try_parse_enum(category_str, category)) throw std::runtime_error(std::string("Category unrecognized: ") + category_str + std::string("."));
 
         // Reconstruct the object.
-        if (!q.good())
-        {
-            aftermath::quiet_error::instance().push(
-                aftermath::not_an_error::runtime_error,
-                aftermath::severity_level::major, 
-                q.message(), __FUNCTION__, __LINE__);
-            return;
-        } // if (...)
         x.set_id(id);
         x.set_names(names);
         x.set_faction(faction);

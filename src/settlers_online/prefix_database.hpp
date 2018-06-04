@@ -2,7 +2,6 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_PREFIX_DATABASE_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_PREFIX_DATABASE_HPP_INCLUDED
 
-#include <aftermath/not_an_error.hpp>
 #include <experimental/filesystem>
 #include <nlohmann/json.hpp>
 
@@ -14,6 +13,7 @@
 #include <fstream> // std::ifstream
 #include <map> // std::map
 #include <set> // std::set
+#include <stdexcept>   // std::out_of_range
 #include <string> // std::string
 #include <type_traits> // std::is_same
 #include <vector> // std::vector
@@ -221,17 +221,14 @@ namespace ropufu
             const std::map<key_type, value_type>& data() const noexcept { return this->m_database; }
 
             /** @brief Access elements by key.
-             *  @exception not_an_error::out_of_range This error is pushed to \c quiet_error if specified \p key is not in the database.
+             *  @exception std::out_of_range Specified \p key is not in the database.
              */
-            const value_type& at(const key_type& key) const noexcept 
+            const value_type& at(const key_type& key) const 
             {
                 auto search = this->m_database.find(key);
                 if (search != this->m_database.end()) return search->second;
 
-                aftermath::quiet_error::instance().push(
-                    aftermath::not_an_error::out_of_range,
-                    aftermath::severity_level::fatal,
-                    "<key> is not present in the database.", __FUNCTION__, __LINE__);
+                throw std::out_of_range("<key> is not present in the database.");
                 return this->m_invalid;
             } // at(...)
 

@@ -2,7 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_BATTLE_SKILL_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_BATTLE_SKILL_HPP_INCLUDED
 
-#include <aftermath/enum_array.hpp>
+#include <ropufu/enum_array.hpp>
 
 #include <cstddef>     // std::size_t
 #include <string>      // std::string, std::to_string

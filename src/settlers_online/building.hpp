@@ -2,7 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_BUILDING_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_BUILDING_HPP_INCLUDED
 
-#include <aftermath/algebra.hpp> // ropufu::aftermath::algebra::matrix_index
+#include <ropufu/algebra.hpp> // ropufu::aftermath::algebra::matrix_index
 
 #include "blueprint.hpp"
 #include "island_vertex.hpp"
@@ -16,7 +16,7 @@ namespace ropufu::settlers_online
     struct building : public blueprint<building, bool, island_vertex>
     {
         using type = building;
-        using index_type = ropufu::aftermath::algebra::matrix_index;
+        using index_type = ropufu::aftermath::algebra::matrix_index<std::size_t>;
         
         friend struct island_map;
 
@@ -46,13 +46,13 @@ namespace ropufu::settlers_online
             // Mark border vertices as walkable.
             for (std::size_t i = 0; i <= height; ++i)
             {
-                this->m_vertices.unchecked_at(i, 0) = s_exterior_vertex; // Left border with corners.
-                this->m_vertices.unchecked_at(i, width) = s_exterior_vertex; // Right border with corners.
+                this->m_vertices(i, 0) = s_exterior_vertex; // Left border with corners.
+                this->m_vertices(i, width) = s_exterior_vertex; // Right border with corners.
             } // for (...)
             for (std::size_t j = 1; j < width; ++j)
             {
-                this->m_vertices.unchecked_at(0, j) = s_exterior_vertex; // Top border without corners.
-                this->m_vertices.unchecked_at(height, j) = s_exterior_vertex; // Bottom border without corners.
+                this->m_vertices(0, j) = s_exterior_vertex; // Top border without corners.
+                this->m_vertices(height, j) = s_exterior_vertex; // Bottom border without corners.
             } // for (...)
 
             this->mark_as_entrance(height, width / 2);
@@ -86,7 +86,7 @@ namespace ropufu::settlers_online
             if (row_index >= this->m_vertices.height()) return;
             if (column_index >= this->m_vertices.width()) return;
 
-            this->m_vertices.unchecked_at(row_index, column_index).set_entrance(true);
+            this->m_vertices(row_index, column_index).set_entrance(true);
             this->m_entrance_indices.emplace_back(row_index, column_index);
         } // mark_as_entrance
     }; // struct building

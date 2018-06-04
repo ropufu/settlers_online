@@ -2,9 +2,9 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_UNIT_DATABASE_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_UNIT_DATABASE_HPP_INCLUDED
 
-#include <aftermath/not_an_error.hpp>
 #include <experimental/filesystem>
 #include <nlohmann/json.hpp>
+#include <ropufu/json_traits.hpp>
 
 #include "char_string.hpp"
 #include "prefix_database.hpp"
@@ -14,6 +14,7 @@
 #include <fstream> // std::ifstream
 #include <map> // std::map
 #include <set> // std::set
+#include <stdexcept>  // std::runtime_error
 #include <string> // std::string
 #include <vector> // std::vector
 
@@ -88,7 +89,7 @@ namespace ropufu
                 {
                     logger.write(std::string("Unit with id ") + std::to_string(unit.id()) + std::string(" already exists."));
                     do_cancel = true;
-                }
+                } // if (...)
             } // on_loading(...)
 
             /** @brief Happens when a unit has been loaded. */
@@ -108,7 +109,6 @@ namespace ropufu
                     std::ifstream i(p.path()); // Try to open the file for reading.
                     if (!i.good()) continue; // Skip on failure.
 
-                    // @todo Get rid of the try/catch statement.
                     try
                     {
                         nlohmann::json map { };// = nlohmann::json::parse(i);
@@ -128,23 +128,17 @@ namespace ropufu
                                 if (this->add(unit, logger)) count++;
                             }
                         }
-                    }
+                    } // try
                     catch (const std::exception& /*e*/)
                     {
-                        aftermath::quiet_error::instance().push(
-                            aftermath::not_an_error::runtime_error,
-                            aftermath::severity_level::minor,
-                            std::string("Parsing error encountered in ") + p.path().string() + std::string("."), __FUNCTION__, __LINE__);
+                        logger.write(std::string("Parsing error encountered in ") + p.path().string() + std::string("."));
                         continue;
-                    }
+                    } // catch (...)
                     catch (...)
                     {
-                        aftermath::quiet_error::instance().push(
-                            aftermath::not_an_error::runtime_error,
-                            aftermath::severity_level::fatal,
-                            std::string("Something went very wrong.") + p.path().string() + std::string("."), __FUNCTION__, __LINE__);
+                        logger.write(std::string("Something went very wrong.") + p.path().string() + std::string("."));
                         continue;
-                    }
+                    } // catch (...)
                 }
                 return count;
             } // load_from_folder(...)

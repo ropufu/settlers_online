@@ -2,7 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_ISLAND_MAP_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_ISLAND_MAP_HPP_INCLUDED
 
-#include <aftermath/algebra.hpp> // ropufu::aftermath::algebra::matrix
+#include <ropufu/algebra.hpp> // ropufu::aftermath::algebra::matrix
 
 #include "blueprint.hpp"
 #include "building.hpp"
@@ -19,7 +19,7 @@ namespace ropufu::settlers_online
     struct island_map : public blueprint<island_map, std::optional<std::size_t>, island_vertex>
     {
         using type = island_map;
-        using index_type = ropufu::aftermath::algebra::matrix_index;
+        using index_type = ropufu::aftermath::algebra::matrix_index<std::size_t>;
         using mask_type = ropufu::aftermath::algebra::matrix<bool>;
 
     private:
@@ -65,7 +65,7 @@ namespace ropufu::settlers_online
 
             for (std::size_t i = 0; i < m; ++i)
                 for (std::size_t j = 0; j < n; ++j)
-                    this->m_walkable.unchecked_at(i, j) = this->m_vertices.unchecked_at(i, j).walkable();
+                    this->m_walkable(i, j) = this->m_vertices(i, j).walkable();
         
             for (island_path& path : this->m_paths) path.develop(this->m_walkable);
         } // invalidate_paths(...)
@@ -94,11 +94,11 @@ namespace ropufu::settlers_online
                 {
                     std::size_t global_j = column_index + j;
                     // Unset blueprint faces don't prevent building.
-                    if (blueprint.faces().unchecked_at(i, j) == false) continue;
+                    if (blueprint.faces()(i, j) == false) continue;
                     // Check map bounds.
                     if (global_i >= this->m_faces.height() || global_j >= this->m_faces.width()) return false;
                     // Disallow overlapping faces.
-                    if (this->m_faces.unchecked_at(global_i, global_j).has_value()) return false;
+                    if (this->m_faces(global_i, global_j).has_value()) return false;
                 } // for (...)
             } // for (...)
 
@@ -110,11 +110,11 @@ namespace ropufu::settlers_online
                 {
                     std::size_t global_j = column_index + j;
                     // Walkable blueprint vertices don't prevent building.
-                    if (blueprint.vertices().unchecked_at(i, j).walkable()) continue;
+                    if (blueprint.vertices()(i, j).walkable()) continue;
                     // Check map bounds.
                     if (global_i >= this->m_vertices.height() || global_j >= this->m_vertices.width()) return false;
                     // Unset vertices on the map don't prevent building.
-                    const island_vertex& map_vertex = this->m_vertices.unchecked_at(global_i, global_j);
+                    const island_vertex& map_vertex = this->m_vertices(global_i, global_j);
                     if (map_vertex.not_walkable()) return false;
                     if (map_vertex.prevents_building()) return false;
                 } // for (...)
@@ -138,9 +138,9 @@ namespace ropufu::settlers_online
             {
                 for (std::size_t j = 0; j < blueprint.faces().width(); ++j)
                 {
-                    if (blueprint.faces().unchecked_at(i, j) == true)
+                    if (blueprint.faces()(i, j) == true)
                     {
-                        this->m_faces.unchecked_at(row_index + i, column_index + j) = face_value;
+                        this->m_faces(row_index + i, column_index + j) = face_value;
                     }; // if (...)
                 } // for (...)
             } // for (...)
@@ -150,10 +150,10 @@ namespace ropufu::settlers_online
             {
                 for (std::size_t j = 0; j < blueprint.vertices().width(); ++j)
                 {
-                    const island_vertex& blueprint_vertex = blueprint.vertices().unchecked_at(i, j);
+                    const island_vertex& blueprint_vertex = blueprint.vertices()(i, j);
                     if (!blueprint_vertex.empty()) // If the blueprint vertex has not been set, continue.
                     {
-                        this->m_vertices.unchecked_at(row_index + i, column_index + j) = blueprint_vertex;
+                        this->m_vertices(row_index + i, column_index + j) = blueprint_vertex;
                     }; // if (...)
                 } // for (...)
             } // for (...)

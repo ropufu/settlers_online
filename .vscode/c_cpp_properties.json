@@ -9,7 +9,7 @@
                 "/usr/include",
                 "${workspaceRoot}",
                 "${workspaceRoot}/../opensource",
-                "${workspaceRoot}/../aftermath"
+                "${workspaceRoot}/../aftermath/src"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
@@ -21,7 +21,7 @@
                     "/usr/include",
                     "${workspaceRoot}",
                     "${workspaceRoot}/../opensource",
-                    "${workspaceRoot}/../aftermath"
+                    "${workspaceRoot}/../aftermath/src"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -38,7 +38,7 @@
                 "/usr/local/include",
                 "${workspaceRoot}",
                 "${workspaceRoot}/../opensource",
-                "${workspaceRoot}/../aftermath"
+                "${workspaceRoot}/../aftermath/src"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
@@ -48,7 +48,7 @@
                     "/usr/local/include",
                     "${workspaceRoot}",
                     "${workspaceRoot}/../opensource",
-                    "${workspaceRoot}/../aftermath"
+                    "${workspaceRoot}/../aftermath/src"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -61,7 +61,7 @@
                 "C:/Program Files (x86)/Windows Kits/10/Include/10.0.17134.0/ucrt",
                 "${workspaceRoot}",
                 "${workspaceRoot}/../opensource",
-                "${workspaceRoot}/../aftermath"
+                "${workspaceRoot}/../aftermath/src"
             ],
             "defines": [
                 "_DEBUG",
@@ -74,7 +74,7 @@
                     "C:/Program Files (x86)/Windows Kits/10/Include/10.0.17134.0/ucrt",
                     "${workspaceRoot}",
                     "${workspaceRoot}/../opensource",
-                    "${workspaceRoot}/../aftermath"
+                    "${workspaceRoot}/../aftermath/src"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""

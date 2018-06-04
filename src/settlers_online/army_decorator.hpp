@@ -3,8 +3,7 @@
 #define ROPUFU_SETTLERS_ONLINE_ARMY_DECORATOR_HPP_INCLUDED
 
 #include <nlohmann/json.hpp>
-#include <aftermath/quiet_json.hpp>
-#include <aftermath/not_an_error.hpp>
+#include <ropufu/json_traits.hpp>
 
 #include "army.hpp"
 #include "camp.hpp"
@@ -113,9 +112,8 @@ namespace ropufu::settlers_online
         else j[type::jstr_skill_map] = x.skills();
     } // to_json(...)
 
-    void from_json(const nlohmann::json& j, army_decorator& x) noexcept
+    void from_json(const nlohmann::json& j, army_decorator& x)
     {
-        ropufu::aftermath::quiet_json q(j);
         using type = army_decorator;
         
         // Populate default values.
@@ -123,56 +121,16 @@ namespace ropufu::settlers_online
         std::map<std::string, type::skills_type> skills = x.skills();
 
         // Parse json entries.
-        q.required(type::jstr_camp, camp);
-        if (j.count(type::jstr_skill_map) == 0)
-        {
-            aftermath::quiet_error::instance().push(
-                aftermath::not_an_error::runtime_error,
-                aftermath::severity_level::major,
-                "Skills missing", __FUNCTION__, __LINE__);
-            return;
-        } // if (...)
+        camp = j[type::jstr_camp];
         const nlohmann::json& skills_json = j[type::jstr_skill_map];
         if (skills_json.is_string())
         {
             std::string value = skills_json;
-            if (!(value == "none" || value == "empty"))
-            {
-                aftermath::quiet_error::instance().push(
-                    aftermath::not_an_error::runtime_error,
-                    aftermath::severity_level::major,
-                    "Skills not recognized", __FUNCTION__, __LINE__);
-                return;
-            }
+            if (!(value == "none" || value == "empty")) throw std::runtime_error("Skills not recognized");
         } // if (...)
-        else q.required(type::jstr_skill_map, skills);
-        // else if (skills_json.is_object())
-        // {
-        //     for (auto it = skills_json.begin(); it != skills_json.end(); ++it)
-        //     {
-        //         std::string key = it.key();
-        //         army_decorator::skills_type value = it.value(); 
-        //         skills.emplace(key, value);
-        //     }
-        // }
-        // else 
-        // {
-        //     aftermath::quiet_error::instance().push(
-        //         aftermath::not_an_error::runtime_error,
-        //         aftermath::severity_level::major,
-        //         "Skills not recognized", __FUNCTION__, __LINE__);
-        //     return;
-        // }
+        else skills = skills_json.get<std::map<std::string, type::skills_type>>();
         
         // Reconstruct the object.
-        if (!q.good())
-        {
-            aftermath::quiet_error::instance().push(
-                aftermath::not_an_error::runtime_error,
-                aftermath::severity_level::major, 
-                q.message(), __FUNCTION__, __LINE__);
-            return;
-        } // if (...)
         x.set_camp(camp);
         x.set_skills(skills);
     } // from_json(...)

@@ -2,9 +2,8 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_COMBAT_MECHANICS_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_COMBAT_MECHANICS_HPP_INCLUDED
 
-#include <aftermath/algebra.hpp> // aftermath::algebra::permutation
-#include <aftermath/enum_array.hpp>
-#include <aftermath/not_an_error.hpp>
+#include <ropufu/algebra.hpp> // aftermath::algebra::permutation
+#include <ropufu/enum_array.hpp>
 
 // ~~ Basic structures ~~
 #include "combat_result.hpp"
@@ -47,19 +46,12 @@ namespace ropufu
             const detail::combat_result& outcome() const noexcept { return this->m_outcome; }
 
             /** @brief Runs the combat sequence. Can only be called once.
-             *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if \c execute is called more than once.
+             *  @exception std::logic_error \c execute is called more than once.
              */
             template <typename t_left_sequence_type, typename t_right_sequence_type, typename t_logger_type>
-            std::size_t execute(attack_sequence<t_left_sequence_type>& left_sequencer, attack_sequence<t_right_sequence_type>& right_sequencer, t_logger_type& logger) noexcept
+            std::size_t execute(attack_sequence<t_left_sequence_type>& left_sequencer, attack_sequence<t_right_sequence_type>& right_sequencer, t_logger_type& logger)
             {
-                if (this->m_is_in_destruction_phase)
-                {
-                    aftermath::quiet_error::instance().push(
-                        aftermath::not_an_error::logic_error,
-                        aftermath::severity_level::major,
-                        "<execute> cannot be called twice.", __FUNCTION__, __LINE__);
-                    return 0;
-                }
+                if (this->m_is_in_destruction_phase) throw std::logic_error("<execute> cannot be called twice.");
                 
                 double left_frenzy_bonus = this->m_left.underlying().frenzy_bonus();
                 double right_frenzy_bonus = this->m_right.underlying().frenzy_bonus();
@@ -105,19 +97,12 @@ namespace ropufu
 
             /** @brief Destruction sequence.
              *  @remark Can be called any number of times. Could be beneficial, since destruction sequence is a lot simpler (faster) than execution.
-             *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if \c destruct is called prior to \c execute.
+             *  @exception std::logic_error \c destruct is called prior to \c execute.
              */
             template <typename t_left_sequence_type, typename t_right_sequence_type>
-            std::size_t destruct(attack_sequence<t_left_sequence_type>& left_sequencer, attack_sequence<t_right_sequence_type>& right_sequencer) const noexcept
+            std::size_t destruct(attack_sequence<t_left_sequence_type>& left_sequencer, attack_sequence<t_right_sequence_type>& right_sequencer) const
             {
-                if (!this->m_is_in_destruction_phase)
-                {
-                    aftermath::quiet_error::instance().push(
-                        aftermath::not_an_error::logic_error,
-                        aftermath::severity_level::major,
-                        "<execute> has to be called prior to destruction phase.", __FUNCTION__, __LINE__);
-                    return 0;
-                }
+                if (!this->m_is_in_destruction_phase) throw std::logic_error("<execute> has to be called prior to destruction phase.");
 
                 if (this->m_outcome.is_left_victorious())
                     return combat_mechanics::destruct(this->m_right.underlying(), this->m_left.underlying().by_mask(this->m_outcome.left_alive_mask()), left_sequencer);

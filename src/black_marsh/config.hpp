@@ -46,7 +46,7 @@ namespace ropufu
                 bool has(const std::string& name) const noexcept { return this->m_json.count(name) != 0; }
 
                 template <typename t_result_type>
-                bool maybe(const std::string& name, t_result_type& result) const noexcept
+                bool maybe(const std::string& name, t_result_type& result) const
                 {
                     if (this->m_json.count(name) != 0)
                     {
@@ -54,7 +54,7 @@ namespace ropufu
                         return true;
                     }
                     return false;
-                }
+                } // maybe(...)
 
             protected:
                 // Always try to read the default configuration on construction.
@@ -137,7 +137,7 @@ namespace ropufu
 
                         return true;
                     }
-                    catch (const std::exception& /*e*/)
+                    catch (...)
                     {
                         this->m_is_good = false;
                         return false;

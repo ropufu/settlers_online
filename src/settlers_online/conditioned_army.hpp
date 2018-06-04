@@ -2,9 +2,8 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_CONDITIONED_ARMY_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_CONDITIONED_ARMY_HPP_INCLUDED
 
-#include <aftermath/algebra.hpp> // aftermath::algebra::permutation
-#include <aftermath/enum_array.hpp>
-#include <aftermath/not_an_error.hpp>
+#include <ropufu/algebra.hpp> // aftermath::algebra::permutation
+#include <ropufu/enum_array.hpp>
 
 // ~~ Basic structures ~~
 #include "damage.hpp"
@@ -30,7 +29,7 @@ namespace ropufu
         struct attack_group_cache
         {
         private:
-            aftermath::algebra::permutation m_attack_order = { }; // Order in which enemy units are to be attacked.
+            aftermath::algebra::permutation<std::size_t> m_attack_order = { }; // Order in which enemy units are to be attacked.
             std::vector<double> m_damage_factors = { }; // Damage factors agains defender units, without frenzy bonus.
             std::vector<bool> m_is_one_to_one = { }; // Indicates that (i) there is no splash damage and (ii) the minimal effective damage is enough to kill one defeding unit.
             bool m_is_uniform_splash = false; // Indicates that (i) there is always splash damage and (ii) there is no effective damage reduction that can prevent splash optimization.
@@ -81,7 +80,7 @@ namespace ropufu
                 this->m_attack_order = do_attack_weakest_target ? other.order_by_hp() : other.order_by_id();
             } // attack_group_cache(...)
 
-            const aftermath::algebra::permutation& order() const noexcept { return this->m_attack_order; }
+            const aftermath::algebra::permutation<std::size_t>& order() const noexcept { return this->m_attack_order; }
 
             bool is_uniform_splash() const noexcept { return this->m_is_uniform_splash; }
             double uniform_damage_factor() const noexcept { return this->m_uniform_damage_factor; }
@@ -111,14 +110,17 @@ namespace ropufu
             static void apply_friendly_skill(unit_type& unit, battle_skill skill, std::size_t level) noexcept
             {
                 if (level == 0) return;
+                if (level > 3) level = 3;
                 // Level    0   1   2   3   4   ...
                 // Factor   0   0   5   15  30  ...
                 std::size_t square_factor = (level * (level - 1) * 5) / 2;
                 // Level      0  1   2   3    4    ...
                 // Thirds, %  0  33  66  100  133  ...
                 double thirds = fraction_floor(100 * level, static_cast<std::size_t>(3)) / 100.0;
+                if (thirds > 1) thirds = 1;
+                //auto corece = [](double p) { return p < 0 ? 0 : (p > 1 ? 1 : p); };
 
-                detail::damage damage_bonus(true); // Quietly coerce all values.
+                detail::damage damage_bonus {}; // Quietly coerce all values.
                 switch (skill)
                 {
                     case battle_skill::juggernaut: // Increases the general's (faction: general) attack damage by 20/40/60. These attacks have a 33/66/100% chance of dealing splash damage.
@@ -165,8 +167,6 @@ namespace ropufu
                 
                 // Add bonus, quietly coercing.
                 damage_bonus += unit.damage();
-                // Stop quiet coercion.
-                damage_bonus.set_is_quiet(false);
                 // Apply new damage.
                 unit.set_damage(damage_bonus);
             } // apply_friendly_skill(...)
@@ -205,13 +205,14 @@ namespace ropufu
             std::vector<std::size_t> calculate_losses() const noexcept
             {
                 std::vector<std::size_t> losses = this->m_counts;
-                aftermath::algebra::elementwise::subtract_assign(losses, this->m_army.counts_by_type());
+                /** @todo Check for operation result. */
+                aftermath::algebra::elementwise::try_subtract_assign(losses, this->m_army.counts_by_type());
                 return losses;
             } // calculate_losses(...)
 
             /** Initiates and attack by this army on its opponent \c other. */
             template <typename t_sequence_type, typename t_logger_type>
-            void initiate_phase(battle_phase phase, type& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, t_logger_type& logger) const noexcept;
+            void initiate_phase(battle_phase phase, type& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, t_logger_type& logger) const;
         }; // struct conditioned_army
 
         /** @brief Constructs a version of the army \p a conditioned for a fight against \p other.
@@ -238,8 +239,6 @@ namespace ropufu
 
                 // Take the damage to modify.
                 detail::damage damage = t.damage();
-                // Allow quiet coercion.
-                damage.set_is_quiet(true);
                 // ~~ Traits ~~
                 // Friendly trait: explosive ammunition.
                 if (this->m_army.has(battle_trait::explosive_ammunition) && t.is(unit_category::ranged))
@@ -259,8 +258,6 @@ namespace ropufu
                 // Enemy trait: dazzle.
                 if (other.has(battle_trait::dazzle)) damage.set_accuracy(0);
 
-                // Stop quiet coercion.
-                damage.set_is_quiet(false);
                 // Apply new damage.
                 t.set_damage(damage);
                 // Apply new type.
@@ -281,7 +278,7 @@ namespace ropufu
 
         /** Initiates and attack by this army on its opponent \c other. */
         template <typename t_sequence_type, typename t_logger_type>
-        void conditioned_army::initiate_phase(battle_phase phase, conditioned_army& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, t_logger_type& logger) const noexcept
+        void conditioned_army::initiate_phase(battle_phase phase, conditioned_army& other, double frenzy_factor, attack_sequence<t_sequence_type>& sequencer, t_logger_type& logger) const
         {
             for (std::size_t i : this->m_group_indices[phase])
             {
@@ -352,10 +349,7 @@ namespace ropufu
                     if (attacking_unit_index == attacking_group.count_at_snapshot()) break;
                     if (attacking_unit_index > attacking_group.count_at_snapshot()) 
                     {
-                        aftermath::quiet_error::instance().push(
-                            aftermath::not_an_error::logic_error,
-                            aftermath::severity_level::fatal,
-                            "<attacking_unit_index> overflow.", __FUNCTION__, __LINE__);
+                        throw std::overflow_error("<attacking_unit_index> overflow.");
                         break;
                     }
                 }

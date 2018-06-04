@@ -2,8 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_BLACK_MARSH_TURTLE_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_BLACK_MARSH_TURTLE_HPP_INCLUDED
 
-#include <aftermath/not_an_error.hpp>
-#include <aftermath/probability.hpp>
+#include <ropufu/probability.hpp>
 #include <nlohmann/json.hpp>
 
 #include "config.hpp"
@@ -30,6 +29,7 @@
 #include <cstddef> // std::size_t, nullptr
 #include <cstdint> // std::int32_t
 #include <deque> // std::deque
+#include <exception> // std::exception
 #include <map> // std::map
 #include <set> // std::set
 #include <string> // std::string, std::to_string

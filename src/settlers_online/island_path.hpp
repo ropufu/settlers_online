@@ -2,8 +2,8 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_ISLAND_PATH_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_ISLAND_PATH_HPP_INCLUDED
 
-#include <aftermath/algebra.hpp>   // ropufu::aftermath::algebra::matrix_index
-#include <aftermath/algorithm.hpp> // ropufu::aftermath::algorithm::matrix_pathfinder
+#include <ropufu/algebra.hpp>   // ropufu::aftermath::algebra::matrix_index
+#include <ropufu/algorithm.hpp> // ropufu::aftermath::algorithm::matrix_pathfinder
 
 #include "building.hpp"
 
@@ -16,7 +16,7 @@ namespace ropufu::settlers_online
     {
         struct path_anchor
         {
-            using index_type = ropufu::aftermath::algebra::matrix_index;
+            using index_type = ropufu::aftermath::algebra::matrix_index<std::size_t>;
 
         private:
             index_type m_position{};
@@ -62,7 +62,7 @@ namespace ropufu::settlers_online
     struct forking_paths
     {
         using type = forking_paths;
-        using index_type = ropufu::aftermath::algebra::matrix_index;
+        using index_type = ropufu::aftermath::algebra::matrix_index<std::size_t>;
         using mask_type = ropufu::aftermath::algebra::matrix<bool>;
         using pathfinder_type = ropufu::aftermath::algorithm::matrix_pathfinder;
 
@@ -128,7 +128,7 @@ namespace ropufu::settlers_online
     struct island_path
     {
         using type = island_path;
-        using index_type = ropufu::aftermath::algebra::matrix_index;
+        using index_type = ropufu::aftermath::algebra::matrix_index<std::size_t>;
         using mask_type = ropufu::aftermath::algebra::matrix<bool>;
         
         friend struct island_map;

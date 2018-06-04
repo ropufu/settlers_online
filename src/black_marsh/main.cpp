@@ -1,6 +1,4 @@
 
-#include <aftermath/not_an_error.hpp>
-
 #include "config.hpp"
 #include "turtle.hpp"
 #include "../settlers_online/army.hpp"
@@ -12,6 +10,7 @@
 #include <chrono> // std::chrono::steady_clock, std::chrono::duration_cast
 #include <cstddef> // std::size_t
 #include <cstdint> // std::int32_t
+#include <exception> // std::exception
 #include <iostream> // std::cout, std::endl, std::cin
 #include <string> // std::string, std::to_string, std::getline, std::stol, std::stod
 
@@ -19,7 +18,6 @@
 using unit_faction = ropufu::settlers_online::unit_faction;
 using unit_database = ropufu::settlers_online::unit_database;
 using char_string = ropufu::settlers_online::char_string;
-using quiet_error = ropufu::aftermath::quiet_error;
 
 template <typename t_collection_type>
 void print_elements(const t_collection_type& container, const std::string& delimiter = ", ")
@@ -78,29 +76,6 @@ enum struct command_name
     log, // Run simulation in log mode.
     run // Run simulation in regular mode.
 }; // struct command_name
-
-void unwind_errors(bool do_skip_log, bool is_quiet = false) noexcept
-{
-    ropufu::aftermath::quiet_error& err = ropufu::aftermath::quiet_error::instance();
-
-    if (!is_quiet)
-    {
-        if (!err.good()) std::cout << "~~ Oh no! Errors encoutered: ~~" << std::endl;
-        else if (!err.empty()) std::cout << "~~ Something to keep in mind: ~~" << std::endl;
-    }
-    while (!err.empty())
-    {
-        ropufu::aftermath::quiet_error_descriptor desc = err.pop();
-        if (is_quiet) continue;
-        if (do_skip_log && desc.severity() == ropufu::aftermath::severity_level::not_at_all) continue; // Skip log messages.
-
-        std::cout << '\t' <<
-            " " << std::to_string(desc.severity()) <<
-            " " << std::to_string(desc.error_code()) <<
-            " on line " << desc.caller_line_number() <<
-            " of <" << desc.caller_function_name() << ">: " << desc.description() << std::endl;
-    }
-} // unwind_errors(...)
 
 void split_in_two(const std::string& expression, std::string& command, std::string& argument) noexcept
 {
@@ -295,7 +270,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
 
         if (argc > 3)
         {
-            unwind_errors(false);
+            //unwind_errors(false);
             std::string sw = std::string(argv[3]);
             if (sw == "-l") { lucy.log(); return 0; }
             if (sw == "-r") { lucy.run(); return 0; }
@@ -308,7 +283,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
         std::string command;
         std::string argument;
 
-        unwind_errors(false);
+        //unwind_errors(false);
         lucy.logger().unwind();
 
         std::cout << "> ";

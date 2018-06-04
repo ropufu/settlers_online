@@ -57,11 +57,11 @@ namespace ropufu
             return product_ceiling(hit_points, 1.0 / factor);
         } // inverse_damage_cast(...)
 
-        /** Adjusts \p hit_points by \p factor (multiplicative). */
-        static std::size_t hit_points_cast(std::size_t hit_points, double factor)
-        {
-            return product_ceiling(hit_points, factor);
-        } // hit_points_cast(...)
+        // /** Adjusts \p hit_points by \p factor (multiplicative). */
+        // static std::size_t hit_points_cast(std::size_t hit_points, double factor)
+        // {
+        //     return product_ceiling(hit_points, factor);
+        // } // hit_points_cast(...)
     } // namespace settlers_online
 } // namespace ropufu
 

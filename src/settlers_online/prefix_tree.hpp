@@ -2,8 +2,6 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_PREFIX_TREE_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_PREFIX_TREE_HPP_INCLUDED
 
-#include <aftermath/not_an_error.hpp>
-
 #include <cstddef> // std::size_t
 #include <initializer_list> // std::initializer_list
 #include <string> // std::string

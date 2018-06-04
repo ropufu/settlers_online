@@ -3,8 +3,7 @@
 #define ROPUFU_SETTLERS_ONLINE_DAMAGE_HPP_INCLUDED
 
 #include <nlohmann/json.hpp>
-#include <aftermath/quiet_json.hpp>
-#include <aftermath/not_an_error.hpp>
+#include <ropufu/json_traits.hpp>
 
 #include <cstddef>    // std::size_t
 #include <functional> // std::hash
@@ -26,81 +25,51 @@ namespace ropufu::settlers_online
             static constexpr char jstr_splash_chance[] = "splash chance";
 
         private:
-
-            bool m_is_quiet = false;    // Indicates if errors are to be pushed onto \c quiet_error when coercing occurs.
             std::size_t m_low = 0;      // Low damage.
             std::size_t m_high = 0;     // High damage.
             double m_accuracy = 0;      // Probability of high damage.
             double m_splash_chance = 0; // Probability of dealing splash damage.
 
+            void validate()
+            {
+                if (this->m_accuracy < 0 || this->m_accuracy > 1) throw std::logic_error("Accuracy outside the interval [0, 1].");
+                if (this->m_splash_chance < 0 || this->m_splash_chance > 1) throw std::logic_error("Splash chance outside the interval [0, 1].");
+            } // validate(...)
+
             void coerce() noexcept
             {
-                if (this->m_low > this->m_high)
-                {
-                    this->m_low = this->m_high;
-                    if (!this->m_is_quiet) aftermath::quiet_error::instance().push(
-                        aftermath::not_an_error::logic_error,
-                        aftermath::severity_level::minor,
-                        "Low damage exceeds high damage. Capped low damage to match high.", __FUNCTION__, __LINE__);
-                }
-                if (this->m_accuracy < 0 || this->m_accuracy > 1)
-                {
-                    if (this->m_accuracy < 0) this->m_accuracy = 0;
-                    if (this->m_accuracy > 1) this->m_accuracy = 1;
-                    if (!this->m_is_quiet) aftermath::quiet_error::instance().push(
-                        aftermath::not_an_error::logic_error,
-                        aftermath::severity_level::minor,
-                        "Accuracy outside the interval [0, 1]. Accuracy coerced.", __FUNCTION__, __LINE__);
-                }
-                if (this->m_splash_chance < 0 || this->m_splash_chance > 1)
-                {
-                    if (this->m_splash_chance < 0) this->m_splash_chance = 0;
-                    if (this->m_splash_chance > 1) this->m_splash_chance = 1;
-                    if (!this->m_is_quiet) aftermath::quiet_error::instance().push(
-                        aftermath::not_an_error::logic_error,
-                        aftermath::severity_level::minor,
-                        "Splash chance outside the interval [0, 1]. Splash chance coerced.", __FUNCTION__, __LINE__);
-                }
+                if (this->m_accuracy < 0) this->m_accuracy = 0;
+                if (this->m_accuracy > 1) this->m_accuracy = 1;
+                if (this->m_splash_chance < 0) this->m_splash_chance = 0;
+                if (this->m_splash_chance > 1) this->m_splash_chance = 1;
             } // coerce(...)
 
         public:
+            /** @brief Offensive capabilities of the unit. */
             damage() noexcept { }
-
-            /** @brief Offensive capabilities of the unit.
-             *  @param is_quiet Indicates if errors are to be pushed onto \c quiet_error when coercing occurs.
-             */
-            explicit damage(bool is_quiet) noexcept : m_is_quiet(is_quiet) { }
 
             /** @brief Offensive capabilities of the unit.
              *  @param low Low damage.
              *  @param high High damage.
              *  @param accuracy Probability of dealing high damage.
              *  @param splash_chance Probability of dealing splash damage.
-             *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if \p low exceeds \p high.
-             *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if \p accuracy is outside the interval [0, 1].
-             *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if \p splash_chance is outside the interval [0, 1].
+             *  @exception std::logic_error \p accuracy is outside the interval [0, 1].
+             *  @exception std::logic_error \p splash_chance is outside the interval [0, 1].
              */
-            damage(std::size_t low, std::size_t high, double accuracy, double splash_chance) noexcept
+            damage(std::size_t low, std::size_t high, double accuracy, double splash_chance)
                 : m_low(low), m_high(high), m_accuracy(accuracy), m_splash_chance(splash_chance)
             {
-                this->coerce();
+                this->validate();
             } // damage(...)
-
-            /** Indicates if errors are to be pushed onto \c quiet_error when coercing occurs. */
-            bool is_quiet() const noexcept { return this->m_is_quiet; }
-            /** Indicates if errors are to be pushed onto \c quiet_error when coercing occurs. */
-            void set_is_quiet(bool value) noexcept { this->m_is_quiet = value; }
 
             /** @brief Offensive capabilities of the unit.
              *  @param low Low damage.
              *  @param high High damage.
-             *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if \p low exceeds \p high.
              */
             void reset(std::size_t low, std::size_t high) noexcept
             {
                 this->m_low = low;
                 this->m_high = high;
-                this->coerce();
             } // reset(...)
 
             /** @brief Offensive capabilities of the unit.
@@ -108,33 +77,34 @@ namespace ropufu::settlers_online
              *  @param high High damage.
              *  @param accuracy Probability of dealing high damage.
              *  @param splash_chance Probability of dealing splash damage.
-             *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if \p low exceeds \p high.
+             *  @exception std::logic_error \p accuracy is outside the interval [0, 1].
+             *  @exception std::logic_error \p splash_chance is outside the interval [0, 1].
              */
-            void reset(std::size_t low, std::size_t high, double accuracy, double splash_chance) noexcept
+            void reset(std::size_t low, std::size_t high, double accuracy, double splash_chance)
             {
                 this->m_low = low;
                 this->m_high = high;
                 this->m_accuracy = accuracy;
                 this->m_splash_chance = splash_chance;
-                this->coerce();
+                this->validate();
             } // reset(...)
             
             /** Low damage. */
             std::size_t low() const noexcept { return this->m_low; }
             /** Low damage. */
-            void set_low(std::size_t value) noexcept { this->m_low = value; this->coerce(); }
+            void set_low(std::size_t value) noexcept { this->m_low = value; }
             /** High damage. */
             std::size_t high() const noexcept { return this->m_high; }
             /** High damage. */
-            void set_high(std::size_t value) noexcept { this->m_high = value; this->coerce(); }
+            void set_high(std::size_t value) noexcept { this->m_high = value; }
             /** Probability of dealing high damage. */
             double accuracy() const noexcept { return this->m_accuracy; }
             /** Probability of dealing high damage. */
-            void set_accuracy(double value) noexcept { this->m_accuracy = value; this->coerce(); }
+            void set_accuracy(double value) { this->m_accuracy = value; this->validate(); }
             /** Probability of dealing splash damage. */
             double splash_chance() const noexcept { return this->m_splash_chance; }
             /** Probability of dealing splash damage. */
-            void set_splash_chance(double value) noexcept { this->m_splash_chance = value; this->coerce(); }
+            void set_splash_chance(double value) { this->m_splash_chance = value; this->validate(); }
             
             /** Checks two types for equality. */
             bool operator ==(const type& other) const noexcept
@@ -203,9 +173,8 @@ namespace ropufu::settlers_online
             };
         } // to_json(...)
     
-        void from_json(const nlohmann::json& j, damage& x) noexcept
+        void from_json(const nlohmann::json& j, damage& x)
         {
-            ropufu::aftermath::quiet_json q(j);
             using type = damage;
 
             // Populate default values.
@@ -215,20 +184,12 @@ namespace ropufu::settlers_online
             double splash_chance = x.splash_chance();
 
             // Parse json entries.
-            q.optional(type::jstr_low, low);
-            q.optional(type::jstr_high, high);
-            q.optional(type::jstr_accuracy, accuracy);
-            q.optional(type::jstr_splash_chance, splash_chance);
+            if (j.count(type::jstr_low) > 0) low = j[type::jstr_low];
+            if (j.count(type::jstr_high) > 0) high = j[type::jstr_high];
+            if (j.count(type::jstr_accuracy) > 0) accuracy = j[type::jstr_accuracy];
+            if (j.count(type::jstr_splash_chance) > 0) splash_chance = j[type::jstr_splash_chance];
             
             // Reconstruct the object.
-            if (!q.good())
-            {
-                aftermath::quiet_error::instance().push(
-                    aftermath::not_an_error::runtime_error,
-                    aftermath::severity_level::major, 
-                    q.message(), __FUNCTION__, __LINE__);
-                return;
-            } // if (...)
             x.reset(low, high, accuracy, splash_chance);
         } // from_json(...)
     } // namespace detail

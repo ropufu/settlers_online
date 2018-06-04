@@ -2,8 +2,6 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_ARMY_PARSER_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_ARMY_PARSER_HPP_INCLUDED
 
-#include <aftermath/not_an_error.hpp>
-
 #include "army.hpp"
 #include "char_string.hpp"
 #include "unit_database.hpp"

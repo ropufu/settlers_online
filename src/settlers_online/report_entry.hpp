@@ -3,14 +3,14 @@
 #define ROPUFU_SETTLERS_ONLINE_REPORT_ENTRY_HPP_INCLUDED
 
 #include <nlohmann/json.hpp>
-#include <aftermath/quiet_json.hpp>
+#include <ropufu/json_traits.hpp>
 
-#include <aftermath/not_an_error.hpp>
-#include <aftermath/probability.hpp>
+#include <ropufu/probability.hpp>
 
 #include "unit_group.hpp"
 
 #include <cstddef> // std::size_t
+#include <stdexcept>  // std::runtime_error
 #include <string>  // std::string
 #include <ostream> // std::ostream, std::endl
 #include <utility> // std:pair, std::make_pair
@@ -128,17 +128,22 @@ namespace ropufu::settlers_online
         if (!x.observations().empty())
         {
             std::size_t size = x.observations().data().size();
-            std::vector<std::size_t> values(size);
-            std::vector<std::size_t> counts(size);
-            x.observations().copy_to(values.data(), counts.data());
+            std::vector<std::size_t> values {};
+            std::vector<std::size_t> counts {};
+            values.reserve(size);
+            counts.reserve(size);
+            for (const auto& item : x.observations().data())
+            {
+                values.push_back(item.first);
+                counts.push_back(item.second);
+            } // for (...)
             j[type::jstr_observed_values] = values;
             j[type::jstr_observed_counts] = counts;
         } // if (...)
     } // to_json(...)
 
-    void from_json(const nlohmann::json& j, report_entry& x) noexcept
+    void from_json(const nlohmann::json& j, report_entry& x)
     {
-        ropufu::aftermath::quiet_json q(j);
         using type = report_entry;
 
         // Populate default values.
@@ -156,13 +161,13 @@ namespace ropufu::settlers_online
         std::vector<std::size_t> counts = { };
 
         // Parse json entries.
-        q.required(type::jstr_is_header, is_header);
-        q.required(type::jstr_caption, caption);
-        q.optional(type::jstr_details, details);
-        q.optional(type::jstr_clipboard_text, clipboard_text);
-        q.optional(type::jstr_unit_name, unit_name);
-        q.optional(type::jstr_observed_values, values);
-        q.optional(type::jstr_observed_counts, counts);
+        is_header = j[type::jstr_is_header];
+        caption = j[type::jstr_caption].get<std::string>();
+        if (j.count(type::jstr_details) > 0) details = j[type::jstr_details].get<std::string>();
+        if (j.count(type::jstr_clipboard_text) > 0) clipboard_text = j[type::jstr_clipboard_text].get<std::string>();
+        if (j.count(type::jstr_unit_name) > 0) unit_name = j[type::jstr_unit_name].get<std::string>();
+        if (j.count(type::jstr_observed_values) > 0) values = j[type::jstr_observed_values].get<std::vector<std::size_t>>();
+        if (j.count(type::jstr_observed_counts) > 0) counts = j[type::jstr_observed_counts].get<std::vector<std::size_t>>();
 
         // More entries.
         if (j.count(type::jstr_lower_bound) > 0)
@@ -170,7 +175,7 @@ namespace ropufu::settlers_online
             if (!j[type::jstr_lower_bound].is_null())
             {
                 has_lower_bound = true;
-                q.required(type::jstr_lower_bound, lower_bound);
+                lower_bound = j[type::jstr_lower_bound];
             } // if (...)
         } // if (...)
         if (j.count(type::jstr_upper_bound) > 0)
@@ -178,27 +183,12 @@ namespace ropufu::settlers_online
             if (!j[type::jstr_upper_bound].is_null())
             {
                 has_upper_bound = true;
-                q.required(type::jstr_upper_bound, upper_bound);
+                upper_bound = j[type::jstr_upper_bound];
             } // if (...)
         } // if (...)
 
         // Reconstruct the object.
-        if (!q.good())
-        {
-            aftermath::quiet_error::instance().push(
-                aftermath::not_an_error::runtime_error,
-                aftermath::severity_level::major, 
-                q.message(), __FUNCTION__, __LINE__);
-            return;
-        } // if (...)
-        if (values.size() != counts.size())
-        {
-            aftermath::quiet_error::instance().push(
-                aftermath::not_an_error::runtime_error,
-                aftermath::severity_level::major,
-                "Observations size mismatch.", __FUNCTION__, __LINE__);
-            return;
-        } // if (...)
+        if (values.size() != counts.size()) throw std::runtime_error("Observations size mismatch.");
         x.set_is_header(is_header);
         x.set_text(caption, details, clipboard_text);
         x.set_unit_name(unit_name);

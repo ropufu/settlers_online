@@ -2,9 +2,8 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_ARMY_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_ARMY_HPP_INCLUDED
 
-#include <aftermath/algebra.hpp>
-#include <aftermath/enum_array.hpp>
-#include <aftermath/not_an_error.hpp>
+#include <ropufu/algebra.hpp>
+#include <ropufu/enum_array.hpp>
 
 // ~~ Basic structures ~~
 #include "camp.hpp"
@@ -22,6 +21,7 @@
 #include <initializer_list> // std::initializer_list
 #include <ostream> // std::ostream
 #include <set> // std::set
+#include <stdexcept>  // std::logic_error
 #include <unordered_map> // std::unordered_map
 #include <vector> // std::vector
 
@@ -38,9 +38,9 @@ namespace ropufu::settlers_online
         std::vector<mask_type> m_metagroup_masks = { }; // For each non-singleton metagroup store its mask (default-sorted).
         detail::camp m_camp = { }; // Determines the defensive capabilities of the army.
         // ~~ Permutations of <m_groups> ~~
-        aftermath::algebra::permutation m_order_original = { }; // Original permutation.
-        aftermath::algebra::permutation m_order_by_id = { };    // Identity permutation.
-        aftermath::algebra::permutation m_order_by_hp = { };    // Permutation when defending agains units with \c do_attack_weakest_target.
+        aftermath::algebra::permutation<std::size_t> m_order_original = { }; // Original permutation.
+        aftermath::algebra::permutation<std::size_t> m_order_by_id = { };    // Identity permutation.
+        aftermath::algebra::permutation<std::size_t> m_order_by_hp = { };    // Permutation when defending agains units with \c do_attack_weakest_target.
         // ~~ Battle modifiers and traits ~~
         double m_frenzy_bonus = 0; // Increases (multiplicative) the attack damage of this army for every combat round past the first.
         aftermath::enum_array<battle_skill, std::size_t> m_skills = { }; // Skills affecting various aspects of the battle.
@@ -51,16 +51,16 @@ namespace ropufu::settlers_online
         army() noexcept : army(std::vector<unit_group>(0)) { }
 
         /** @brief Constructs an army from the collection of \c unit_groups.
-         *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if there are two groups sharing the same \c id.
-         *  @exception not_an_error::out_of_range This error is pushed to \c quiet_error if the number of groups exceeds \c army_capacity constant.
+         *  @exception std::logic_error There are two groups sharing the same \c id.
+         *  @exception std::out_of_range The number of groups exceeds \c army_capacity constant.
          */
-        army(std::initializer_list<unit_group> groups) noexcept : army(std::vector<unit_group>(groups)) { }
+        army(std::initializer_list<unit_group> groups) : army(std::vector<unit_group>(groups)) { }
 
         /** @brief Constructs an army from the collection of \c unit_groups.
-         *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if there are two groups sharing the same \c id.
-         *  @exception not_an_error::out_of_range This error is pushed to \c quiet_error if the number of groups exceeds \c army_capacity constant.
+         *  @exception std::logic_error There are two groups sharing the same \c id.
+         *  @exception std::out_of_range The number of groups exceeds \c army_capacity constant.
          */
-        army(const std::vector<unit_group>& groups, const detail::camp& camp = { }) noexcept;
+        army(const std::vector<unit_group>& groups, const detail::camp& camp = { });
 
         /** Groups (ordered by \c id). */
         const std::vector<unit_group>& groups() const noexcept { return this->m_groups; }
@@ -87,18 +87,11 @@ namespace ropufu::settlers_online
         /** Increases (multiplicative) the attack damage of this army for every combat round past the first. */
         double frenzy_bonus() const noexcept { return this->m_frenzy_bonus; }
         /** @brief Increases (multiplicative) the attack damage of this army for every combat round past the first.
-         *  @exception not_an_error::logic_error This error is pushed to \c quiet_error if \p value is negative.
+         *  @exception std::logic_error \p value is negative.
          */
-        void set_frenzy_bonus(double value) noexcept
+        void set_frenzy_bonus(double value)
         {
-            if (value < 0)
-            {
-                aftermath::quiet_error::instance().push(
-                    aftermath::not_an_error::logic_error,
-                    aftermath::severity_level::minor,
-                    "Negative frenzy bonus coerced to zero.", __FUNCTION__, __LINE__);
-                value = 0;
-            }
+            if (value < 0) throw std::logic_error("Frenzy bonus cannot be negative.");
             this->m_frenzy_bonus = value;
         } // set_frenzy_bonus(...)
 
@@ -135,61 +128,53 @@ namespace ropufu::settlers_online
         std::size_t count_groups() const noexcept { return this->m_groups.size(); }
 
         /** Access groups (ordered by \c id). */
-        const unit_group& operator [](std::size_t index) const noexcept { return this->m_groups[index]; }
+        const unit_group& operator [](std::size_t index) const { return this->m_groups[index]; }
         /** Access groups (ordered by \c id). */
-        unit_group& operator [](std::size_t index) noexcept { return this->m_groups[index]; }
+        unit_group& operator [](std::size_t index) { return this->m_groups[index]; }
 
         /** @brief Access groups (ordered by \c id).
-         *  @exception not_an_error::out_of_range This error is pushed to \c quiet_error if \p index is greater of equal to the number of groups in the army.
+         *  @exception std::out_of_range \p index is greater of equal to the number of groups in the army.
          */
-        const unit_group& at(std::size_t index) const noexcept
+        const unit_group& at(std::size_t index) const
         {
-            if (index >= this->m_groups.size())
-            {
-                aftermath::quiet_error::instance().push(
-                    aftermath::not_an_error::out_of_range,
-                    aftermath::severity_level::fatal,
-                    "<index> must be smaller than the number of groups in the army.", __FUNCTION__, __LINE__);
-                return this->m_invalid;
-            }
+            if (index >= this->m_groups.size()) throw std::out_of_range("<index> must be smaller than the number of groups in the army.");
             return this->operator [](index);
         } // at(...)
 
         /** @brief Access groups (ordered by \c id).
-         *  @exception not_an_error::out_of_range This error is pushed to \c quiet_error if \p index is greater of equal to the number of groups in the army.
+         *  @exception std::out_of_range \p index is greater of equal to the number of groups in the army.
          */
-        unit_group& at(std::size_t index) noexcept
+        unit_group& at(std::size_t index)
         {
-            if (index >= this->m_groups.size())
-            {
-                aftermath::quiet_error::instance().push(
-                    aftermath::not_an_error::out_of_range,
-                    aftermath::severity_level::fatal,
-                    "<index> must be smaller than the number of groups in the army.", __FUNCTION__, __LINE__);
-                return this->m_invalid;
-            }
+            if (index >= this->m_groups.size()) throw std::out_of_range("<index> must be smaller than the number of groups in the army.");
             return this->operator [](index);
         } // at(...)
 
         /** Original ordering of the units. */
-        const aftermath::algebra::permutation& order_original() const noexcept { return this->m_order_original; }
+        const aftermath::algebra::permutation<std::size_t>& order_original() const noexcept { return this->m_order_original; }
 
         /** Ordering by unit id. */
-        const aftermath::algebra::permutation& order_by_id() const noexcept { return this->m_order_by_id; }
+        const aftermath::algebra::permutation<std::size_t>& order_by_id() const noexcept { return this->m_order_by_id; }
 
         /** Ordering by unit hit points. */
-        const aftermath::algebra::permutation& order_by_hp() const noexcept { return this->m_order_by_hp; }
+        const aftermath::algebra::permutation<std::size_t>& order_by_hp() const noexcept { return this->m_order_by_hp; }
 
         /** The mask, specific to this instance of \c army, indicating the surviving groups. */
         mask_type compute_alive_mask() const noexcept
         {
-            return aftermath::algebra::elementwise::to_binary_mask(this->m_groups, [] (const unit_group& g) { return g.count() > 0; });
+            mask_type result {};
+            aftermath::algebra::elementwise::to_binary_mask(this->m_groups, [] (const unit_group& g) { return g.count() > 0; }, result);
+            return result;
         } // compute_alive_mask(...)
 
         /** Returns only the unit groups masked by \p alive_mask. */
         std::vector<unit_group> by_mask(mask_type alive_mask) const noexcept
         {
-            return aftermath::algebra::elementwise::from_binary_mask(this->m_groups, alive_mask);
+            std::vector<unit_group> result {};
+            result.reserve(this->m_groups.size());
+            aftermath::algebra::elementwise::from_binary_mask(this->m_groups, alive_mask, [&](const auto& g) { result.push_back(g); });
+            result.shrink_to_fit();
+            return result;
         } // by_mask(...)
 
         /** Total number of metagroups (groups of unit groups). */
@@ -248,7 +233,7 @@ namespace ropufu::settlers_online
         } // to_string(...)
     }; // struct army
 
-    army::army(const std::vector<unit_group>& groups, const detail::camp& camp) noexcept
+    army::army(const std::vector<unit_group>& groups, const detail::camp& camp)
         : m_groups(0), m_metagroup_masks(0), m_camp(camp),
         m_order_original(0), m_order_by_id(groups.size()), m_order_by_hp(groups.size())
     {
@@ -256,14 +241,11 @@ namespace ropufu::settlers_online
         // Check mask capacity.
         if (groups.size() > army_capacity)
         {
-            aftermath::quiet_error::instance().push(
-                aftermath::not_an_error::out_of_range,
-                aftermath::severity_level::fatal,
-                "<mask_type> not large enought to store this army. Defaulting to empty.", __FUNCTION__, __LINE__);
-            this->m_order_by_id = aftermath::algebra::permutation(0);
-            this->m_order_by_hp = aftermath::algebra::permutation(0);
+            throw std::out_of_range("<mask_type> not large enought to store this army. Defaulting to empty.");
+            this->m_order_by_id = aftermath::algebra::permutation<std::size_t>(0);
+            this->m_order_by_hp = aftermath::algebra::permutation<std::size_t>(0);
             return;
-        }
+        } // if (...)
 
         // Check for duplicate id's.
         std::set<std::size_t> unit_ids { };
@@ -273,28 +255,27 @@ namespace ropufu::settlers_online
             bool has_inserted = unit_ids.insert(id).second;
             if (!has_inserted)
             {
-                aftermath::quiet_error::instance().push(
-                    aftermath::not_an_error::logic_error,
-                    aftermath::severity_level::major,
-                    "<groups> cannot have duplicate ids. Defaulting to empty.", __FUNCTION__, __LINE__);
-            this->m_order_by_id = aftermath::algebra::permutation(0);
-            this->m_order_by_hp = aftermath::algebra::permutation(0);
-            return;
-            }
-        }
+                throw std::logic_error("<groups> cannot have duplicate ids. Defaulting to empty.");
+                this->m_order_by_id = aftermath::algebra::permutation<std::size_t>(0);
+                this->m_order_by_hp = aftermath::algebra::permutation<std::size_t>(0);
+                return;
+            } // if (...)
+        } // for (...)
 
         // ~~ Construction ~~
         // Store groups ordered by id.
-        aftermath::algebra::permutation order_by_id(groups.size());
-        order_by_id.order_by(
+        aftermath::algebra::permutation<std::size_t> order_by_id(groups.size());
+        /** @todo Check whether ordering succeded. */
+        order_by_id.try_order_by(
             groups, [] (const unit_group& x) { return x.unit(); }, unit_type::compare_by_id);
         this->m_groups.reserve(groups.size());
         for (std::size_t i = 0; i < groups.size(); i++) this->m_groups.push_back(groups[order_by_id[i]]);
         this->m_groups.shrink_to_fit();
 
         // Store permutations.
-        this->m_order_original = order_by_id.invert();
-        this->m_order_by_hp.order_by(
+        this->m_order_original = order_by_id.inverse();
+        /** @todo Check whether ordering succeded. */
+        this->m_order_by_hp.try_order_by(
             this->m_groups, [] (const unit_group& x) { return x.unit(); }, unit_type::compare_by_hit_points);
 
         // Count non-singleton metagroups, and build traits.
@@ -319,8 +300,9 @@ namespace ropufu::settlers_online
         for (const auto& p : metagroup_ids)
         {
             if (p.second == 1) continue; // Skip singletons.
-            mask_type metagroup_mask = aftermath::algebra::elementwise::to_binary_mask(
-                this->m_groups, [&] (const unit_group& g) { return g.metagroup_id() == p.first; });
+            mask_type metagroup_mask {};
+            aftermath::algebra::elementwise::to_binary_mask(
+                this->m_groups, [&] (const unit_group& g) { return g.metagroup_id() == p.first; }, metagroup_mask);
             this->m_metagroup_masks.push_back(metagroup_mask);
         }
         this->m_metagroup_masks.shrink_to_fit();
