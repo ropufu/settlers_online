@@ -45,7 +45,7 @@
             "category": "unknown",
             "phases": [ "last strike" ],
             "hit points": 10000,
-            "damage": { "low": 500, "high": 700, "accuracy": 0.5 },
+            "damage": { "low": 500, "high": 700, "accuracy": 0.5, "splash chance": 1 },
             "experience when killed": 200,
             "special abilities": [ "attack weakest target", "overrun" ]
         },
