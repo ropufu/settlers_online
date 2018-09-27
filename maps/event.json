@@ -101,9 +101,9 @@
             "id": 754,
             "names": [ "Shaman" ],
             "category": "unknown",
-            "phases": [ "first strike" ],
-            "hit points": 5,
-            "damage": { "low": 0, "high": 5, "accuracy": 0.6 },
+            "phases": [ "normal" ],
+            "hit points": 9000,
+            "damage": { "low": 200, "high": 500, "accuracy": 0.7 },
             "experience when killed": 1,
             "special abilities": [ "attack weakest target" ]
         },
