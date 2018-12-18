@@ -22,16 +22,25 @@ namespace ropufu::settlers_online
 {
     namespace detail
     {
-        struct army_conditioner
+        struct battle_snapshot
         {
-            army left;
-            army right;
+        private:
+            const army m_conditioned_army_left;
+            const army m_conditioned_army_right;
+            const army_mechanics m_mechanics_left;
+            const army_mechanics m_mechanics_right;
 
-            army_conditioner(const army& a, const army& b, std::error_code& ec) noexcept
-                : left(army::condition(a, b, ec)), right(army::condition(b, a, ec))
+        public:
+            battle_snapshot(const army& a, const army& b, std::error_code& ec) noexcept
+                : m_conditioned_army_left(army::condition(a, b, ec)), m_conditioned_army_right(army::condition(b, a, ec)),
+                m_mechanics_left(this->m_conditioned_army_left, this->m_conditioned_army_right),
+                m_mechanics_right(this->m_conditioned_army_right, this->m_conditioned_army_left)
             {
-            } // army_conditioner(...)
-        }; // struct army_conditioner
+            } // battle_snapshot(...)
+
+            const army_mechanics& mechanics_left() const noexcept { return this->m_mechanics_left; }
+            const army_mechanics& mechanics_right() const noexcept { return this->m_mechanics_right; }
+        }; // struct battle_snapshot
     } // namespace detail
 
     /** @brief Handles the logic of the battle between two armies. */
@@ -42,9 +51,9 @@ namespace ropufu::settlers_online
 
     private:
         aftermath::enum_array<battle_phase, void> m_phases = {};
-        detail::army_conditioner m_ground_zero;
-        army_mechanics m_left;  // Left army.
-        army_mechanics m_right; // Right army.
+        const detail::battle_snapshot m_ground_zero; // Snapshot of the battle before it begins.
+        army_mechanics m_left;  // Left army mechanics.
+        army_mechanics m_right; // Right army mechanics.
         army_sequence<t_left_sequence_type> m_left_sequence;   // Left sequence.
         army_sequence<t_right_sequence_type> m_right_sequence; // Right sequence.
 
@@ -55,8 +64,8 @@ namespace ropufu::settlers_online
         /** Prepares two un-conditioned armies for combat. */
         battle(const army& left, const army& right, std::error_code& ec) noexcept
             : m_ground_zero(left, right, ec),
-            m_left(this->m_ground_zero.left, this->m_ground_zero.right),
-            m_right(this->m_ground_zero.right, this->m_ground_zero.left),
+            m_left(this->m_ground_zero.mechanics_left()),
+            m_right(this->m_ground_zero.mechanics_right()),
             m_left_sequence(this->m_left.underlying()), m_right_sequence(this->m_right.underlying())
         {
         } // battle(...)
@@ -64,8 +73,8 @@ namespace ropufu::settlers_online
         /** Restores the armies to their original state. */
         void reset() noexcept
         {
-            this->m_left = army_mechanics(this->m_ground_zero.left, this->m_ground_zero.right);
-            this->m_right = army_mechanics(this->m_ground_zero.right, this->m_ground_zero.left);
+            this->m_left = this->m_ground_zero.mechanics_left();
+            this->m_right = this->m_ground_zero.mechanics_right();
 
             this->m_outcome = {};
             this->m_clock = {};
