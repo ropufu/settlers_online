@@ -6,60 +6,27 @@ using System.Text;
 
 namespace Ropufu.LeytePond.Bridge
 {
-    using CharTree = PrefixTree<Char, String>;
-    
     /** Mirrors structural behavior of \c unit_database.hpp. */
-    public class UnitDatabase : PrefixDatabase<UnitType>
+    public class UnitDatabase : NameDatabase<UnitType, Int32>
     {
-        private static readonly UnitDatabase instance = new UnitDatabase();
+        protected override int OnBuildKey(UnitType unit) => unit.Id;
 
-        public static UnitDatabase Instance => UnitDatabase.instance;
+        protected override HashSet<String> OnBuildNames(UnitType unit) => new HashSet<String>(unit.Names);
 
-        public static String BuildKey(UnitType unit)
+        protected override void OnRelaxed(UnitType unit, HashSet<String> relaxedNames, ref HashSet<String> strictNames)
         {
-            var key = unit.FirstName;
-            foreach (var name in unit.Names) if (name.Length < key.Length) key = name;
-            return key;
+            foreach (var code in unit.Codenames) strictNames.Add(code);
         }
-
-        public static String BuildPrimaryName(UnitType unit) => unit.FirstName.RelaxCase();
-
-        public static IEnumerable<String> Names(UnitType unit) => unit.Names;
-
-        protected override String OverrideBuildKey(UnitType unit) => UnitDatabase.BuildKey(unit);
-
-        protected override String OverrideBuildPrimaryName(UnitType unit) => UnitDatabase.BuildPrimaryName(unit);
-
-        protected override IEnumerable<String> OverrideNames(UnitType unit) => UnitDatabase.Names(unit);
-
-        private HashSet<Int32> ids = new HashSet<Int32>();
 
         public UnitDatabase()
         {
-
         }
 
-        protected override void OnClear()
-        {
-            this.ids.Clear();
-        }
+        public IEnumerable<UnitType> Generals => from pair in this.Data where pair.Value.Is(UnitFaction.General) select pair.Value;
 
-        public IEnumerable<UnitType> Generals => from pair in this.Database where pair.Value.Is(UnitFaction.General) select pair.Value;
-
-        protected override void OnLoading(ref UnitType unit, out Boolean doCancel)
+        protected override void OnLoading(UnitType unit, ref Boolean doCancel)
         {
-            doCancel = false;
             unit.Trim();
-            if (this.ids.Contains(unit.Id))
-            {
-                App.Warnings.Push($"Unit with the same id ({unit.Id}) already loaded.");
-                doCancel = true;
-            }
-        }
-
-        protected override void OnLoaded(ref UnitType unit)
-        {
-            this.ids.Add(unit.Id);
         }
     }
 }

@@ -157,7 +157,8 @@ namespace Ropufu.LeytePond
             set => this.isStrict = value;
         }
 
-        private void AppendSuggestions<T>(PrefixDatabase<T> source)
+        private void AppendSuggestions<T, TKey>(NameDatabase<T, TKey> source)
+            where TKey : IEquatable<TKey>
         {
             // ~~ Update suggestions ~~
             var countSuggestions = 0;
@@ -178,25 +179,29 @@ namespace Ropufu.LeytePond
             this.suggestionsSource.Clear();
 
             var groups = new List<UnitGroup>();
+            var unitDatabase = App.Map.Units;
+            var adventureDatabase = App.Map.Adventures;
             foreach (var parser in this.parsers)
             {
                 var warnings = new Logger();
-                var army = parser.Build(warnings, this.doCheckGenerals, this.doCoerceFactions, this.isStrict);
+                var army = parser.Build(unitDatabase, warnings, this.doCheckGenerals, this.doCoerceFactions, this.isStrict);
 
                 if (parser.IsGood) // Take suggestions if string format is that of an army.
                 {
                     // ...unless the army has been reconstructed successfully and(!) there is only one (obvious) suggestion.
-                    if (army.IsEmpty || UnitDatabase.Instance.Suggestions.Count() > 1) this.AppendSuggestions(UnitDatabase.Instance); 
+                    if (army.IsEmpty || unitDatabase.Suggestions.Count() > 1) this.AppendSuggestions(unitDatabase); 
                 }
                 else // Otherwise try interpreting the string as adventure name.
                 {
-                    var adventure = default(Adventure);
-                    if (AdventureDatabase.Instance.TryFind(parser.Value, ref adventure))
+                    //var adventure = default(Adventure);
+                    //if (adventureDatabase.TryFind(parser.Value, ref adventure, null))
+                    var adventure = adventureDatabase.Find(parser.Value, null);
+                    if (adventure != default(Adventure))
                     {
                         warnings.Clear();
                         army = new Army((from u in adventure.Units select new UnitGroup(u, 0)).ToArray());
                     }
-                    this.AppendSuggestions(AdventureDatabase.Instance);
+                    this.AppendSuggestions(adventureDatabase);
                 }
                 // @todo Change the handling of warnings, e.g., missing general check for multiple armies.
                 this.warnings.Append(warnings);
@@ -235,6 +240,7 @@ namespace Ropufu.LeytePond
             this.doHold = true;
             this.ArmyString = this.IsPlayerArmy ? this.armySource.ToCompactString() : this.armySource.ToString();
             this.Decorator?.Decorate(this.armySource, new Logger());
+            this.armySource.Invalidate(); // Make sure new skills are reflected immediately.
             this.suggestionsSource.Clear();
             this.HideSuggestionList();
             this.doHold = false;

@@ -18,7 +18,7 @@ namespace Ropufu.LeytePond
 
         private void Initialize()
         {
-            this.Source = Bridge.AdventureDatabase.Instance;
+            this.Source = App.Map.Adventures;
             this.Mode = BindingMode.OneWay;
         }
     }

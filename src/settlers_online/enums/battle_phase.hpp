@@ -13,7 +13,7 @@ namespace ropufu::settlers_online
     /** @brief Names categories of units.
      *  @remark Used internally as an indexer for \c enum_array, so don't go too high or negative. 
      **/
-    enum struct battle_phase : std::size_t
+    enum struct battle_phase : char
     {
         first_strike = 0,
         normal = 1,

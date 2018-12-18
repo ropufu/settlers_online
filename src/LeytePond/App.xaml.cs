@@ -18,8 +18,11 @@ namespace Ropufu
         public partial class App : Application
         {
             private Logger warnings = new Logger();
+            private Bridge.Map map = new Bridge.Map();
 
             public static Logger Warnings => App.Current.warnings;
+
+            public static Bridge.Map Map => App.Current.map;
 
             public static new App Current => (App)Application.Current;
 
@@ -32,7 +35,7 @@ namespace Ropufu
                 Bridge.BlackMarsh.Instance.ProcessPath = blackMarshExe;
                 Bridge.BlackMarsh.Instance.CborPath = blackMarshCbor;
                 Bridge.Config.Read(blackMarshConfig);
-                Bridge.Map.LoadFromFolder(Bridge.Config.Instance.MapsPath);
+                this.map = Bridge.Map.LoadFromFolder(Bridge.Config.Instance.MapsPath);
 
                 this.CheckImages();
                 base.OnStartup(e);
@@ -48,7 +51,7 @@ namespace Ropufu
                         this.warnings.Push($"Invalid location for unit faces.");
                         return;
                     }
-                    foreach (var unit in Bridge.UnitDatabase.Instance.Units)
+                    foreach (var unit in this.map.Units.All)
                     {
                         var imagePath = System.IO.Path.Combine(facesPath, $"{unit.FirstName}.png");
                         if (!System.IO.File.Exists(imagePath))
@@ -59,8 +62,10 @@ namespace Ropufu
                     foreach (var imagePath in System.IO.Directory.GetFiles(facesPath))
                     {
                         var unitName = System.IO.Path.GetFileNameWithoutExtension(imagePath);
-                        var unit = default(Bridge.UnitType);
-                        if (!Bridge.UnitDatabase.Instance.TryFind(unitName, ref unit))
+                        //var unit = default(Bridge.UnitType);
+                        //if (!this.map.Units.TryFind(unitName, ref unit, null))
+                        var unit = this.map.Units.Find(unitName, null);
+                        if (unit == default(Bridge.UnitType))
                         {
                             this.warnings.Push($"Unrecognized face: {unitName}.");
                         }

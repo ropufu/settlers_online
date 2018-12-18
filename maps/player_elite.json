@@ -2,74 +2,111 @@
     "units": [
         {
             "id": 1011,
-            "names": [ "Swordsman", "S" ],
+            "names": [ "Swordsman" ],
+            "codenames": [ "S" ],
             "faction": "elite",
             "category": "melee",
             "phases": [ "normal" ],
             "hit points": 150,
-            "damage": { "low": 40, "high": 80, "accuracy": 0.9 },
+            "damage": {
+                "low": 40,
+                "high": 80,
+                "accuracy": 0.9
+            },
             "experience when killed": 49
         },
         {
             "id": 1012,
-            "names": [ "Mounted Swordsman", "MS" ],
+            "names": [ "Mounted Swordsman" ],
+            "codenames": [ "MS" ],
             "faction": "elite",
             "category": "melee",
             "phases": [ "normal" ],
             "hit points": 250,
-            "damage": { "low": 25, "high": 50, "accuracy": 0.9 },
+            "damage": {
+                "low": 25,
+                "high": 50,
+                "accuracy": 0.9
+            },
             "experience when killed": 66
         },
         {
             "id": 1013,
-            "names": [ "Knight", "K" ],
+            "names": [ "Knight" ],
+            "codenames": [ "K" ],
             "faction": "elite",
             "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 80,
-            "damage": { "low": 35, "high": 70, "accuracy": 0.9 },
+            "damage": {
+                "low": 35,
+                "high": 70,
+                "accuracy": 0.9
+            },
             "experience when killed": 18
         },
         {
             "id": 1014,
-            "names": [ "Marksman", "M" ],
+            "names": [ "Marksman" ],
+            "codenames": [ "M" ],
             "faction": "elite",
             "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 50,
-            "damage": { "low": 50, "high": 100, "accuracy": 0.9 },
+            "damage": {
+                "low": 50,
+                "high": 100,
+                "accuracy": 0.9
+            },
             "experience when killed": 21,
             "special abilities": [ "tower bonus", "sniper training" ]
         },
         {
             "id": 1015,
-            "names": [ "Armored Marksman", "AM" ],
+            "names": [ "Armored Marksman" ],
+            "codenames": [ "AM" ],
             "faction": "elite",
             "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 50,
-            "damage": { "low": 100, "high": 200, "accuracy": 0.9 },
+            "damage": {
+                "low": 100,
+                "high": 200,
+                "accuracy": 0.9
+            },
             "experience when killed": 69,
             "special abilities": [ "tower bonus", "attack weakest target" ]
         },
         {
             "id": 1016,
-            "names": [ "Mounted Marksman", "MM" ],
+            "names": [ "Mounted Marksman" ],
+            "codenames": [ "MM" ],
             "faction": "elite",
             "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 50,
-            "damage": { "low": 50, "high": 100, "accuracy": 0.9, "splash chance": 1 },
+            "damage": {
+                "low": 50,
+                "high": 100,
+                "accuracy": 0.9,
+                "splash chance": 1
+            },
             "experience when killed": 38
         },
         {
             "id": 1017,
-            "names": [ "Besieger", "B" ],
+            "names": [ "Besieger" ],
+            "codenames": [ "B" ],
             "faction": "elite",
             "category": "artillery",
             "phases": [ "last strike" ],
             "hit points": 80,
-            "damage": { "low": 100, "high": 200, "accuracy": 0.9, "splash chance": 1 },
+            "damage": {
+                "low": 100,
+                "high": 200,
+                "accuracy": 0.9,
+                "splash chance": 1
+            },
             "experience when killed": 70,
             "special abilities": [ "tower bonus" ]
         }

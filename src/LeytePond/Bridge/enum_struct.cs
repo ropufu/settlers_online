@@ -69,9 +69,10 @@ namespace Ropufu.LeytePond.Bridge
     public enum BattleTrait
     {
         None = 0,
-        Dazzle = 1,             // Enemy accuracy is reduced to 0%.
-        Intercept = 2,          // Enemy units deal 5% less damage and their ability \c do_attack_weakest_target is ignored.
-        ExplosiveAmmunition = 3 // Ranged units get \c do_attack_weakest_target and 100\% \c splash_chance.
+        Dazzle = 1,              // Enemy accuracy is reduced to 0%.
+        Intercept = 2,           // Enemy units deal 5% less damage and their ability \c do_attack_weakest_target is ignored.
+        ExplosiveAmmunition = 3, // Ranged units get \c do_attack_weakest_target and 100\% \c splash_chance.
+        Bombastic = 4            // Doubles the damage of \c artillery units.
     }
 
     /** Mirrors \c battle_phase.hpp. */

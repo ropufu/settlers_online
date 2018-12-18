@@ -5,11 +5,12 @@
 #include <nlohmann/json.hpp>
 #include <ropufu/json_traits.hpp>
 
-#include "army.hpp"
-#include "camp.hpp"
-#include "char_string.hpp"
-#include "enums.hpp"
-#include "logger.hpp"
+#include "../char_string.hpp"
+#include "../enums.hpp"
+#include "../logger.hpp"
+
+#include "../combat/army.hpp"
+#include "../combat/camp.hpp"
 
 #include <cstddef> // std::size_t
 #include <map> // std::map
@@ -24,24 +25,25 @@ namespace ropufu::settlers_online
     {
         using type = army_decorator;
         using skills_type = aftermath::enum_array<battle_skill, std::size_t>;
+        using camp_type = settlers_online::camp;
         // ~~ Json names ~~
         static constexpr char jstr_camp[] = "camp";
         static constexpr char jstr_skill_map[] = "skills";
 
     private:
-        detail::camp m_camp = { };
-        std::map<std::string, skills_type> m_skills = { };
+        camp_type m_camp = {};
+        std::map<std::string, skills_type> m_skills = {};
 
     public:
-        const detail::camp& camp() const noexcept { return this->m_camp; }
-        void set_camp(const detail::camp& value) noexcept { this->m_camp =  value; }
+        const camp_type& camp() const noexcept { return this->m_camp; }
+        void set_camp(const camp_type& value) noexcept { this->m_camp = value; }
 
         const std::map<std::string, skills_type>& skills() const noexcept { return this->m_skills; }
         void set_skills(const std::map<std::string, skills_type>& value) noexcept { this->m_skills = value; }
 
         void decorate(army& a) const noexcept
         {
-            detail::no_logger logger { };
+            detail::no_logger logger {};
             this->decorate(a, logger);
         } // decorate(...)
         
@@ -55,10 +57,10 @@ namespace ropufu::settlers_online
             for (const auto& pair : this->m_skills)
             {
                 bool is_match = false;
-                for (const unit_group& g : a.groups()) if (g.count() > 0) for (const std::string& name : g.unit().names()) if (name == pair.first) is_match = true;
+                for (const unit_group& g : a.groups()) if (g.count_attacker() > 0) for (const std::string& name : g.unit().names()) if (name == pair.first) is_match = true;
                 if (!is_match) continue;
                 
-                std::vector<std::string> skill_names { };
+                std::vector<std::string> skill_names {};
                 for (const auto& skill_pair : pair.second)
                 {
                     if (skill_pair.value() == 0) continue;
@@ -117,7 +119,7 @@ namespace ropufu::settlers_online
         using type = army_decorator;
         
         // Populate default values.
-        detail::camp camp = x.camp();
+        settlers_online::camp camp = x.camp();
         std::map<std::string, type::skills_type> skills = x.skills();
 
         // Parse json entries.

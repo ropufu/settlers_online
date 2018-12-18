@@ -65,16 +65,17 @@ namespace Ropufu.LeytePond.Bridge
         public Boolean IsGood => this.isValid;
         public Int32 Count => this.armyBlueprint.Count;
 
-        public Boolean TryBuild(ref Army a, Func<UnitType, Boolean> filter = null)
+        public Boolean TryBuild(ref Army a, UnitDatabase db, Func<UnitType, Boolean> filter)
         {
-            if (Object.ReferenceEquals(filter, null)) filter = u => true;
             if (!this.isValid) return false;
 
             var groups = new List<UnitGroup>(this.armyBlueprint.Count);
             foreach (var pair in this.armyBlueprint)
             {
-                var u = new UnitType();
-                if (!UnitDatabase.Instance.TryFind(pair.Key, ref u, filter)) return false;
+                //var u = new UnitType();
+                //if (!db.TryFind(pair.Key, ref u, filter)) return false;
+                var u = db.Find(pair.Key, filter);
+                if (u == default(UnitType)) return false;
 
                 if (pair.Value == 0) continue; // Skip empty groups.
                 groups.Add(new UnitGroup(u, pair.Value));
@@ -83,7 +84,7 @@ namespace Ropufu.LeytePond.Bridge
             return true;
         }
 
-        public Army Build(Logger warnings, Boolean doCheckGenerals = false, Boolean doCoerceFactions = false, Boolean isStrct = false)
+        public Army Build(UnitDatabase db, Logger warnings, Boolean doCheckGenerals = false, Boolean doCoerceFactions = false, Boolean isStrct = false)
         {
             var army = new Army();
             if (!this.isValid)
@@ -92,7 +93,7 @@ namespace Ropufu.LeytePond.Bridge
                 return army;
             }
 
-            if (!this.TryBuild(ref army, null))
+            if (!this.TryBuild(ref army, db, null))
             {
                 warnings.Push($"Reconstructing army from database failed.");
                 return army;
@@ -121,7 +122,7 @@ namespace Ropufu.LeytePond.Bridge
                     foreach (var f in factions)
                     {
                         // Try to re-build this army assuming only fraction <f> is allowed (or generals).
-                        if (this.TryBuild(ref a, u => u.Is(f) || u.Is(UnitFaction.General)))
+                        if (this.TryBuild(ref a, db, u => u.Is(f) || u.Is(UnitFaction.General)))
                         {
                             ++countOptions;
                             warnings.Push($"Did you mean: {a.ToCompactString()}?");

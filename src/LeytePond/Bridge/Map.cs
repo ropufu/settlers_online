@@ -6,7 +6,7 @@ namespace Ropufu.LeytePond.Bridge
 {
     // @todo Mirror in c++.
     [JsonObject(MemberSerialization.OptIn)]
-    class Map
+    public class Map
     {
         [JsonProperty("units")]
         private List<UnitType> units = new List<UnitType>();
@@ -15,37 +15,44 @@ namespace Ropufu.LeytePond.Bridge
         [JsonProperty("adventures")]
         private List<Adventure> adventures = new List<Adventure>();
 
-        public ICollection<UnitType> Units { get => this.units.AsReadOnly(); }
-        public ICollection<Camp> Camps { get => this.camps.AsReadOnly(); }
-        public ICollection<Adventure> Adventures { get => this.adventures.AsReadOnly(); }
+        private UnitDatabase unitDatabase = new UnitDatabase();
+        private CampDatabase campDatabase = new CampDatabase();
+        private AdventureDatabase adventureDatabase = new AdventureDatabase();
 
-        private static Int32 Load<T>(ICollection<T> units, PrefixDatabase<T> database)
+        //public ICollection<UnitType> Units { get => this.units.AsReadOnly(); }
+        //public ICollection<Camp> Camps { get => this.camps.AsReadOnly(); }
+        //public ICollection<Adventure> Adventures { get => this.adventures.AsReadOnly(); }
+
+        public UnitDatabase Units => this.unitDatabase;
+        public CampDatabase Camps => this.campDatabase;
+        public AdventureDatabase Adventures => this.adventureDatabase;
+
+        private static Int32 Load<T, TKey>(ICollection<T> units, NameDatabase<T, TKey> database)
+            where TKey : IEquatable<TKey>
         {
             var count = 0;
             foreach (var unit in units) if (database.Add(unit)) ++count;
             return count;
         }
 
-        private static void LinkAdventureUnits()
+        private void LinkAdventureUnits()
         {
-            var unitDatabase = UnitDatabase.Instance;
-            foreach (var a in AdventureDatabase.Instance.Adventures)
+            foreach (var a in this.adventureDatabase.All)
             {
                 for (var i = 0; i < a.UnitNames.Count; ++i)
                 {
-                    var u = default(UnitType);
                     var unitName = a.UnitNames[i];
-                    if (!unitDatabase.TryFind(unitName, ref u)) App.Warnings.Push($"Unit {unitName} from adventure {a.Name} not found.");
+                    var u = this.unitDatabase.Find(unitName, null);
+                    //if (!this.unitDatabase.TryFind(unitName, ref u, null))
+                    if (u == default(UnitType)) App.Warnings.Push($"Unit {unitName} from adventure {a.Name} not found.");
                     else a.LinkUnitAt(i, u);
                 }
             }
         }
 
-        public static Int32 LoadFromFolder(String folderPath)
+        public static Map LoadFromFolder(String folderPath)
         {
-            var unitDatabase = UnitDatabase.Instance;
-            var adventureDatabase = AdventureDatabase.Instance;
-            var campDatabase = CampDatabase.Instance;
+            var result = new Map();
 
             var countUnits = 0;
             var countAdventures = 0;
@@ -55,8 +62,8 @@ namespace Ropufu.LeytePond.Bridge
             {
                 files = System.IO.Directory.GetFiles(folderPath);
             }
-            catch (System.IO.IOException) { return 0; }
-            catch (UnauthorizedAccessException) { return 0; }
+            catch (System.IO.IOException) { return result; }
+            catch (UnauthorizedAccessException) { return result; }
 
             foreach (var p in files)
             {
@@ -64,9 +71,9 @@ namespace Ropufu.LeytePond.Bridge
                 {
                     var json = System.IO.File.ReadAllText(p);
                     var map = JsonConvert.DeserializeObject<Map>(json);
-                    countUnits += Map.Load(map.units, unitDatabase);
-                    countAdventures += Map.Load(map.adventures, adventureDatabase);
-                    countCamps += Map.Load(map.camps, campDatabase);
+                    countUnits += Map.Load(map.units, result.unitDatabase);
+                    countAdventures += Map.Load(map.adventures, result.adventureDatabase);
+                    countCamps += Map.Load(map.camps, result.campDatabase);
                 }
                 catch (JsonReaderException)
                 {
@@ -89,8 +96,8 @@ namespace Ropufu.LeytePond.Bridge
                     App.Warnings.Push($"Authorization error reading file ({p}).");
                 }
             }
-            Map.LinkAdventureUnits();
-            return countUnits;
+            result.LinkAdventureUnits();
+            return result;
         }
     }
 }

@@ -13,7 +13,7 @@ namespace ropufu::settlers_online
     /** @brief Enumerates some of the abilities for \c unit_type.
      *  @remark Used internally as an indexer for \c enum_array, so don't go too high or negative. 
      **/
-    enum struct special_ability : std::size_t
+    enum struct special_ability : char
     {
         none = 0,
         attack_weakest_target = 1, // When attacking enemies this unit will sort them by \c hit_points instead of \c id.

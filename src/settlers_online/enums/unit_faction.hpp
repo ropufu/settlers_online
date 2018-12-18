@@ -13,7 +13,7 @@ namespace ropufu::settlers_online
     /** @brief Faction categories of units.
      *  @remark Used internally as an indexer for \c enum_array, so don't go too high or negative. 
      **/
-    enum struct unit_faction : std::size_t
+    enum struct unit_faction : char
     {
         non_player_adventure = 0,  // All adventure enemy units.
         non_player_expedition = 1, // All expedition enemy units.

@@ -52,7 +52,7 @@ namespace ropufu
             static void replace(std::string& value, const std::string& what, const std::string& with) noexcept
             {
                 if (what.length() == 0) return;
-                std::vector<std::size_t> indices { };
+                std::vector<std::size_t> indices {};
                 std::size_t index = value.find(what);
                 while (index != std::string::npos)
                 {
@@ -113,9 +113,10 @@ namespace ropufu
                 return result;
             } // deep_trim_copy(...)
 
-            static std::string join(const std::vector<std::string>& values, const std::string& delimiter) noexcept
+            template <typename t_string_collection_type>
+            static std::string join(const t_string_collection_type& values, const std::string& delimiter) noexcept
             {
-                std::stringstream s { };
+                std::stringstream s {};
                 bool is_first = true;
                 for (const std::string& x : values)
                 {
@@ -128,9 +129,9 @@ namespace ropufu
 
             static std::vector<std::string> split(const std::string& value, const std::string& delimiter) noexcept
             {
-                if (delimiter.empty()) return { };
+                if (delimiter.empty()) return {};
 
-                std::vector<std::string> result { };
+                std::vector<std::string> result {};
                 std::size_t offset = 0;
                 std::size_t index_of_delimiter = value.find(delimiter, offset);
                 while (index_of_delimiter != std::string::npos) 

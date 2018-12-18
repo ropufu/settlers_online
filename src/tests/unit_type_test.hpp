@@ -3,7 +3,7 @@
 #define ROPUFU_SETTLERS_ONLINE_TEST_UNIT_TYPE_TEST_HPP_INCLUDED
 
 #include "../settlers_online/enums.hpp"
-#include "../settlers_online/unit_type.hpp"
+#include "../settlers_online/combat/unit_type.hpp"
 
 #include "generator.hpp"
 
@@ -11,6 +11,7 @@
 #include <functional>
 #include <ostream>
 #include <string>
+#include <system_error> // std::error_code, std::errc
 
 namespace ropufu
 {
@@ -28,7 +29,8 @@ namespace ropufu
 
             static bool test_equality()
             {
-                generator& gen = generator::instance();
+                generator gen {};
+                std::error_code ec {};
 
                 std::string name = "no name, nn";
                 std::size_t hit_points = 1985;
@@ -43,10 +45,10 @@ namespace ropufu
                 double splash_chance = u1.damage().splash_chance();
                 splash_chance = (splash_chance == 0) ? 0.5 : (splash_chance / 2);
 
-                u2.set_damage(settlers_online::detail::damage(low_damage, high_damage, accuracy, splash_chance));
+                u2.set_damage(settlers_online::damage(low_damage, high_damage, accuracy, splash_chance, ec), ec);
                 if (u1 == u2) return false;
 
-                return true;
+                return !static_cast<bool>(ec);
             }
         };
     }

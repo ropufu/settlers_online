@@ -13,7 +13,7 @@ namespace ropufu::settlers_online
     /** @brief Traits that some units may have that modify the course of the entire battle.
      *  @remark Used internally as an indexer for \c enum_array, so don't go too high or negative. 
      **/
-    enum struct battle_skill : std::size_t
+    enum struct battle_skill : char
     {
         none = 0,
         juggernaut = 1,         // Increases the general's (faction: general) attack damage by 20/40/60. These attacks have a 33/66/100% chance of dealing splash damage.

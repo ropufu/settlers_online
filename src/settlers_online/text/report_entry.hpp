@@ -7,12 +7,13 @@
 
 #include <ropufu/probability.hpp>
 
-#include "unit_group.hpp"
+#include "../combat/unit_group.hpp"
 
 #include <cstddef> // std::size_t
 #include <stdexcept>  // std::runtime_error
 #include <string>  // std::string
 #include <ostream> // std::ostream, std::endl
+#include <system_error> // std:error_code
 #include <utility> // std:pair, std::make_pair
 #include <vector>  // std::vector
 
@@ -21,7 +22,7 @@ namespace ropufu::settlers_online
     struct report_entry
     {
         using type = report_entry;
-        using empirical_measure = aftermath::probability::empirical_measure<std::size_t, std::size_t, double>;
+        using empirical_measure_type = aftermath::probability::empirical_measure<std::size_t, std::size_t, double>;
         // ~~ Json names ~~
         static constexpr char jstr_is_header[] = "header";
         static constexpr char jstr_caption[] = "caption";
@@ -41,22 +42,25 @@ namespace ropufu::settlers_online
         std::string m_unit_name = "";
         std::pair<std::size_t, bool> m_lower_bound = std::make_pair(0, false);
         std::pair<std::size_t, bool> m_upper_bound = std::make_pair(0, false);
-        empirical_measure m_observations = { };
+        empirical_measure_type m_observations = {};
 
     public:
         report_entry() noexcept { }
 
         explicit report_entry(const std::string& caption, const std::string& details = "", const std::string& clipboard_text = "") noexcept 
             : m_is_header(true), m_caption(caption), m_details(details), m_clipboard_text(clipboard_text)
-        { }
+        {
+        } // report_entry
         
-        explicit report_entry(const std::string& caption, const empirical_measure& observations) noexcept
+        explicit report_entry(const std::string& caption, const empirical_measure_type& observations) noexcept
             : m_caption(caption), m_observations(observations)
-        { }
+        {
+        } // report_entry
         
-        explicit report_entry(const unit_group& group, const empirical_measure& observations) noexcept
-            : m_unit_name(group.unit().names().front()), m_observations(observations)
-        { }
+        explicit report_entry(const unit_group& group, const empirical_measure_type& observations) noexcept
+            : m_unit_name(group.unit().first_name()), m_observations(observations)
+        {
+        } // report_entry
 
         bool is_header() const noexcept { return this->m_is_header; }
         void set_is_header(bool value) noexcept { this->m_is_header = value; }
@@ -83,8 +87,8 @@ namespace ropufu::settlers_online
         void clear_lower_bound() noexcept { this->m_lower_bound = std::make_pair(0, false); }
         void clear_upper_bound() noexcept { this->m_upper_bound = std::make_pair(0, false); }
         
-        const empirical_measure& observations() const noexcept { return this->m_observations; }
-        void set_observations(const empirical_measure& value) noexcept { this->m_observations = value; }
+        const empirical_measure_type& observations() const noexcept { return this->m_observations; }
+        void set_observations(const empirical_measure_type& value) noexcept { this->m_observations = value; }
 
         friend std::ostream& operator <<(std::ostream& os, const type& self)
         {
@@ -156,9 +160,9 @@ namespace ropufu::settlers_online
         bool has_upper_bound = x.has_upper_bound();
         std::size_t lower_bound = x.lower_bound();
         std::size_t upper_bound = x.upper_bound();
-        report_entry::empirical_measure observations = x.observations();
-        std::vector<std::size_t> values = { };
-        std::vector<std::size_t> counts = { };
+        typename type::empirical_measure_type observations = x.observations();
+        std::vector<std::size_t> values = {};
+        std::vector<std::size_t> counts = {};
 
         // Parse json entries.
         is_header = j[type::jstr_is_header];
@@ -189,12 +193,15 @@ namespace ropufu::settlers_online
 
         // Reconstruct the object.
         if (values.size() != counts.size()) throw std::runtime_error("Observations size mismatch.");
+        std::error_code ec {};
+        observations = type::empirical_measure_type(values, counts, ec);
+        if (ec) throw std::runtime_error("Empirical measure reconstruction error.");
+
         x.set_is_header(is_header);
         x.set_text(caption, details, clipboard_text);
         x.set_unit_name(unit_name);
         if (has_lower_bound) x.set_lower_bound(lower_bound);
         if (has_upper_bound) x.set_upper_bound(upper_bound);
-        observations = report_entry::empirical_measure(values, counts);
         x.set_observations(observations);
     } // from_json(...)
 } // namespace ropufu::settlers_online

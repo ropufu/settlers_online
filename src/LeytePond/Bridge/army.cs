@@ -57,7 +57,7 @@ namespace Ropufu.LeytePond.Bridge
     {
         private static readonly String EmptyArmyString = "empty";
         private static readonly Func<UnitType, String> DefaultFormat = u => " " + u.FirstName;
-        private static readonly Func<UnitType, String> CompactFormat = u => UnitDatabase.BuildKey(u);
+        private static readonly Func<UnitType, String> CompactFormat = u => u.Codenames.Count == 0 ? (" " + u.FirstName) : u.Codenames.First();
 
         private Boolean doHoldNotifications = false;
         private UnitGroups groups = new UnitGroups();
@@ -120,11 +120,17 @@ namespace Ropufu.LeytePond.Bridge
             other.NotifyReset();
         }
 
+        public void Invalidate() => this.NotifyReset();
+
         private void OnUnitCountChanged(Object sender, EventArgs e)
         {
             if (this.doHoldNotifications) return;
             var handler = this.PropertyChanged;
             if (Object.ReferenceEquals(handler, null)) return;
+
+            handler(this, new PropertyChangedEventArgs(nameof(this.FrenzyBonus)));
+            handler(this, new PropertyChangedEventArgs(nameof(this.Skills)));
+            handler(this, new PropertyChangedEventArgs(nameof(this.Traits)));
 
             handler(this, new PropertyChangedEventArgs(nameof(this.Types)));
             handler(this, new PropertyChangedEventArgs(nameof(this.CountsByType)));

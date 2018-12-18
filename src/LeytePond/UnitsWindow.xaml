@@ -19,7 +19,7 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
         <!--Visual representation-->
-        <ListView x:Name="itemView" KeyboardNavigation.TabNavigation="Cycle" VirtualizingStackPanel.IsVirtualizing="True" ItemsSource='{local:UnitDatabaseBinding Units}' Margin="0,0,0,5">
+        <ListView x:Name="itemView" KeyboardNavigation.TabNavigation="Cycle" VirtualizingStackPanel.IsVirtualizing="True" ItemsSource='{local:UnitDatabaseBinding All}' Margin="0,0,0,5">
             <ListView.Resources>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Setter Property="IsTabStop" Value="False" />

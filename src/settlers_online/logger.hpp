@@ -21,7 +21,7 @@ namespace ropufu
                 static constexpr bool is_enabled = true;
 
             private:
-                std::deque<std::string> m_entries = { };
+                std::deque<std::string> m_entries = {};
                 std::ostringstream m_message_stream = std::ostringstream();
 
             public:

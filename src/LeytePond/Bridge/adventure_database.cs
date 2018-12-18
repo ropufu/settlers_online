@@ -6,26 +6,12 @@ using System.Text;
 
 namespace Ropufu.LeytePond.Bridge
 {
-    using CharTree = PrefixTree<Char, String>;
-    
     /** Mirrors structural behavior of \c unit_database.hpp. */
-    public class AdventureDatabase : PrefixDatabase<Adventure>
+    public class AdventureDatabase : NameDatabase<Adventure, String>
     {
-        private static readonly AdventureDatabase instance = new AdventureDatabase();
+        protected override String OnBuildKey(Adventure unit) => unit.Name;
 
-        public static AdventureDatabase Instance => AdventureDatabase.instance;
-
-        public static String BuildKey(Adventure unit) => unit.Name;
-
-        public static String BuildPrimaryName(Adventure unit) => unit.Name.RelaxCase();
-
-        public static IEnumerable<String> Names(Adventure unit) => unit.Keys;
-
-        protected override String OverrideBuildKey(Adventure unit) => AdventureDatabase.BuildKey(unit);
-
-        protected override String OverrideBuildPrimaryName(Adventure unit) => AdventureDatabase.BuildPrimaryName(unit);
-
-        protected override IEnumerable<String> OverrideNames(Adventure unit) => AdventureDatabase.Names(unit);
+        protected override HashSet<String> OnBuildNames(Adventure unit) => new HashSet<String>(unit.Keys);
 
         private HashSet<String> keys = new HashSet<String>();
 
@@ -39,9 +25,7 @@ namespace Ropufu.LeytePond.Bridge
             this.keys.Clear();
         }
 
-        public IEnumerable<Adventure> Adventures => from pair in this.Database select pair.Value;
-
-        protected override void OnLoading(ref Adventure unit, out Boolean doCancel)
+        protected override void OnLoading(Adventure unit, ref Boolean doCancel)
         {
             doCancel = false;
             unit.Trim();
@@ -57,7 +41,7 @@ namespace Ropufu.LeytePond.Bridge
             }
         }
 
-        protected override void OnLoaded(ref Adventure unit)
+        protected override void OnLoaded(Adventure unit)
         {
             foreach (var key in unit.Keys) this.keys.Add(key);
         }

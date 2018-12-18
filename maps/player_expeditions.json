@@ -2,75 +2,125 @@
     "units": [
         {
             "id": 4001,
-            "names": [ "Attack Infantry", "AI" ],
+            "names": [ "Attack Infantry" ],
+            "codenames": [ "AI" ],
             "faction": "expedition",
             "category": "melee",
             "phases": [ "normal" ],
             "hit points": 180,
-            "damage": { "low": 30, "high": 30, "accuracy": 1 },
+            "damage": {
+                "low": 30,
+                "high": 30,
+                "accuracy": 1
+            },
             "stack size": 20,
-            "rivals": [ { "category": "cavalry", "bonus": 0.35 } ]
+            "rivals": [
+                {
+                    "category": "cavalry",
+                    "bonus": 0.35
+                }
+            ]
         },
         {
             "id": 4002,
-            "names": [ "Attack Archer", "AA" ],
+            "names": [ "Attack Archer" ],
+            "codenames": [ "AA" ],
             "faction": "expedition",
             "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 180,
-            "damage": { "low": 30, "high": 30, "accuracy": 1 },
+            "damage": {
+                "low": 30,
+                "high": 30,
+                "accuracy": 1
+            },
             "stack size": 20,
-            "rivals": [ { "category": "melee", "bonus": 0.35 } ]
+            "rivals": [
+                {
+                    "category": "melee",
+                    "bonus": 0.35
+                }
+            ]
         },
         {
             "id": 4003,
-            "names": [ "Attack Cavalry", "AC" ],
+            "names": [ "Attack Cavalry" ],
+            "codenames": [ "AC" ],
             "faction": "expedition",
             "category": "cavalry",
             "phases": [ "normal" ],
             "hit points": 180,
-            "damage": { "low": 30, "high": 30, "accuracy": 1 },
+            "damage": {
+                "low": 30,
+                "high": 30,
+                "accuracy": 1
+            },
             "stack size": 20,
-            "rivals": [ { "category": "ranged", "bonus": 0.35 } ]
+            "rivals": [
+                {
+                    "category": "ranged",
+                    "bonus": 0.35
+                }
+            ]
         },
         {
             "id": 4004,
-            "names": [ "Heavy Infantry", "HI" ],
+            "names": [ "Heavy Infantry" ],
+            "codenames": [ "HI" ],
             "faction": "expedition",
             "category": "melee",
             "phases": [ "normal" ],
             "hit points": 400,
-            "damage": { "low": 5, "high": 5, "accuracy": 1 },
+            "damage": {
+                "low": 5,
+                "high": 5,
+                "accuracy": 1
+            },
             "stack size": 10
         },
         {
             "id": 4005,
-            "names": [ "Heavy Archer", "HA" ],
+            "names": [ "Heavy Archer" ],
+            "codenames": [ "HA" ],
             "faction": "expedition",
             "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 400,
-            "damage": { "low": 5, "high": 5, "accuracy": 1 },
+            "damage": {
+                "low": 5,
+                "high": 5,
+                "accuracy": 1
+            },
             "stack size": 10
         },
         {
             "id": 4006,
-            "names": [ "Heavy Cavalry", "HC" ],
+            "names": [ "Heavy Cavalry" ],
+            "codenames": [ "HC" ],
             "faction": "expedition",
             "category": "cavalry",
             "phases": [ "normal" ],
             "hit points": 400,
-            "damage": { "low": 5, "high": 5, "accuracy": 1 },
+            "damage": {
+                "low": 5,
+                "high": 5,
+                "accuracy": 1
+            },
             "stack size": 10
         },
         {
             "id": 4008,
-            "names": [ "Guardsman", "Gr" ],
+            "names": [ "Guardsman" ],
+            "codenames": [ "Gr" ],
             "faction": "expedition",
             "category": "elite",
             "phases": [ "normal" ],
             "hit points": 400,
-            "damage": { "low": 10, "high": 10, "accuracy": 1 },
+            "damage": {
+                "low": 10,
+                "high": 10,
+                "accuracy": 1
+            },
             "stack size": 10
         }
     ]

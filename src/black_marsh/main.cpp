@@ -1,11 +1,12 @@
 
 #include "config.hpp"
 #include "turtle.hpp"
-#include "../settlers_online/army.hpp"
+#include "../settlers_online/combat/army.hpp"
+#include "../settlers_online/combat/unit_type.hpp"
+#include "../settlers_online/text/report_entry.hpp"
+#include "../settlers_online/text/unit_database.hpp"
 #include "../settlers_online/char_string.hpp"
 #include "../settlers_online/enums.hpp"
-#include "../settlers_online/report_entry.hpp"
-#include "../settlers_online/unit_type.hpp"
 
 #include <chrono> // std::chrono::steady_clock, std::chrono::duration_cast
 #include <cstddef> // std::size_t
@@ -13,8 +14,9 @@
 #include <exception> // std::exception
 #include <iostream> // std::cout, std::endl, std::cin
 #include <string> // std::string, std::to_string, std::getline, std::stol, std::stod
+#include <system_error> // std::error_code, std::errc
 
-// ~~ Singleton types ~~
+// ~~ Type shortcuts ~~
 using unit_faction = ropufu::settlers_online::unit_faction;
 using unit_database = ropufu::settlers_online::unit_database;
 using char_string = ropufu::settlers_online::char_string;
@@ -216,11 +218,11 @@ will automatically execute "log" for /l, or "run" for 'r', and then quit.
     }
 } // help(...)
 
-void display_units(const std::string& faction_name) noexcept
+void display_units(const ropufu::settlers_online::black_marsh::turtle& t, const std::string& faction_name) noexcept
 {
     unit_faction faction = unit_faction::general;
     bool do_take_all = !ropufu::aftermath::detail::try_parse_enum(faction_name, faction);
-    for (const auto& pair : unit_database::instance().data())
+    for (const auto& pair : t.database().data())
     {
         const ropufu::settlers_online::unit_type& u = pair.second;
         if (do_take_all || u.faction() == faction)
@@ -253,14 +255,9 @@ std::string read_line() noexcept
 
 std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
 {
-    if (!ropufu::settlers_online::black_marsh::turtle::is_config_valid())
-    {
-        std::cout << "Failed to read config file." << std::endl;
-        return 1;
-    }
+    ropufu::settlers_online::black_marsh::turtle lucy {}; // Default config file.
+    ropufu::settlers_online::black_marsh::config& config = lucy.config();
 
-    ropufu::settlers_online::black_marsh::config& config = ropufu::settlers_online::black_marsh::config::instance();
-    ropufu::settlers_online::black_marsh::turtle lucy { };
     if (argc > 2)
     {
         std::string left_army_string = std::string(argv[1]);
@@ -275,7 +272,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
             if (sw == "-l") { lucy.log(); return 0; }
             if (sw == "-r") { lucy.run(); return 0; }
         }
-    }
+    } // if (...)
 
     welcome();
     while (true)
@@ -296,7 +293,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
                 help(argument);
                 break;
             case command_name::units:
-                display_units(argument);
+                display_units(lucy, argument);
                 break;
             case command_name::left:
                 if (!argument.empty()) lucy.parse_left(argument);
@@ -319,8 +316,9 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
             case command_name::left_camp_reduction:
                 if (!argument.empty())
                 {
+                    std::error_code ec {};
                     auto camp = config.left().camp();
-                    camp.set_damage_reduction(std::stod(argument));
+                    camp.set_damage_reduction(std::stod(argument), ec);
                     config.left().set_camp(camp);
                 }
                 std::cout << "Left camp damage recution: " << config.left().camp().damage_reduction() << std::endl;
@@ -328,8 +326,9 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
             case command_name::right_camp_reduction:
                 if (!argument.empty())
                 {
+                    std::error_code ec {};
                     auto camp = config.right().camp();
-                    camp.set_damage_reduction(std::stod(argument));
+                    camp.set_damage_reduction(std::stod(argument), ec);
                     config.right().set_camp(camp);
                 }
                 std::cout << "Right camp damage recution: " << config.right().camp().damage_reduction() << std::endl;

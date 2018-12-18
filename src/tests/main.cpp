@@ -48,6 +48,7 @@ std::int32_t main()
         //run_test(army_test::test_properties, "<army> properties");
         // ~~ Combat tests ~~
         run_test(combat_mechanics_test::test_deterministic, "<combat_mechanics> deterministic");
+        run_test(combat_mechanics_test::test_randomized, "<combat_mechanics> randomized");
     } // try
     catch (const std::exception& ex)
     {

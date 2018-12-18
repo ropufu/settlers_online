@@ -3,238 +3,294 @@
 #define ROPUFU_SETTLERS_ONLINE_PREFIX_TREE_HPP_INCLUDED
 
 #include <cstddef> // std::size_t
+#include <cstdlib> // std::exit
 #include <initializer_list> // std::initializer_list
+#include <map> // std::map
+#include <optional> // std::optional, std::nullopt
+#include <set> // std::set
 #include <string> // std::string
 #include <vector> // std::vector
 
-namespace ropufu
+namespace ropufu::settlers_online
 {
-    namespace settlers_online
+
+    /** @brief A structure to hold a collection of strings, with fast prefix search. */
+    template <typename t_letter_type, typename t_word_type, typename t_key_type>
+    struct prefix_tree;
+
+    /** @brief Node of a prefix tree.
+        *  Each node has three(!) properties attached to it: "key", "link" and "terminus".
+        *  "Key" is unique within the entire tree. "Link" is unique only between siblings.
+        *  In other words, "link" indicates which branch to take. For example, in the tree
+        *               a
+        *              / \
+        *             b   c
+        *                / \
+        *               d   f
+        *  the strings "a", "b", "c", "d", "f" represent "links" of corresponding nodes.
+        *  Terminus can be missing; its presence indicates that the node terminates the
+        *  underlying sequence of "links". All leaf nodes must be terminal. A "terminus"
+        *  is the concatenation of all "links" in the ancestor nodes, starting with the
+        *  root node, and including the node in question.
+        *  The right-most terminus in the example above is the string "acefg".
+        */
+    template <typename t_letter_type, typename t_word_type, typename t_key_type>
+    struct prefix_tree_node
     {
-        namespace detail
+        using type = prefix_tree_node<t_letter_type, t_word_type, t_key_type>;
+        using letter_type = t_letter_type;
+        using word_type = t_word_type;
+        using key_type = t_key_type;
+
+        friend struct prefix_tree<t_letter_type, t_word_type, t_key_type>;
+
+    private:
+        using index_type = std::size_t;
+        using collection_type = std::vector<type>;
+
+        // ~~ Essential fields. ~~
+        letter_type m_letter = {}; // Letter associated with the stop, unique only between siblings.
+        std::optional<key_type> m_key = std::nullopt; // Key to the associated element in the tree-inducing collection (if any).
+        std::map<letter_type, index_type> m_children_indices = {}; // Indices of child nodes in \c prefix_tree node collection.
+        // ~~ Fields to speed up search and stuff. ~~
+        index_type m_self_index = 0; // Index of this node in \c prefix_tree node collection.
+        index_type m_parent_index = 0; // Index of the parent node in \c prefix_tree node collection.
+        std::set<key_type> m_synonym_keys = {}; // Keys to synonym elements (self excluded) in the tree-inducing collection.
+
+        prefix_tree_node() noexcept { }
+
+        explicit prefix_tree_node(const letter_type& letter) noexcept
+            : m_letter(letter)
         {
-            /** @brief Node of a prefix tree.
-             *  Each node has two(!) properties attached to it: "value" and "terminus".
-             *  Value represents one element in the underlying sequences.
-             *  Terminus can be missing; its presence indicates that the node terminates the underlying
-             *  sequence of values. It is worth pointing out that a "terminus" is the concatenation of
-             *  all values in the ancestor nodes and the node in question.
-             */
-            template <typename t_value_type, typename t_terminus_type>
-            struct node_indexer
-            {
-                using type = node_indexer<t_value_type, t_terminus_type>;
-                using value_type = t_value_type;
-                using terminus_type = t_terminus_type;
 
-            private:
-                value_type m_value = { }; // Value associated with the node.
-                std::vector<std::size_t> m_children_indices = { }; // Indeces of the child nodes in the tree collection.
-                bool m_is_terminal = false; // Indicates if this node has a terminus.
-                // ~~ Cache fields to speed up search and stuff. ~~
-                terminus_type m_terminus = { }; // Value of the terminus (default otherwise).
-                std::size_t m_self_index = 0; // Global index of this node.
-                std::size_t m_parent_index = 0; // Global index of the parent node.
-                std::vector<std::size_t> m_termini_indices = { }; // Global indices of the descendant (self included) terminal nodes.
-                std::size_t m_depth = 0; // Number of ancestors (self excluded).
+        } // prefix_tree_node(...)
 
-            public:
-                node_indexer() noexcept { }
-
-                /** Adds a child with specified value and parent to the vertex collection \p vertices. */
-                static std::size_t emplace_child(const value_type& value, std::size_t parent_index, std::vector<type>& vertices) noexcept
-                {
-                    type child { };
-                    std::size_t child_index = vertices.size();
-
-                    child.m_value = value;
-                    child.m_self_index = child_index;
-                    child.m_parent_index = vertices[parent_index].m_self_index;
-                    child.m_depth = vertices[parent_index].m_depth + 1;
-
-                    vertices.push_back(child); // Store the new vertex in the tree repository.
-                    vertices[parent_index].m_children_indices.push_back(child_index); // Add the child to the current vertex.
-
-                    return child_index;
-                }
-
-                /** Marks an element at the specified index in the vertex collection \p vertices as terminal. */
-                static void mark_as_terminal(std::vector<type>& vertices, std::size_t index, const terminus_type& path) noexcept
-                {
-                    vertices[index].m_terminus = path; // Update terminus.
-                    if (vertices[index].m_is_terminal) return; // No need to do anything else if the vertex has already been marked.
-
-                    // Mark the node as terminal.
-                    vertices[index].m_is_terminal = true;
-                    vertices[index].m_termini_indices.push_back(index);
-                    // Record the terminal node in the ancestors.
-                    std::size_t ancestor_index = index;
-                    while (ancestor_index != 0)
-                    {
-                        ancestor_index = vertices[ancestor_index].m_parent_index;
-                        vertices[ancestor_index].m_termini_indices.push_back(index);
-                    }
-                }
-
-                /** Value associated with the node. */
-                const value_type& value() const noexcept { return this->m_value; }
-
-                /** Number of ancestors (self excluded). */
-                std::size_t depth() const noexcept { return this->m_depth; }
-                
-                /** Global index of this node. */
-                std::size_t self_index() const noexcept { return this->m_self_index; }
-
-                /** Global index of the parent node. */
-                std::size_t parent_index() const noexcept { return this->m_parent_index; }
-
-                /** Global indices of child nodes. */
-                const std::vector<std::size_t> children_indices() const noexcept { return this->m_children_indices; }
-                ///** Global indices of child nodes. */
-                //std::vector<std::size_t> children_indices() noexcept { return this->m_children_indices; }
-
-                /** Global indices of termini at this node or its descendants. */
-                const std::vector<std::size_t> termini_indices() const noexcept { return this->m_termini_indices; }
-                ///** Global indices of termini at this node or its descendants. */
-                //std::vector<std::size_t> termini_indices() noexcept { return this->m_termini_indices; }
-
-                /** Global index of the child with specified value, or zero if none such exist. */
-                std::size_t get_child_index(const value_type& value, const std::vector<type>& vertices) const noexcept;
-
-                /** List of termini at this node or its descendants. */
-                std::vector<terminus_type> build_termini(const std::vector<type>& vertices) const noexcept;
-
-                /** The first terminus at this node or its descendants. */
-                terminus_type first_terminus(const std::vector<type>& vertices) const noexcept { return vertices[this->m_termini_indices.front()].m_terminus; }
-            }; // struct node_indexer
-
-            template <typename t_value_type, typename t_terminus_type>
-            std::size_t node_indexer<t_value_type, t_terminus_type>::get_child_index(const value_type& value, const std::vector<node_indexer<t_value_type, t_terminus_type>>& vertices) const noexcept
-            {
-                using type = node_indexer<t_value_type, t_terminus_type>;
-
-                for (std::size_t child_index : this->m_children_indices)
-                {
-                    const type& maybe = vertices[child_index];
-                    if (maybe.m_value == value) return child_index;
-                }
-                return 0;
-            } // node_indexer::get_child_index(...)
-
-            template <typename t_value_type, typename t_terminus_type>
-            std::vector<t_terminus_type> node_indexer<t_value_type, t_terminus_type>::build_termini(const std::vector<node_indexer<t_value_type, t_terminus_type>>& vertices) const noexcept
-            {
-                using terminus_type = t_terminus_type;
-
-                std::vector<terminus_type> result { };
-                result.reserve(this->m_termini_indices.size());
-                for (std::size_t terminus_index : this->m_termini_indices) result.push_back(vertices[terminus_index].m_terminus);
-                return result;
-            } // node_indexer::build_termini(...)
-        } // namespace detail
-
-        /** @brief A structure to hold a collection of strings, with fast prefix search. */
-        template <typename t_value_type, typename t_terminus_type>
-        struct prefix_tree
+        /** Adds a non-station child with specified link value and parent to the vertex collection \p global_vertex_collection. */
+        bool try_emplace_child(const letter_type& letter, collection_type& node_collection, index_type& child_index) noexcept
         {
-            using type = prefix_tree<t_value_type, t_terminus_type>;
-            using node_type = detail::node_indexer<t_value_type, t_terminus_type>;
-            using value_type = t_value_type;
-            using terminus_type = t_terminus_type;
+            // Check if there is already a child with the same \c letter.
+            auto search = this->m_children_indices.find(letter);
+            if (search != this->m_children_indices.end()) return false;
 
-        private:
-            std::vector<node_type> m_vertices = std::vector<node_type>(1);
+            // Create a new child if not.
+            type next_stop{ letter };
+            child_index = static_cast<index_type>(node_collection.size());
 
-            std::size_t match_node_index(const terminus_type& query) const noexcept
+            next_stop.m_self_index = child_index;
+            next_stop.m_parent_index = this->m_self_index;
+
+            this->m_children_indices.emplace(letter, child_index); // Add the child to the current vertex.
+
+            // Warning: invalidates this pointer.
+            node_collection.push_back(next_stop); // Store the new vertex in the railway repository.
+            return true;
+        } // try_emplace_child(...)
+
+        /** @brief Records \p key as a synonym to all ancsetor nodes, current node excluded. */
+        void propagate_synonym(const key_type& key, collection_type& node_collection) noexcept
+        {
+            // Record the station index in all ancestor records.
+            index_type parent_index = this->m_parent_index;
+            while (parent_index != 0)
             {
-                std::size_t current_index = 0;
-                for (const value_type& x : query)
+                type& ancestor = node_collection[parent_index];
+                ancestor.m_synonym_keys.insert(key);
+                parent_index = ancestor.m_parent_index;
+            } // while (...)
+        } // propagate_synonym(...)
+
+        /** @brief Records \p key as an explicit synonym the current node and all its ancsetors. */
+        void mark_as_synonym_to(const key_type& key, collection_type& node_collection) noexcept
+        {
+            if (this->m_key.has_value() && this->m_key.value() == key) return; // No self-synonyms allowed.
+            this->m_synonym_keys.insert(key);
+            this->propagate_synonym(key, node_collection);
+        } // mark_as_synonym_to(...)
+
+        /** @brief Marks an element at the specified index in the vertex collection \p global_vertex_collection as terminal.
+         *  @warning Does not perform checks on whether \p path is actually the concatenation of links.
+         */
+        bool try_mark_as_word(const key_type& key, collection_type& node_collection) noexcept
+        {
+            bool was_word = this->m_key.has_value();
+            if (was_word) return false;
+
+            this->m_key = key;
+            this->propagate_synonym(key, node_collection);
+            return true;
+        } // try_mark_as_word(...)
+
+        /** Index of the child with specified link value  in \c prefix_tree node collection, or zero if none such exist. */
+        index_type operator [](const letter_type& letter) const noexcept
+        {
+            auto search = this->m_children_indices.find(letter);
+            return (search != this->m_children_indices.end()) ? (search->second) : 0;
+        } // operator [](...)
+
+    public:
+        /** Letter associated with the node. */
+        const letter_type& letter() const noexcept { return this->m_letter; }
+
+        /** Key to the associated element in the tree-inducing collection (if any). */
+        const std::optional<key_type>& key() const noexcept { return this->m_key; }
+
+        bool is_word() const noexcept { return this->m_key.has_value(); }
+
+        /** Keys to synonym elements (self excluded) in the tree-inducing collection. */
+        const std::set<key_type> synonym_keys() const noexcept { return this->m_synonym_keys; }
+    }; // struct prefix_tree_node
+
+    /** @brief A structure to hold a collection of strings, with fast prefix search. */
+    template <typename t_letter_type, typename t_word_type, typename t_key_type>
+    struct prefix_tree
+    {
+        using type = prefix_tree<t_letter_type, t_word_type, t_key_type>;
+        using node_type = prefix_tree_node<t_letter_type, t_word_type, t_key_type>;
+        using letter_type = t_letter_type;
+        using word_type = t_word_type;
+        using key_type = t_key_type;
+
+    private:
+        using index_type = std::size_t;
+        using collection_type = std::vector<node_type>;
+
+        collection_type m_nodes = {}; // Collection of railway stops.
+
+        /** @brief Develops a search query against the railway map. */
+        index_type develop(const word_type& query) const noexcept
+        {
+            // Start at the root node, and "develop" the path.
+            index_type current_index = 0;
+            for (const letter_type& x : query)
+            {
+                const node_type& current_vertex = this->m_nodes[current_index];
+                current_index = current_vertex[x];
+                if (current_index == 0) return 0;
+            } // for (...)
+            return current_index;
+        } // develop(...)
+
+        /** @brief Develops a search query against the railway map, creating new branches as necessary. */
+        index_type active_develop(const word_type& query) noexcept
+        {
+            // Start at the root node, and "develop" the path.
+            index_type current_index = 0;
+            for (const letter_type& x : query)
+            {
+                node_type& current_vertex = this->m_nodes[current_index];
+                current_index = current_vertex[x];
+                // If the symbol has not been matched to children, create a new branch.
+                if (current_index == 0)
                 {
-                    const node_type& current_vertex = this->m_vertices[current_index];
-                    current_index = current_vertex.get_child_index(x, this->m_vertices);
-                    if (current_index == 0) return 0;
-                }
-                return current_index;
-            } // match_node(...)
+                    if (!current_vertex.try_emplace_child(x, this->m_nodes, current_index)) std::exit(8); // This should never happen.
+                } // if (...)
+            } // for (...)
+            return current_index;
+        } // active_develop(...)
 
-        public:
-            prefix_tree() noexcept { }
+    public:
+        prefix_tree() noexcept
+        {
+            this->clear();
+        } // prefix_tree(...)
 
-            void clear() noexcept
-            {
-                this->m_vertices.clear(); // Clear the vertex collection.
-                this->m_vertices.emplace_back(); // Add root element.
-            } // clear(...)
+        void clear() noexcept
+        {
+            node_type root{};
+            this->m_nodes.clear(); // Clear the vertex collection.
+            this->m_nodes.push_back(root); // Add root element.
+        } // clear(...)
 
-            void add(std::initializer_list<terminus_type> collection) noexcept
-            {
-                for (const t_terminus_type& item : collection) this->add(item);
-            } // add(...)
+        void add_synonym(const key_type& key, const word_type& synonym) noexcept
+        {
+            index_type current_index = this->active_develop(synonym); // Develop the path.
+            if (current_index == 0) return; // Empty paths not allowed.
+            // The end of the path has been reached: we are at the end of the word.
+            // Mark the node as an explicit synonym.
+            this->m_nodes[current_index].mark_as_synonym_to(key, this->m_nodes);
+        } // add_synonym(...)
 
-            void add(const std::vector<terminus_type>& collection) noexcept
-            {
-                for (const t_terminus_type& item : collection) this->add(item);
-            } // add(...)
+        bool try_add_single(const key_type& key, const word_type& path) noexcept
+        {
+            index_type current_index = this->active_develop(path); // Develop the path.
+            if (current_index == 0) return false; // Empty paths not allowed.
+            // The end of the path has been reached: we are at the end of the word.
+            // Mark the node as word-containing.
+            if (!this->m_nodes[current_index].try_mark_as_word(key, this->m_nodes)) return false; // Duplicate words not allowed.
+            return true;
+        } // try_add_single(...)
 
-            void add(const terminus_type& path) noexcept
-            {
-                // Start at the root node, and "develop" the path.
-                std::size_t current_index = 0; // Current position.
-                for (const value_type& x : path)
-                {
-                    bool is_new_branch = true; // Indicates whether the path has reached the forking point.
-                    std::size_t next_index = 0; // Index of the next matched node.
-                    for (std::size_t child_index : this->m_vertices[current_index].children_indices())
-                    {
-                        // Try to match the current symbol in the path to the child.
-                        if (this->m_vertices[child_index].value() == x)
-                        {
-                            next_index = child_index;
-                            is_new_branch = false; // If matched, no need to create new branch.
-                            break;
-                        }
-                    }
-                    // If the symbol has not been matched to children, create a new branch.
-                    if (is_new_branch) next_index = node_type::emplace_child(x, current_index, this->m_vertices);
+        template <typename t_word_collection_type>
+        bool try_add_many(const key_type& key, const t_word_collection_type& paths) noexcept
+        {
+            bool has_succeeded = true;
+            for (const word_type& path : paths) has_succeeded &= this->try_add_single(key, path);
+            return has_succeeded;
+        } // try_add_many(...)
 
-                    // Update the position.
-                    current_index = next_index;
-                }
+        /** List all keys for elements in the tree-inducing collection starting with a given prefix. */
+        std::optional<node_type> search(const word_type& query) const noexcept
+        {
+            index_type matched_index = this->develop(query);
+            if (matched_index == 0) return std::nullopt;
+            const node_type& matched = this->m_nodes[matched_index];
+            return matched;
+        } // search(...)
 
-                // The end of the path has been reached: we are at the terminal node.
-                // Mark the node as terminal.
-                node_type::mark_as_terminal(this->m_vertices, current_index, path);
-            } // add(...)
+        /** List all keys for elements in the tree-inducing collection starting with a given prefix. */
+        std::optional<node_type> operator [](const word_type& query) const noexcept { return this->search(query); }
 
-            /** First terminus starting with a given prefix. */
-            terminus_type first(const terminus_type& query, bool& is_single) const noexcept
-            {
-                is_single = false;
-                std::size_t matched_index = this->match_node_index(query);
-                if (matched_index == 0) return { };
-                is_single = (this->m_vertices[matched_index].termini_indices().size() == 1);
-                return this->m_vertices[matched_index].first_terminus(this->m_vertices);
-            } // operator [](...)
+        /** Checks if there are elements in the tree-inducing collection that match a given prefix exactly. */
+        bool contains(const word_type& word) const noexcept
+        {
+            index_type matched_index = this->develop(word);
+            if (matched_index == 0) return false;
+            const node_type& matched = this->m_nodes[matched_index];
+            return matched.is_word();
+        } // match(...)
 
-            /** List all termini starting with a given prefix. */
-            std::vector<terminus_type> operator [](const terminus_type& query) const noexcept
-            {
-                std::size_t matched_index = this->match_node_index(query);
-                if (matched_index == 0) return { };
-                return this->m_vertices[matched_index].build_termini(this->m_vertices);
-            } // operator [](...)
+        /** Checks if there are elements in the tree-inducing collection that match any of the given prefixes exactly. */
+        template <typename t_word_collection_type>
+        bool contains_any(const t_word_collection_type& words) const noexcept
+        {
+            for (const word_type& word : words) if (this->contains(word)) return true;
+            return false;
+        } // match_any(...)
 
-            /** Count termini starting with a given prefix. */
-            std::size_t count(const terminus_type& query) const noexcept
-            {
-                std::size_t matched_index = this->match_node_index(query);
-                if (matched_index == 0) return 0;
-                return this->m_vertices[matched_index].termini_indices().size();
-            } // count(...)
-        }; // struct prefix_tree
+        /** Checks if there are elements in the tree-inducing collection that match all of the given prefixes exactly. */
+        template <typename t_word_collection_type>
+        bool contains_all(const t_word_collection_type& words) const noexcept
+        {
+            for (const word_type& word : words) if (!this->contains(word)) return false;
+            return true;
+        } // match_all(...)
 
-        using char_tree = prefix_tree<char, std::string>;
-    } // namespace settlers_online
-} // namespace ropufu
+        /** Checks if there are elements in the tree-inducing collection starting with a given prefix. */
+        bool match(const word_type& query) const noexcept
+        {
+            index_type matched_index = this->develop(query);
+            return (matched_index != 0);
+        } // match(...)
+
+        /** Checks if there are elements in the tree-inducing collection starting with any of the given prefixes. */
+        template <typename t_word_collection_type>
+        bool match_any(const t_word_collection_type& queries) const noexcept
+        {
+            for (const word_type& query : queries) if (this->match(query)) return true;
+            return false;
+        } // match_any(...)
+
+        /** Checks if there are elements in the tree-inducing collection starting with all of the given prefixes. */
+        template <typename t_word_collection_type>
+        bool match_all(const t_word_collection_type& queries) const noexcept
+        {
+            for (const word_type& query : queries) if (!this->match(query)) return false;
+            return true;
+        } // match_all(...)
+    }; // struct prefix_tree
+
+    template <typename t_key_type>
+    using char_tree_t = prefix_tree<char, std::string, t_key_type>;
+} // namespace ropufu::settlers_online
 
 #endif // ROPUFU_SETTLERS_ONLINE_PREFIX_TREE_HPP_INCLUDED

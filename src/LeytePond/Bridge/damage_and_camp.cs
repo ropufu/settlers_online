@@ -66,12 +66,12 @@ namespace Ropufu.LeytePond.Bridge
     [JsonObject(MemberSerialization.OptIn)]
     public class Camp : IEquatable<Camp>
     {
+        [JsonProperty("names")]
+        private List<String> names = new List<String>();
         [JsonProperty("hit points")]
         private Int32 hitPoints = 0;
         [JsonProperty("damage reduction")]
         private Double damageReduction = 0;
-        [JsonProperty("names")]
-        private List<String> names = new List<String>();
 
         private void Validate<T>(T dummy)
         {
@@ -83,9 +83,9 @@ namespace Ropufu.LeytePond.Bridge
 
         public Camp(Int32 hitPoints, Double damageReduction)
         {
+            this.names = new List<String>();
             this.hitPoints = hitPoints;
             this.damageReduction = damageReduction;
-            this.names = new List<String>();
 
             this.Validate(true);
         }

@@ -9,7 +9,7 @@ PATHINC = -I./../../../aftermath/src -I./../../../opensource -I./..
 
 PATHLIB =
 
-LDFLAGS = -lstdc++fs
+LDFLAGS =
 
 .VPATH: .
 

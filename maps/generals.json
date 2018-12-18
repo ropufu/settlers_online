@@ -2,105 +2,174 @@
     "units": [
         {
             "id": 9001,
-            "names": [ "Tavern General", "((t))" ],
+            "names": [ "Tavern General" ],
+            "codenames": [ "((t))" ],
             "faction": "general",
             "category": "unknown",
             "phases": [ "normal" ],
             "capacity": 200,
             "hit points": 1,
-            "damage": { "low": 120, "high": 120, "accuracy": 1 },
+            "damage": {
+                "low": 120,
+                "high": 120,
+                "accuracy": 1
+            },
             "special abilities": [ "not weak" ]
         },
         {
             "id": 9002,
-            "names": [ "General", "((g))", "((log))", "((vet))" ],
+            "names": [ "General" ],
+            "codenames": [ "((g))", "((log))", "((vet))" ],
             "faction": "general",
             "category": "unknown",
             "phases": [ "normal" ],
             "capacity": 200,
             "hit points": 1,
-            "damage": { "low": 120, "high": 120, "accuracy": 1 },
+            "damage": {
+                "low": 120,
+                "high": 120,
+                "accuracy": 1
+            },
             "special abilities": [ "not weak" ]
         },
         {
             "id": 9003,
-            "names": [ "Major General", "((m))" ],
+            "names": [ "Major General" ],
+            "codenames": [ "((m))" ],
             "faction": "general",
             "category": "unknown",
             "phases": [ "normal" ],
             "capacity": 270,
             "hit points": 1,
-            "damage": { "low": 120, "high": 120, "accuracy": 1 },
+            "damage": {
+                "low": 120,
+                "high": 120,
+                "accuracy": 1
+            },
             "special abilities": [ "not weak" ]
         },
         {
             "id": 9004,
-            "names": [ "Master of Martial Arts", "((cxv))", "((mma))" ],
+            "names": [ "Master of Martial Arts" ],
+            "codenames": [ "((cxv))", "((mma))" ],
             "faction": "general",
             "category": "unknown",
             "phases": [ "first strike" ],
             "capacity": 220,
             "hit points": 1,
-            "damage": { "low": 450, "high": 500, "accuracy": 0.8, "splash chance": 1 },
+            "damage": {
+                "low": 450,
+                "high": 500,
+                "accuracy": 0.8,
+                "splash chance": 1
+            },
             "special abilities": [ "not weak", "attack weakest target" ]
         },
         {
             "id": 9005,
-            "names": [ "Master of Defense", "((w))", "((wh))", "((md))" ],
+            "names": [ "Master of Defense" ],
+            "codenames": [ "((w))", "((wh))", "((md))" ],
             "faction": "general",
             "category": "unknown",
             "phases": [ "normal" ],
             "capacity": 200,
             "hit points": 5000,
-            "damage": { "low": 25, "high": 50, "accuracy": 0.8, "splash chance": 1 },
+            "damage": {
+                "low": 25,
+                "high": 50,
+                "accuracy": 0.8,
+                "splash chance": 1
+            },
             "special abilities": [ "not weak", "attack weakest target" ]
         },
         {
             "id": 9007,
-            "names": [ "Lord Dracul", "((d))" ],
+            "names": [ "Lord Dracul" ],
+            "codenames": [ "((d))" ],
             "faction": "general",
             "category": "unknown",
             "phases": [ "first strike" ],
             "capacity": 200,
             "hit points": 999,
-            "damage": { "low": 111, "high": 333, "accuracy": 0.77, "splash chance": 1 },
+            "damage": {
+                "low": 111,
+                "high": 333,
+                "accuracy": 0.77,
+                "splash chance": 1
+            },
             "special abilities": [ "not weak" ]
         },
         {
             "id": 9010,
-            "names": [ "Vargus", "((v))" ],
+            "names": [ "Vargus" ],
+            "codenames": [ "((v))" ],
             "faction": "general",
             "category": "unknown",
             "phases": [ "first strike" ],
             "capacity": 180,
             "hit points": 200,
-            "damage": { "low": 750, "high": 1250, "accuracy": 0.8, "splash chance": 1 },
+            "damage": {
+                "low": 750,
+                "high": 1250,
+                "accuracy": 0.8,
+                "splash chance": 1
+            },
             "special abilities": [ "not weak" ],
             "traits": [ "intercept" ]
         },
         {
             "id": 9011,
-            "names": [ "Nusala", "((n))" ],
+            "names": [ "Nusala" ],
+            "codenames": [ "((n))" ],
             "faction": "general",
             "category": "unknown",
             "phases": [ "first strike" ],
             "capacity": 165,
             "hit points": 150,
-            "damage": { "low": 1000, "high": 1500, "accuracy": 0.9, "splash chance": 1 },
+            "damage": {
+                "low": 1000,
+                "high": 1500,
+                "accuracy": 0.9,
+                "splash chance": 1
+            },
             "special abilities": [ "not weak", "attack weakest target" ],
             "traits": [ "explosive ammunition" ]
         },
         {
             "id": 9012,
-            "names": [ "Anslem", "((a))" ],
+            "names": [ "Anslem" ],
+            "codenames": [ "((a))" ],
             "faction": "general",
             "category": "unknown",
             "phases": [ "normal" ],
             "capacity": 150,
             "hit points": 150,
-            "damage": { "low": 1000, "high": 1500, "accuracy": 0.5, "splash chance": 1 },
+            "damage": {
+                "low": 1000,
+                "high": 1500,
+                "accuracy": 0.5,
+                "splash chance": 1
+            },
             "special abilities": [ "not weak", "attack weakest target" ],
             "traits": [ "dazzle" ]
+        },
+        {
+            "id": 9013,
+            "names": [ "Mad General" ],
+            "codenames": [ "((mad))" ],
+            "faction": "general",
+            "category": "artillery",
+            "phases": [ "last strike" ],
+            "capacity": 200,
+            "hit points": 1,
+            "damage": {
+                "low": 300,
+                "high": 600,
+                "accuracy": 0.6,
+                "splash chance": 1
+            },
+            "special abilities": [ "not weak", "attack weakest target" ],
+            "traits": [ "bombastic" ]
         }
     ]
 }

@@ -2,13 +2,14 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_TEST_COMBAT_MECHANICS_TEST_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_TEST_COMBAT_MECHANICS_TEST_HPP_INCLUDED
 
-#include "../settlers_online/army.hpp"
-#include "../settlers_online/combat_result.hpp"
-#include "../settlers_online/combat_mechanics.hpp"
+#include "../settlers_online/combat/army.hpp"
+#include "../settlers_online/combat/combat_result.hpp"
+#include "../settlers_online/combat/battle.hpp"
+#include "../settlers_online/combat/trivial_attack_sequence.hpp"
+#include "../settlers_online/combat/randomized_attack_sequence.hpp"
+#include "../settlers_online/combat/unit_group.hpp"
+#include "../settlers_online/combat/unit_type.hpp"
 #include "../settlers_online/logger.hpp"
-#include "../settlers_online/trivial_attack_sequence.hpp"
-#include "../settlers_online/unit_group.hpp"
-#include "../settlers_online/unit_type.hpp"
 
 #include "generator.hpp"
 
@@ -16,7 +17,9 @@
 #include <cstdint>
 #include <functional>
 #include <ostream>
+#include <random>
 #include <string>
+#include <system_error> // std::error_code, std::errc
 
 namespace ropufu
 {
@@ -24,27 +27,54 @@ namespace ropufu
     {
         struct combat_mechanics_test
         {
-            typedef combat_mechanics_test type;
-            typedef settlers_online::combat_mechanics tested_type;
-            typedef settlers_online::trivial_attack_sequence<true> sequencer_type;
+            using type = combat_mechanics_test;
+            using engine_type = std::mt19937;
+            using sequencer_type_a = settlers_online::trivial_attack_sequence<true>;
+            using sequencer_type_b = settlers_online::trivial_attack_sequence<false>;
+            using sequencer_type_c = settlers_online::randomized_attack_sequence<engine_type>;
+            using tested_type_1 = settlers_online::battle<sequencer_type_a, sequencer_type_b>;
+            using tested_type_2 = settlers_online::battle<sequencer_type_c, sequencer_type_c>;
 
             static bool test_deterministic()
             {
-                generator& gen = generator::instance();
+                generator gen {};
+                std::error_code ec {};
+                settlers_online::detail::no_logger logger {};
 
                 settlers_online::army left_army = gen.next_army(250);
                 settlers_online::army right_army = gen.next_army(270);
 
-				sequencer_type left_seq = { };
-				sequencer_type right_seq = { };
 
-				tested_type combat(left_army, right_army);
-                settlers_online::detail::no_logger logger { };
-				std::size_t battle_rounds = combat.execute(left_seq, right_seq, logger);
+				tested_type_1 combat(left_army, right_army, ec);
+                
+				// std::size_t battle_rounds = 
+                    combat.execute(logger, ec);
 				std::size_t destruction_rounds = 0;
-				for (std::size_t i = 0; i < 100; i++) destruction_rounds += combat.destruct(left_seq, right_seq);
+				for (std::size_t i = 0; i < 100; ++i) destruction_rounds += combat.peek_destruction(ec);
 				destruction_rounds /= 100;
-                return (destruction_rounds + battle_rounds) > 2;
+
+                return !static_cast<bool>(ec);
+            }
+
+            static bool test_randomized()
+            {
+                generator gen {};
+                std::error_code ec {};
+                settlers_online::detail::no_logger logger {};
+
+                settlers_online::army left_army = gen.next_army(250);
+                settlers_online::army right_army = gen.next_army(270);
+
+
+				tested_type_2 combat(left_army, right_army, ec);
+                
+				// std::size_t battle_rounds = 
+                    combat.execute(logger, ec);
+				std::size_t destruction_rounds = 0;
+				for (std::size_t i = 0; i < 100; ++i) destruction_rounds += combat.peek_destruction(ec);
+				destruction_rounds /= 100;
+
+                return !static_cast<bool>(ec);
             }
         };
     }

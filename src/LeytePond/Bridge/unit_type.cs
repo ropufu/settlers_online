@@ -13,6 +13,8 @@ namespace Ropufu.LeytePond.Bridge
         private Int32 id = 0;
         [JsonProperty("names", Required = Required.Always)]
         private List<String> names = new List<String>();
+        [JsonProperty("codenames")]
+        private List<String> codenames = new List<String>();
         [JsonProperty("faction"), JsonConverter(typeof(JsonCppEnumConverter<UnitFaction>))]
         private UnitFaction faction = UnitFaction.NonPlayerAdventure;
         [JsonProperty("category"), JsonConverter(typeof(JsonCppEnumConverter<UnitCategory>))]
@@ -50,6 +52,7 @@ namespace Ropufu.LeytePond.Bridge
 
         public Int32 Id { get => this.id; set => this.id = value; }
         public List<String> Names { get => this.names; }
+        public List<String> Codenames { get => this.codenames; }
         public Int32 Experience { get => this.experience; set => this.experience = value; }
         public Int32 Capacity { get => this.capacity; set => this.capacity = value; }
         public Int32 HitPoints { get => this.hitPoints; set => this.hitPoints = value; }
@@ -60,7 +63,7 @@ namespace Ropufu.LeytePond.Bridge
         public UnitFaction Faction { get => this.faction; set => this.faction = value; }
         public UnitCategory Category { get => this.category; set => this.category = value; }
         
-        public String FirstName => this.names.Count == 0 ? String.Empty : this.names[0];
+        public String FirstName => this.names.Count == 0 ? "??" : this.names[0];
 
         public Boolean Is(UnitFaction faction) => this.faction == faction;
 

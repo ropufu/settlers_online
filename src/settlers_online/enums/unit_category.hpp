@@ -13,7 +13,7 @@ namespace ropufu::settlers_online
     /** @brief Named categories of units.
      *  @remark Used internally as an indexer for \c enum_array, so don't go too high or negative. 
      **/
-    enum struct unit_category : std::size_t
+    enum struct unit_category : char
     {
         unknown = 0,
         melee = 1,

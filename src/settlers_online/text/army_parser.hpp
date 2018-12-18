@@ -2,14 +2,17 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_ARMY_PARSER_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_ARMY_PARSER_HPP_INCLUDED
 
-#include "army.hpp"
-#include "char_string.hpp"
+#include "../char_string.hpp"
+
+#include "../combat/army.hpp"
+#include "../combat/unit_group.hpp"
+#include "../combat/unit_type.hpp"
+
 #include "unit_database.hpp"
-#include "unit_group.hpp"
-#include "unit_type.hpp"
 
 #include <cstddef> // std::size_t
 #include <string> // std::string
+#include <system_error> // std::error_code, std::errc
 #include <utility> // std::pair, std::make_pair
 #include <vector> // std::vector
 
@@ -25,7 +28,7 @@ namespace ropufu
         private:
             std::string m_value = "";
             bool m_is_valid = false;
-            std::vector<std::pair<std::size_t, std::string>> m_army_blueprint = { };
+            std::vector<std::pair<std::size_t, std::string>> m_army_blueprint = {};
 
             /** Parses the provided \p value. It is assumed that the string has already been trimmed, and all spaces replaced with whitespaces. */
             void parse_blueprint(const std::string& value) noexcept
@@ -85,42 +88,48 @@ namespace ropufu
 
             std::size_t size() const noexcept { return this->m_army_blueprint.size(); }
 
-            bool try_build(army& a) const noexcept
-            {
-                return this->try_build(a, [] (const unit_type& /**u*/) { return true; });
-            } // try_build(...)
+            // bool try_build(army& a, const unit_database& db) const noexcept
+            // {
+            //     //return this->try_build(a, db, [] (const unit_type& /**u*/) { return true; });
+            //     return this->try_build(a, db, nullptr);
+            // } // try_build(...)
 
             template <typename t_predicate_type>
-            bool try_build(army& a, const t_predicate_type& filter) const noexcept
+            bool try_build(army& a, const unit_database& db, const t_predicate_type& filter) const noexcept
             {
                 if (!this->m_is_valid) return false;
 
-                const unit_database& db = unit_database::instance();
-                std::vector<unit_group> groups { };
+                std::vector<unit_group> groups {};
                 groups.reserve(this->m_army_blueprint.size());
                 for (const auto& pair : this->m_army_blueprint)
                 {
-                    unit_type u { };
-                    if (!db.try_find(pair.second, u, filter)) return false;
+                    // unit_type u {};
+                    // if (!db.try_find(pair.second, u, filter)) return false;
+                    const unit_type& u = db.find(pair.second, filter);
+                    if (!db.is_valid(u)) return false;
 
                     if (pair.first == 0) continue; // Skip empty groups.
                     groups.emplace_back(u, pair.first);
                 }
-                a = groups;
+
+                std::error_code ec {};
+                camp c {};
+                a = army(groups, c, ec);
                 return true;
             } // try_build(...)
             
             template <typename t_logger_type>
-            army build(t_logger_type& logger, bool do_check_generals = false, bool do_coerce_factions = false, bool is_strict = false) const noexcept
+            army build(const unit_database& db, t_logger_type& logger, bool do_check_generals = false, bool do_coerce_factions = false, bool is_strict = false) const noexcept
             {
-                army a { };
+                army a {};
                 if (!this->m_is_valid)
                 {
                     logger.write("Parsing army failed.");
                     return a;
                 }
 
-                if (!this->try_build(a, [] (const unit_type& /**u*/) { return true; }))
+                //if (!this->try_build(a, db, [] (const unit_type& /**u*/) { return true; }))
+                if (!this->try_build(a, db, nullptr))
                 {
                     logger.write("Reconstructing army from database failed.");
                     return a;
@@ -137,9 +146,9 @@ namespace ropufu
                 // Check for multiple factions.
                 if (do_coerce_factions)
                 {
-                    const auto& format_compact = [] (const unit_type& u) { return prefix_builder<unit_type>::build_key(u); };
+                    const auto& format_compact = [&] (const unit_type& u) { return " " + u.first_name(); }; // TODO: replace with codenames where possible.
 
-                    std::set<unit_faction> factions { };
+                    std::set<unit_faction> factions {};
                     for (const auto& g : a.groups()) factions.insert(g.unit().faction());
                     factions.erase(unit_faction::general); // Generals do not count.
 
@@ -147,11 +156,11 @@ namespace ropufu
                     if (factions.size() > 1)
                     {
                         logger.write("There is more than one faction in the army.");
-                        army b { };
+                        army b {};
                         for (unit_faction f : factions)
                         {
                             // Try to re-build this army assuming only fraction <f> is allowed (or generals).
-                            if (this->try_build(b, [&](const unit_type& u) { return u.is(f) || u.is(unit_faction::general); }))
+                            if (this->try_build(b, db, [&] (const unit_type& u) { return u.is(f) || u.is(unit_faction::general); }))
                             {
                                 ++count_options;
                                 logger.write("Did you mean: " + b.to_string(format_compact) + "?");

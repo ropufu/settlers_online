@@ -138,7 +138,7 @@
     <Compile Include="Bridge\config.cs" />
     <Compile Include="Bridge\prefix_tree.cs" />
     <Compile Include="Bridge\report.cs" />
-    <Compile Include="Bridge\prefix_database.cs" />
+    <Compile Include="Bridge\name_database.cs" />
     <Compile Include="Updater\GitHubFileInfo.cs" />
     <Compile Include="Core\IBijection.cs" />
     <Compile Include="Core\ShouldNotHappenException.cs" />

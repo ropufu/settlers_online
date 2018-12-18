@@ -1,4 +1,7 @@
 
+# ~~ CBOR output ~~
+*.cbor
+
 # ~~ C++.gitignore ~~
 # Prerequisites
 *.d
