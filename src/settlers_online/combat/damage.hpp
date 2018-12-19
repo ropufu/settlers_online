@@ -15,6 +15,16 @@
 
 namespace ropufu::settlers_online
 {
+    namespace detail
+    {
+        template <typename t_value_type>
+        struct damage_pair
+        {
+            t_value_type low;
+            t_value_type high;
+        }; // struct damage_pair
+    } // namespace detail
+
     /** Descriptor for unit types. */
     struct damage;
 
@@ -34,8 +44,7 @@ namespace ropufu::settlers_online
         friend struct unit_type;
 
     private:
-        std::size_t m_low = 0;      // Low damage.
-        std::size_t m_high = 0;     // High damage.
+        detail::damage_pair<std::size_t> m_value = {};
         double m_accuracy = 0;      // Probability of high damage.
         double m_splash_chance = 0; // Probability of dealing splash damage.
 
@@ -67,7 +76,7 @@ namespace ropufu::settlers_online
          *  @param ec Set to std::errc::invalid_argument if \p splash_chance is outside the interval [0, 1].
          */
         damage(std::size_t low, std::size_t high, double accuracy, double splash_chance, std::error_code& ec) noexcept
-            : m_low(low), m_high(high), m_accuracy(accuracy), m_splash_chance(splash_chance)
+            : m_value({low, high}), m_accuracy(accuracy), m_splash_chance(splash_chance)
         {
             if (!this->validate(ec)) this->coerce();
         } // damage(...)
@@ -75,8 +84,8 @@ namespace ropufu::settlers_online
         damage(const nlohmann::json& j, std::error_code& ec) noexcept
         {
             // Parse json entries.
-            aftermath::noexcept_json::optional(j, type::jstr_low, this->m_low, ec);
-            aftermath::noexcept_json::optional(j, type::jstr_high, this->m_high, ec);
+            aftermath::noexcept_json::optional(j, type::jstr_low, this->m_value.low, ec);
+            aftermath::noexcept_json::optional(j, type::jstr_high, this->m_value.high, ec);
             aftermath::noexcept_json::optional(j, type::jstr_accuracy, this->m_accuracy, ec);
             aftermath::noexcept_json::optional(j, type::jstr_splash_chance, this->m_splash_chance, ec);
 
@@ -89,19 +98,21 @@ namespace ropufu::settlers_online
          */
         void reset(std::size_t low, std::size_t high) noexcept
         {
-            this->m_low = low;
-            this->m_high = high;
+            this->m_value.low = low;
+            this->m_value.high = high;
         } // reset(...)
+
+        const detail::damage_pair<std::size_t>& value() const noexcept { return this->m_value; }
         
         /** Low damage. */
-        std::size_t low() const noexcept { return this->m_low; }
+        std::size_t low() const noexcept { return this->m_value.low; }
         /** Low damage. */
-        void set_low(std::size_t value) noexcept { this->m_low = value; }
+        void set_low(std::size_t value) noexcept { this->m_value.low = value; }
 
         /** High damage. */
-        std::size_t high() const noexcept { return this->m_high; }
+        std::size_t high() const noexcept { return this->m_value.high; }
         /** High damage. */
-        void set_high(std::size_t value) noexcept { this->m_high = value; }
+        void set_high(std::size_t value) noexcept { this->m_value.high = value; }
 
         /** Probability of dealing high damage. */
         double accuracy() const noexcept { return this->m_accuracy; }
@@ -125,8 +136,8 @@ namespace ropufu::settlers_online
         bool operator ==(const type& other) const noexcept
         {
             return
-                this->m_low == other.m_low &&
-                this->m_high == other.m_high &&
+                this->m_value.low == other.m_value.low &&
+                this->m_value.high == other.m_value.high &&
                 this->m_accuracy == other.m_accuracy &&
                 this->m_splash_chance == other.m_splash_chance;
         } // operator ==(...)
@@ -140,8 +151,8 @@ namespace ropufu::settlers_online
         /** Component-wise addition. */
         type& operator +=(const type& other) noexcept
         {
-            this->m_low += other.m_low;
-            this->m_high += other.m_high;
+            this->m_value.low += other.m_value.low;
+            this->m_value.high += other.m_value.high;
             this->m_accuracy += other.m_accuracy;
             this->m_splash_chance += other.m_splash_chance;
             this->coerce();
@@ -151,8 +162,8 @@ namespace ropufu::settlers_online
         /** Component-wise addition. */
         type& operator -=(const type& other) noexcept
         {
-            this->m_low = (this->m_low < other.m_low) ? 0 : (this->m_low - other.m_low);
-            this->m_high = (this->m_high < other.m_high) ? 0 : (this->m_high - other.m_high);
+            this->m_value.low = (this->m_value.low < other.m_value.low) ? 0 : (this->m_value.low - other.m_value.low);
+            this->m_value.high = (this->m_value.high < other.m_value.high) ? 0 : (this->m_value.high - other.m_value.high);
             this->m_accuracy -= other.m_accuracy;
             this->m_splash_chance -= other.m_splash_chance;
             this->coerce();

@@ -1,8 +1,0 @@
-The way we described in the past how different damage modifiers are applied is different than it actually works in the game for this general. To avoid changing the current mechanic and therefore potentially rendering tactical maps, battle calculators etc. wrong under most circumstances, we decided to leave the mechanic untouched and instead explain how it actually works.
-
-In the past, we said that all absolute bonuses are applied before the relative ones. Then the relative bonuses are summed and applied at once instead of one after another. This order is changed. First, the relative bonuses are applied to the base value, and then the absolute bonuses are applied. This leads to a small difference if both absolute and relative modifiers are active. As an example with a 120 damage unit, an absolute +10 damage bonus and two separate 10% damage modifiers:
-
-How it was described:
-(120 + 10) * (1 + 0.1 + 0.1) = 156
-How it works now:
-120 + 10 + (120 * (0.1 + 0.1)) = 154

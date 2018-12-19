@@ -105,24 +105,24 @@ namespace ropufu::settlers_online
             
             double left_frenzy_bonus = this->m_left.underlying().frenzy_bonus();
             double right_frenzy_bonus = this->m_right.underlying().frenzy_bonus();
-            double left_frenzy_factor = 1;
-            double right_frenzy_factor = 1;
+            double left_frenzy_rate = 0;
+            double right_frenzy_rate = 0;
 
             while (this->m_left.underlying().alive() && this->m_right.underlying().alive())
             {
                 if constexpr (t_logger_type::is_enabled)
                 {
                     logger << "Begin round " << (1 + this->m_clock.round_index()) << "." << nullptr;
-                    if (left_frenzy_factor != 1) logger << "Left frenzy bonus: " << static_cast<std::size_t>(100 * (left_frenzy_factor - 1)) << "%." << nullptr;
-                    if (right_frenzy_factor != 1) logger << "Right frenzy bonus: " << static_cast<std::size_t>(100 * (right_frenzy_factor - 1)) << "%." << nullptr;
+                    if (left_frenzy_rate != 0) logger << "Left frenzy bonus: " << static_cast<std::size_t>(100 * left_frenzy_rate) << "%." << nullptr;
+                    if (right_frenzy_rate != 0) logger << "Right frenzy bonus: " << static_cast<std::size_t>(100 * right_frenzy_rate) << "%." << nullptr;
                 } // if constexpr (...)
 
                 for (battle_phase phase : this->m_phases)
                 {
                     if constexpr (t_logger_type::is_enabled) logger << "Begin " << std::to_string(phase) << " phase." << nullptr;
 
-                    this->m_left.initiate_phase(this->m_right, phase, left_frenzy_factor, this->m_left_sequence, this->m_clock, logger);
-                    this->m_right.initiate_phase(this->m_left, phase, right_frenzy_factor, this->m_right_sequence, this->m_clock, logger);
+                    this->m_left.initiate_phase(this->m_right, phase, left_frenzy_rate, this->m_left_sequence, this->m_clock, logger);
+                    this->m_right.initiate_phase(this->m_left, phase, right_frenzy_rate, this->m_right_sequence, this->m_clock, logger);
 
                     this->m_left.snapshot();
                     this->m_right.snapshot();
@@ -131,8 +131,8 @@ namespace ropufu::settlers_online
                     if constexpr (t_logger_type::is_enabled) logger << "End " << std::to_string(phase) << " phase." << nullptr;
                 } // for (...)
 
-                left_frenzy_factor *= (1 + left_frenzy_bonus);
-                right_frenzy_factor *= (1 + right_frenzy_bonus);
+                left_frenzy_rate = (1 + this->m_clock.round_index()) * left_frenzy_bonus;
+                right_frenzy_rate = (1 + this->m_clock.round_index()) * right_frenzy_bonus;
 
                 this->m_clock.next_round();
                 if constexpr (t_logger_type::is_enabled) logger << "End round " << (1 + this->m_clock.round_index()) << "." << nullptr;

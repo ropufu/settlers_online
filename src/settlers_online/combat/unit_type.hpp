@@ -13,6 +13,7 @@
 #include "arithmetic.hpp"
 #include "damage.hpp"
 
+#include <array>      // std::array
 #include <cstddef>    // std::size_t
 #include <functional> // std::hash
 #include <ostream>    // std::ostream
@@ -69,9 +70,13 @@ namespace ropufu::settlers_online
         aftermath::flags_t<special_ability> m_abilities = {};  // Special abilities.
         aftermath::flags_t<battle_trait> m_traits = {};        // Special traits that affect the entire battle.
 
+        detail::damage_pair<std::size_t> m_damage_additive_bonus = {}; // Additive bonus to the damage.
+        detail::damage_pair<double> m_damage_rate_bonus = {}; // Multiplicative modifier to the damage. Rates themselves stack additively: two 10% bonuses will result in 20% rather than 21% = (1 + 10%)(1 + 10%) - 100%.
+
         bool validate(std::error_code& ec) const noexcept
         {
             if (this->m_hit_points == 0) return aftermath::detail::on_error(ec, std::errc::invalid_argument, "Hit points cannot be zero.", false);
+            if (this->m_damage_rate_bonus.low < -1 || this->m_damage_rate_bonus.high < -1) return aftermath::detail::on_error(ec, std::errc::invalid_argument, "Damage rate cannot less than -100%.", false);
             if (!this->m_damage.validate(ec)) return false;
             return true;
         } // validate(...)
@@ -79,8 +84,12 @@ namespace ropufu::settlers_online
         void coerce() noexcept
         {
             if (this->m_hit_points == 0) this->m_hit_points = 1;
+            if (this->m_damage_rate_bonus.low < -1) this->m_damage_rate_bonus.low = -1;
+            if (this->m_damage_rate_bonus.high < -1) this->m_damage_rate_bonus.high = -1;
+
             this->m_damage.coerce();
             this->m_display_name = this->m_names.empty() ? "??" : this->m_names.front();
+
             // ~~ Optimize ~~
             this->m_names.shrink_to_fit();
             this->m_codenames.shrink_to_fit();
@@ -175,7 +184,6 @@ namespace ropufu::settlers_online
             this->m_names.clear();
             this->m_names.reserve(1);
             this->m_names.push_back(value);
-            this->m_names.shrink_to_fit();
             this->coerce();
         } // set_names(...)
 
@@ -247,6 +255,24 @@ namespace ropufu::settlers_online
             if (!this->validate(ec)) this->coerce();
         } // set_damage(...)
 
+        /** @brief Effective damage of the unit.
+         *  @warning \p frenzy_rate is not checked, and could potentially lead to infinite execution when effective damage is set to zero.
+         */
+        detail::damage_pair<std::size_t> effective_damage(double frenzy_rate) const noexcept
+        {
+            // Multiplicative bonus: affects base damage.
+            detail::damage_pair<std::size_t> bonus = this->m_damage.value();
+            bonus.low = product_floor(bonus.low, this->m_damage_rate_bonus.low + frenzy_rate);
+            bonus.high = product_floor(bonus.high, this->m_damage_rate_bonus.high + frenzy_rate);
+            // Additive bonus comes next.
+            bonus.low += this->m_damage_additive_bonus.low;
+            bonus.high += this->m_damage_additive_bonus.high;
+            // Apply the bonus to base damage.
+            bonus.low += this->m_damage.low();
+            bonus.high += this->m_damage.high();
+            return bonus;
+        } // effective_damage(...)
+
         /** Determines whether the two objects are in order by id. */
         static bool compare_by_id(const type& x, const type& y) noexcept
         {
@@ -273,22 +299,25 @@ namespace ropufu::settlers_online
             if (level == 0) return;
             if (level > 3) level = 3;
 
-            // Level      0   1   2   3   4   ...
-            // Sq.factor  0   0   5   15  30  ...
-            std::size_t square_factor = (level * (level - 1) * 5) / 2;
+            double accuracy_bonus = 0;
+            double splash_bonus = 0;
+
             // Level      0  1   2   3    4    ...
             // Thirds, %  0  33  66  100  133  ...
-            double thirds = fraction_floor(100 * level, static_cast<std::size_t>(3)) / 100.0;
-            if (thirds > 1) thirds = 1;
-            //auto corece = [](double p) { return p < 0 ? 0 : (p > 1 ? 1 : p); };
+            constexpr std::size_t three = 3;
+            const double thirds = fraction_floor(100 * level, three) / 100.0;
 
-            damage_type damage_bonus {};
-            std::error_code ec {};
+            // Misc.
+            const std::array<double, 4> sniper_bonus_table { 0, 0.45, 0.85, 1.30 };
+            const double sniper_bonus = sniper_bonus_table[level];
+
             switch (skill)
             {
             case battle_skill::juggernaut: // Increases the general's (faction: general) attack damage by 20/40/60. These attacks have a 33/66/100% chance of dealing splash damage.
                 if (!this->is(unit_faction::general)) return;
-                damage_bonus = damage_type(20 * level, 20 * level, 0, thirds, ec);
+                this->m_damage_additive_bonus.low += 20 * level;
+                this->m_damage_additive_bonus.high += 20 * level;
+                splash_bonus = thirds;
                 break;
             case battle_skill::garrison_annex: // Increases the unit capacity (faction: general) by 5/10/15.
                 if (!this->is(unit_faction::general)) return;
@@ -300,36 +329,42 @@ namespace ropufu::settlers_online
                 break;
             case battle_skill::unstoppable_charge: // Increases the maximum attack damage of your swift units (faction: cavalry) by 1/2/3 and their attacks have a 33/66/100% chance of dealing splash damage.
                 if (!this->is(unit_category::cavalry)) return;
-                damage_bonus = damage_type(0, level, 0, thirds, ec);
+                this->m_damage_additive_bonus.high += level;
+                splash_bonus = thirds;
                 break;
             case battle_skill::weekly_maintenance: // Increases the attack damage of your heavy units (faction: artillery) by 10/20/30.
                 if (!this->is(unit_category::artillery)) return;
-                damage_bonus.reset(10 * level, 10 * level);
+                this->m_damage_additive_bonus.low += 10 * level;
+                this->m_damage_additive_bonus.high += 10 * level;
                 break;
             case battle_skill::master_planner: // Adds 10% to this army's accuracy.
-                damage_bonus = damage_type(0, 0, 0.1, 0, ec);
+                accuracy_bonus = 0.1;
                 break;
             case battle_skill::rapid_fire: // Increases the maximum attack damage of your Bowmen by 5/10/15.
                 if (!this->has(special_ability::rapid_fire)) return;
-                damage_bonus.reset(0, 5 * level);
+                this->m_damage_additive_bonus.high += 5 * level;
                 break;
             case battle_skill::sniper_training: // Increases your Longbowmen's and regular Marksmen's minimum attack damage by 45/85/130% and the maximum by 5/10/15%.
                 if (!this->has(special_ability::sniper_training)) return;
-                damage_bonus.reset(
-                    fraction_floor(level >= 3 ?
-                        (this->m_damage.high() * (100 + 5 * level)) :
-                        (this->m_damage.low() * (45 * level - square_factor)), static_cast<std::size_t>(100)),
-                    fraction_floor(this->m_damage.high() * (5 * level), static_cast<std::size_t>(100)));
+                this->m_damage_rate_bonus.low += sniper_bonus;
+                this->m_damage_rate_bonus.high += ((5 * level) / 100.0);
                 break;
             case battle_skill::cleave: // Increases the attack damage of Elite Soldiers by 4/8/12 and their attacks have a 33/66/100% chance of dealing splash damage.
                 if (!this->has(special_ability::cleave)) return;
-                damage_bonus = damage_type(4 * level, 4 * level, 0, thirds, ec);
+                this->m_damage_additive_bonus.low += 4 * level;
+                this->m_damage_additive_bonus.high += 4 * level;
+                splash_bonus = thirds;
                 break;
             default: break;
             } // switch(...)
+
+            double new_accuracy = this->m_damage.accuracy() + accuracy_bonus;
+            double new_splash = this->m_damage.splash_chance() + splash_bonus;
             
             // Apply new damage.
-            this->m_damage += damage_bonus;
+            std::error_code ec {};
+            this->m_damage.set_accuracy(new_accuracy, ec);
+            this->m_damage.set_splash_chance(new_splash, ec);
         } // apply_friendly_skill(...)
 
         /** @brief Apply the enemy army's skill to a unit.
@@ -340,14 +375,19 @@ namespace ropufu::settlers_online
             if (level == 0) return;
             if (level > 3) level = 3;
 
+            // Misc.
+            const std::array<std::size_t, 4> overrun_percentage_table { 0, 8, 16, 25 };
+            const std::size_t overrun_percentage = 100 - overrun_percentage_table[level];
+            constexpr std::size_t hundred = static_cast<std::size_t>(100);
+
             switch (skill)
             {
             case battle_skill::fast_learner: // Increases the XP gained from enemy units defeated by this army by 10/20/30%.
-                this->m_experience = fraction_floor(this->m_experience * (100 + 10 * level), static_cast<std::size_t>(100));
+                this->m_experience = fraction_floor(this->m_experience * (100 + 10 * level), hundred);
                 break;
             case battle_skill::overrun: // Decreases the HP of enemy bosses by 8/16/25%.
                 if (!this->has(special_ability::overrun)) return;
-                this->m_hit_points = fraction_ceiling(this->m_hit_points * (100 - (level >= 3 ? 25 : (8 * level))), static_cast<std::size_t>(100));
+                this->m_hit_points = fraction_ceiling(this->m_hit_points * overrun_percentage, hundred);
                 break;
             default: break;
             } // switch (...)

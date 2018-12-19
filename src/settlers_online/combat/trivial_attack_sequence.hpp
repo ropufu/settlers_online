@@ -31,9 +31,14 @@ namespace ropufu::settlers_online
         trivial_attack_sequence() noexcept { }
 
         trivial_attack_sequence(const unit_group& g, std::size_t /*group_index*/, std::error_code& /*ec*/) noexcept
-            : m_is_always_high(g.unit().damage().accuracy() == 0 ? false : type::is_always_high),
-            m_is_always_splash(g.unit().damage().splash_chance() == 0 ? false : type::is_always_splash)
         {
+            const damage& d = g.unit().damage();
+
+            if (d.accuracy() == 0) this->m_is_always_high = false;
+            if (d.accuracy() == 1) this->m_is_always_high = true;
+
+            if (d.splash_chance() == 0) this->m_is_always_splash = false;
+            if (d.splash_chance() == 1) this->m_is_always_splash = true;
         } // trivial_attack_sequence(...)
 
         /** @brief Indicates whether the current unit will do high damage. */
