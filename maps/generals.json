@@ -168,7 +168,7 @@
                 "accuracy": 0.6,
                 "splash chance": 1
             },
-            "special abilities": [ "not weak", "attack weakest target" ],
+            "special abilities": [ "not weak" ],
             "traits": [ "bombastic" ]
         }
     ]
