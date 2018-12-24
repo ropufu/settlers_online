@@ -245,6 +245,87 @@
                 "splash chance": 1
             },
             "special abilities": [ "overrun" ]
+        },
+        {
+            "id": 45050,
+            "names": [ "Frost Bear" ],
+            "category": "melee",
+            "phases": [ "normal" ],
+            "hit points": 350,
+            "damage": {
+                "low": 160,
+                "high": 200,
+                "accuracy": 0.9,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45051,
+            "names": [ "Frost Ibex" ],
+            "category": "melee",
+            "phases": [ "normal" ],
+            "hit points": 250,
+            "damage": {
+                "low": 120,
+                "high": 150,
+                "accuracy": 0.85,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45052,
+            "names": [ "Frost Fox" ],
+            "category": "cavalry",
+            "phases": [ "first strike" ],
+            "hit points": 75,
+            "damage": {
+                "low": 80,
+                "high": 100,
+                "accuracy": 0.90,
+                "splash chance": 1
+            },
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 45053,
+            "names": [ "Frost Eagle" ],
+            "category": "cavalry",
+            "phases": [ "first strike" ],
+            "hit points": 100,
+            "damage": {
+                "low": 90,
+                "high": 150,
+                "accuracy": 0.95,
+                "splash chance": 1
+            },
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 45054,
+            "names": [ "Frost Leopard" ],
+            "category": "ranged",
+            "phases": [ "normal" ],
+            "hit points": 150,
+            "damage": {
+                "low": 240,
+                "high": 300,
+                "accuracy": 0.90,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45101,
+            "names": [ "Ribbitha" ],
+            "category": "unknown",
+            "phases": [ "normal" ],
+            "hit points": 65000,
+            "damage": {
+                "low": 700,
+                "high": 800,
+                "accuracy": 0.80,
+                "splash chance": 1
+            },
+            "special abilities": [ "overrun" ]
         }
     ]
 }
