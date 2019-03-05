@@ -100,6 +100,7 @@ namespace ropufu
                 logger_type m_logger = {};
                 std::deque<army> m_left_sequence = {};
                 std::deque<army> m_right_sequence = {};
+                battle_weather m_weather = battle_weather::none;
 
             public:
                 explicit turtle(const std::string& filename = "./black_marsh.config") noexcept
@@ -114,6 +115,9 @@ namespace ropufu
                     this->m_left_sequence = {};
                     this->m_right_sequence = {};
                 } // turtle(...)
+
+                battle_weather weather() const noexcept { return this->m_weather; }
+                void set_weather(battle_weather weather) noexcept { this->m_weather = weather; }
 
                 const logger_type& logger() const noexcept { return this->m_logger; }
                 logger_type& logger() noexcept { return this->m_logger; }
@@ -132,7 +136,7 @@ namespace ropufu
                     {
                         army_parser parser = army_string;
                         this->m_left_sequence.emplace_back(parser.build(this->m_database, this->m_logger, true, true, false));
-                    }
+                    } // for (...)
                 } // parse_left(...)
 
                 void parse_right(const std::string& army_list_string) noexcept
@@ -142,7 +146,7 @@ namespace ropufu
                     {
                         army_parser parser = army_string;
                         this->m_right_sequence.emplace_back(parser.build(this->m_database, this->m_logger));
-                    }
+                    } // for (...)
                 } // parse_right(...)
 
                 std::vector<report_entry> log() noexcept 
@@ -152,14 +156,14 @@ namespace ropufu
                     std::vector<report_entry> report = this->run(c.left(), c.right(), 1, 1, logger);
                     logger.unwind();
                     return report;
-                }
+                } // log(...)
 
                 std::vector<report_entry> run() noexcept 
                 {
                     const config_type& c = this->m_config;
                     no_logger_type logger {};
                     return this->run(c.left(), c.right(), c.simulation_count(), c.destruction_count(), logger);
-                }
+                } // run(...)
                 
             private:
                 template <typename t_logger_type>
@@ -186,27 +190,27 @@ namespace ropufu
                         for (army& next_left : attacker_sequence)
                         {
                             if (next_left.count_units() == 0) continue; // If the attacker wave has been defeated, continue to the next one.
-                            type::run(next_left, next_right, report, simulation_count, destruction_count, logger);
-                        }
-                    }
+                            type::run(next_left, next_right, this->m_weather, report, simulation_count, destruction_count, logger);
+                        } // for (...)
+                    } // for (...)
 
                     this->m_config.to_cbor(report);
                     return report;
                 } // run(...)
 
                 template <typename t_logger_type>
-                static void run(army& left, army& right, std::vector<report_entry>& report, std::size_t simulation_count, std::size_t destruction_count, t_logger_type& logger) noexcept
+                static void run(army& left, army& right, battle_weather weather, std::vector<report_entry>& report, std::size_t simulation_count, std::size_t destruction_count, t_logger_type& logger) noexcept
                 {
                     std::error_code ec {};
                     no_logger_type no_logger {};
                     army next_left = left;
 
                     // ~~ Bounds phase ~~
-                    ropufu::settlers_online::battle<sequencer_type_low, sequencer_type_high> combat_favor_right(left, right, ec);
-                    ropufu::settlers_online::battle<sequencer_type_high, sequencer_type_low> combat_favor_left(left, right, ec);
+                    ropufu::settlers_online::battle<sequencer_type_low, sequencer_type_high> combat_favor_right(left, right, weather, ec);
+                    ropufu::settlers_online::battle<sequencer_type_high, sequencer_type_low> combat_favor_left(left, right, weather, ec);
 
                     // ~~ Combat phase ~~
-                    ropufu::settlers_online::battle<sequencer_type, sequencer_type> combat(left, right, ec);
+                    ropufu::settlers_online::battle<sequencer_type, sequencer_type> combat(left, right, weather, ec);
                     //ropufu::settlers_online::battle<sequencer_type, sequencer_type> snapshot = combat;
 
                     auto army_format = [] (const unit_type& u) { return " " + u.first_name(); };
@@ -249,7 +253,7 @@ namespace ropufu
                             total_rounds.observe(count_combat_rounds + count_destruction_rounds);
                         }
                         combat.reset(); // Reset combat.
-                    }
+                    } // for (...)
                     
                     report.emplace_back("Rounds", total_rounds);
                     if (!destruction_rounds.empty() && destruction_rounds.max() != 0)

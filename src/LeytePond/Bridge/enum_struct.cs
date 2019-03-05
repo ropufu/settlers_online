@@ -122,4 +122,14 @@ namespace Ropufu.LeytePond.Bridge
         Artillery = 4,
         Elite = 5
     }
+
+    /** Mirrors \c battle_weather.hpp. */
+    public enum BattleWeather
+    {
+        None = 0,
+        HardFrost = 1,         // All \c melee units (including enemy \c melee units) gain splash damage.
+        BrightSunshine = 2,    // The HP of all units (including enemy units) are increased by 20%.
+        HeavyFog = 3,          // All units (including enemy units) gain \c do_attack_weakest_target.
+        Hurricane = 4          // The minimum and maximum damage of all units (including enemy units) is increased by 20%.
+    }
 }

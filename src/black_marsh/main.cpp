@@ -20,6 +20,7 @@
 using unit_faction = ropufu::settlers_online::unit_faction;
 using unit_database = ropufu::settlers_online::unit_database;
 using char_string = ropufu::settlers_online::char_string;
+using battle_weather = ropufu::settlers_online::battle_weather;
 
 template <typename t_collection_type>
 void print_elements(const t_collection_type& container, const std::string& delimiter = ", ")
@@ -74,6 +75,7 @@ enum struct command_name
     right_camp_reduction,
     left_skills,
     right_skills,
+    weather,
     n, // Number of sumulations.
     log, // Run simulation in log mode.
     run // Run simulation in regular mode.
@@ -158,6 +160,7 @@ command_name parse_command(const std::string& expression, std::string& argument)
             default: return command_name::right;
         }
     }
+    if (command == "weather" || command == "w") return command_name::weather;
     if (command == "n") return command_name::n;
     if (command == "log") return command_name::log;
     if (command == "run") return command_name::run;
@@ -189,6 +192,7 @@ void help(const std::string& argument) noexcept
     units, u       | Lists units from a specified faction.
     left, l        | Get or set left army.
     right, r       | Get or set right army.
+    weather, w     | Get or set weather conditions.
     n              | Gets or sets the number of simulations.
     log            | Displays one battle report.
     run            | Executes the simulations.
@@ -236,8 +240,8 @@ void display_units(const ropufu::settlers_online::black_marsh::turtle& t, const 
                 is_first = false;
             }
             std::cout << std::endl;
-        }
-    }
+        } // if (...)
+    } // for (...)
 } // display_units(...)
 
 std::int32_t quit() noexcept
@@ -258,54 +262,83 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
     ropufu::settlers_online::black_marsh::turtle lucy {}; // Default config file.
     ropufu::settlers_online::black_marsh::config& config = lucy.config();
 
+    // Ordered arguments.
     if (argc > 2)
     {
         std::string left_army_string = std::string(argv[1]);
         std::string right_army_string = std::string(argv[2]);
         lucy.parse_left(left_army_string);
         lucy.parse_right(right_army_string);
-
-        if (argc > 3)
-        {
-            //unwind_errors(false);
-            std::string sw = std::string(argv[3]);
-            if (sw == "-l") { lucy.log(); return 0; }
-            if (sw == "-r") { lucy.run(); return 0; }
-        }
     } // if (...)
 
-    welcome();
+    // Unordered arguments.
+    bool has_log_flag = false;
+    bool has_run_flag = false;
+    for (std::int32_t i = 3; i < argc; ++i)
+    {
+        // <argc> is at least <i + 1>.
+        std::string sw = std::string(argv[i]);
+        if (sw == "-l") has_log_flag = true;
+        if (sw == "-r") has_run_flag = true;
+        if (sw == "-w" && argc > i + 1)
+        {
+            std::string sw_value = std::string(argv[i + 1]);
+            battle_weather w = battle_weather::none;
+            if (ropufu::aftermath::detail::try_parse_enum(sw_value, w))
+            {
+                lucy.set_weather(w);
+            } // if (...)
+        } // if (...)
+    } // for (...)
+    
+    if (has_log_flag && has_run_flag) std::cout << "Switch conflict." << std::endl;
+    else
+    {
+        if (has_log_flag) { lucy.log(); return 0; }
+        if (has_run_flag) { lucy.run(); return 0; }
+    } // else (...)
+
+    ::welcome();
     while (true)
     {
-        std::string command;
-        std::string argument;
+        std::string command {};
+        std::string argument {};
 
         //unwind_errors(false);
         lucy.logger().unwind();
 
         std::cout << "> ";
-        command = read_line();
+        command = ::read_line();
 
-        switch (parse_command(command, argument))
+        switch (::parse_command(command, argument))
         {
             case command_name::quit: return quit();
             case command_name::help:
-                help(argument);
+                ::help(argument);
                 break;
             case command_name::units:
-                display_units(lucy, argument);
+                ::display_units(lucy, argument);
                 break;
             case command_name::left:
                 if (!argument.empty()) lucy.parse_left(argument);
                 std::cout << "Left army: ";
-                print_elements(lucy.left_sequence(), " + ");
+                ::print_elements(lucy.left_sequence(), " + ");
                 std::cout << std::endl;
                 break;
             case command_name::right:
                 if (!argument.empty()) lucy.parse_right(argument);
                 std::cout << "Right army: ";
-                print_elements(lucy.right_sequence(), " + ");
+                ::print_elements(lucy.right_sequence(), " + ");
                 std::cout << std::endl;
+                break;
+            case command_name::weather:
+                if (!argument.empty())
+                {
+                    battle_weather w = battle_weather::none;
+                    if (ropufu::aftermath::detail::try_parse_enum(argument, w)) lucy.set_weather(w);
+                    else std::cout << "Weather \"" << argument << "\" not recognized." << std::endl;
+                } // if (...)
+                std::cout << "Weather conditions: " << std::to_string(lucy.weather()) << std::endl;
                 break;
             case command_name::left_camp:
                 std::cout << "Left campt: " << config.left().camp() << std::endl;
@@ -320,7 +353,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
                     auto camp = config.left().camp();
                     camp.set_damage_reduction(std::stod(argument), ec);
                     config.left().set_camp(camp);
-                }
+                } // if (...)
                 std::cout << "Left camp damage recution: " << config.left().camp().damage_reduction() << std::endl;
                 break;
             case command_name::right_camp_reduction:
@@ -330,7 +363,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
                     auto camp = config.right().camp();
                     camp.set_damage_reduction(std::stod(argument), ec);
                     config.right().set_camp(camp);
-                }
+                } // if (...)
                 std::cout << "Right camp damage recution: " << config.right().camp().damage_reduction() << std::endl;
                 break;
             case command_name::left_camp_hit_points:
@@ -339,7 +372,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
                     auto camp = config.left().camp();
                     camp.set_hit_points(static_cast<std::size_t>(std::stol(argument)));
                     config.left().set_camp(camp);
-                }
+                } // if (...)
                 std::cout << "Left camp hit points: " << config.left().camp().hit_points() << std::endl;
                 break;
             case command_name::right_camp_hit_points:
@@ -348,7 +381,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
                     auto camp = config.right().camp();
                     camp.set_hit_points(static_cast<std::size_t>(std::stol(argument)));
                     config.right().set_camp(camp);
-                }
+                } // if (...)
                 std::cout << "Right camp hit points: " << config.right().camp().hit_points() << std::endl;
                 break;
             case command_name::left_skills:
@@ -370,7 +403,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
             default:
                 std::cout << "Command \"" << command << "\" not recognized. Try \"help\" to get a list of avaiable commands, or \"quit\" to quit." << std::endl;
                 break;
-        }
-    }
+        } // switch (...)
+    } // while (...)
     return 0;
 } // main(...)

@@ -7,6 +7,7 @@
     <Application.Resources>
         <converters:EnumConverter x:Key="EnumConverter" />
         <converters:UnitImageConverter x:Key="FaceConverter" />
+        <converters:BattleWeatherConverter x:Key="WeatherConverter" />
         <converters:BattleSkillsConverter x:Key="SkillsConverter" />
         <converters:SkillMapConverter x:Key="SkillMapConverter" />
         <converters:IsNotEmptyConverter x:Key="NotEmptyConverter" />

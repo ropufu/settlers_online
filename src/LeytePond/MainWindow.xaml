@@ -89,11 +89,40 @@
             <sys:Object />
         </ListView>
 
-        <DockPanel Grid.Row="1" Grid.ColumnSpan="2" LastChildFill="False">
-            <TextBlock DockPanel.Dock="Left" Text="Simulations: " Margin="10,1,10,1" VerticalAlignment="Center" />
+        <DockPanel Grid.Row="1" Grid.ColumnSpan="2" LastChildFill="False" Margin="0,1,0,24" Grid.RowSpan="2">
+            <TextBlock DockPanel.Dock="Left" Text="Sim's: " Margin="10,1,10,1" VerticalAlignment="Center" />
             <local:GroupCountUpDown DockPanel.Dock="Left" Value='{local:ConfigBinding CountCombatSims}' VerticalAlignment="Center" Width="80" Margin="0,2,5,2" />
-            <TextBlock DockPanel.Dock="Left" Text="Destruction Passes per Sim: " Margin="10,1,10,1" VerticalAlignment="Center" />
+            <TextBlock DockPanel.Dock="Left" Text="Destruction Passes: " Margin="10,1,10,1" VerticalAlignment="Center" />
             <local:GroupCountUpDown DockPanel.Dock="Left" Value='{local:ConfigBinding CountDestructSimsPerCombat}' VerticalAlignment="Center" Width="50" Margin="0,2,5,2" />
+            <TextBlock DockPanel.Dock="Left" Text="Weather: " Margin="10,1,10,1" VerticalAlignment="Center" />
+            <ListBox DockPanel.Dock="Left" ItemsSource='{x:Static local:AppHelper.WeatherStation}' SelectedValue='{Binding ElementName=self, Path=Weather}' VerticalAlignment="Center" Margin="0,2,5,2">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="ToolTip">
+                            <Setter.Value>
+                                <ToolTip>
+                                    <TextBlock Text='{Binding Converter={StaticResource EnumConverter}}' />
+                                </ToolTip>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ItemsControl.Template>
+                    <ControlTemplate TargetType="ItemsControl">
+                        <ItemsPresenter/>
+                    </ControlTemplate>
+                </ItemsControl.Template>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Image Source='{Binding Converter={StaticResource WeatherConverter}}' Height="16" Width="16" Margin="0" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ListBox>
         </DockPanel>
         
         <StatusBar Grid.Row="2" Grid.ColumnSpan="2" x:Name="statusBar">

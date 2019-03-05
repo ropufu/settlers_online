@@ -25,14 +25,18 @@ namespace ropufu::settlers_online
         struct battle_snapshot
         {
         private:
+            const army m_weathered_left;
+            const army m_weathered_right;
             const army m_conditioned_army_left;
             const army m_conditioned_army_right;
             const army_mechanics m_mechanics_left;
             const army_mechanics m_mechanics_right;
 
         public:
-            battle_snapshot(const army& a, const army& b, std::error_code& ec) noexcept
-                : m_conditioned_army_left(army::condition(a, b, ec)), m_conditioned_army_right(army::condition(b, a, ec)),
+            battle_snapshot(const army& a, const army& b, battle_weather weather, std::error_code& ec) noexcept
+                : m_weathered_left(a, weather), m_weathered_right(b, weather),
+                m_conditioned_army_left(army::condition(this->m_weathered_left, this->m_weathered_right, ec)),
+                m_conditioned_army_right(army::condition(this->m_weathered_right, this->m_weathered_left, ec)),
                 m_mechanics_left(this->m_conditioned_army_left, this->m_conditioned_army_right),
                 m_mechanics_right(this->m_conditioned_army_right, this->m_conditioned_army_left)
             {
@@ -62,8 +66,8 @@ namespace ropufu::settlers_online
 
     public:
         /** Prepares two un-conditioned armies for combat. */
-        battle(const army& left, const army& right, std::error_code& ec) noexcept
-            : m_ground_zero(left, right, ec),
+        battle(const army& left, const army& right, battle_weather weather, std::error_code& ec) noexcept
+            : m_ground_zero(left, right, weather, ec),
             m_left(this->m_ground_zero.mechanics_left()),
             m_right(this->m_ground_zero.mechanics_right()),
             m_left_sequence(this->m_left.underlying()), m_right_sequence(this->m_right.underlying())

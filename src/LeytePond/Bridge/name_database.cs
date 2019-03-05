@@ -185,7 +185,7 @@ namespace Ropufu.LeytePond.Bridge
                     this.suggestions.Clear();
                     return unit;
                 }
-                App.Warnings.Push($"Multiple units match the specified query: {lowercase}.");
+                App.Suggestions.Push($"Multiple units match the specified query: {lowercase}.");
                 return default(T);
             } // if (...)
 
@@ -199,7 +199,7 @@ namespace Ropufu.LeytePond.Bridge
                     this.suggestions.Clear();
                     return unit;
                 }
-                App.Warnings.Push($"Multiple units match the specified query: {misspelled}.");
+                App.Suggestions.Push($"Multiple units match the specified query: {misspelled}.");
                 return default(T);
             } // if (...)
 

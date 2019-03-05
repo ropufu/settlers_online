@@ -23,6 +23,19 @@ namespace Ropufu
             const String LeftTagKey = "LeftTag";
             const String RightTagKey = "RightTag";
 
+            #region Dependency Property: Weather
+
+            public static DependencyProperty WeatherProperty = DependencyProperty.Register(nameof(MainWindow.Weather), typeof(Bridge.BattleWeather), typeof(MainWindow),
+                new PropertyMetadata(Bridge.BattleWeather.None));
+
+            public Bridge.BattleWeather Weather
+            {
+                get => (Bridge.BattleWeather)this.GetValue(MainWindow.WeatherProperty);
+                set => this.SetValue(MainWindow.WeatherProperty, value);
+            }
+
+            #endregion
+
             private Bridge.BlackMarsh blackMarsh = Bridge.BlackMarsh.Instance;
             private UpdateManager updater = null;
 
@@ -122,7 +135,7 @@ namespace Ropufu
                 var leftWaves = this.BuildWavesString(this.leftWavesView);
                 var rightWaves = this.BuildWavesString(this.rightWavesView);
 
-                this.blackMarsh.Execute(leftWaves, rightWaves, isLog);
+                this.blackMarsh.Execute(leftWaves, rightWaves, this.Weather, isLog);
                 new ReportWindow(this.blackMarsh.Report) { Owner = this }.Show();
             }
 

@@ -18,9 +18,11 @@ namespace Ropufu
         public partial class App : Application
         {
             private Logger warnings = new Logger();
+            private Logger suggestions = new Logger();
             private Bridge.Map map = new Bridge.Map();
 
             public static Logger Warnings => App.Current.warnings;
+            public static Logger Suggestions => App.Current.suggestions;
 
             public static Bridge.Map Map => App.Current.map;
 

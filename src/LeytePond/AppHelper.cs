@@ -8,7 +8,7 @@ using System.Windows.Media;
 
 namespace Ropufu.LeytePond
 {
-    static class AppHelper
+    public static class AppHelper
     {
         public static DependencyObject FindVisualChild(this DependencyObject item, Predicate<DependencyObject> predicate)
         {
@@ -34,5 +34,7 @@ namespace Ropufu.LeytePond
             var count = VisualTreeHelper.GetChildrenCount(item);
             for (var i = 0; i < count; i++) VisualTreeHelper.GetChild(item, i).ForVisualChildren(predicate, action);
         }
+
+        public static IEnumerable<Bridge.BattleWeather> WeatherStation => Enum.GetValues(typeof(Bridge.BattleWeather)) as IEnumerable<Bridge.BattleWeather>;
     }
 }

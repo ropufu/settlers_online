@@ -78,6 +78,16 @@ namespace ropufu::settlers_online
             if (!this->initialize(ec)) this->m_groups.clear();
         } // army(...)
 
+        /** Applies weather conditions to the army. */
+        void weather(battle_weather w) noexcept;
+
+        /** Creates a copy of \p other with weather conditions applied. */
+        army(const type& other, battle_weather w) noexcept
+            : army(other)
+        {
+            this->weather(w);
+        } // army(...)
+
         /** @brief Constructs a modified version of the army \p a conditioned for a fight against \p other.
          *  @param a The unconditioned(!) army to modify.
          *  @param other The unconditioned(!) army to prepare to fight against.
@@ -254,6 +264,39 @@ namespace ropufu::settlers_online
             return char_string::join(group_names, " ");
         } // to_string(...)
     }; // struct army
+
+    void army::weather(battle_weather w) noexcept
+    {
+        std::error_code ec {};
+
+        for (unit_group& g : this->m_groups)
+        {
+            unit_type t = g.unit(); // Copy of unit type to adjust.
+            damage d = t.damage(); // Damage to modify.
+            std::size_t hp = t.hit_points(); // Hit points to modify.
+
+            switch (w)
+            {
+                case battle_weather::hard_frost:
+                    if (t.is(unit_category::melee)) d.set_splash_chance(1, ec);
+                    break;
+                case battle_weather::bright_sunshine:
+                    hp = product_floor(hp, 1.2);
+                    break;
+                case battle_weather::heavy_fog:
+                    t.set_ability(special_ability::attack_weakest_target, true);
+                    break;
+                case battle_weather::hurricane:
+                    d.reset(
+                        product_floor(d.low(), 1.2),
+                        product_floor(d.high(), 1.2));
+                    break;
+            } // switch (...)
+            t.set_hit_points(hp, ec);
+            t.set_damage(d, ec);
+            g.set_unit(t); // Apply new type.
+        } // for (...)
+    } // army::weather(...)
 
     army army::condition(const army& a, const army& other, std::error_code& ec) noexcept
     {
