@@ -104,7 +104,7 @@ namespace ropufu::settlers_online
                     } // if (...)
 
                     // Since it is overshoot damage, each consecutive defending unit has full hit points.
-                    damage_required = inverse_damage_cast(defender_type.hit_points(), damage_factor); // Pure damage required to kill the defending unit.
+                    damage_required = inverse_damage_cast(defender_type.effective_hit_points(), damage_factor); // Pure damage required to kill the defending unit.
                     if (overshoot_damage > damage_required)
                     {
                         overshoot_damage -= damage_required;

@@ -267,33 +267,10 @@ namespace ropufu::settlers_online
 
     void army::weather(battle_weather w) noexcept
     {
-        std::error_code ec {};
-
         for (unit_group& g : this->m_groups)
         {
             unit_type t = g.unit(); // Copy of unit type to adjust.
-            damage d = t.damage(); // Damage to modify.
-            std::size_t hp = t.hit_points(); // Hit points to modify.
-
-            switch (w)
-            {
-                case battle_weather::hard_frost:
-                    if (t.is(unit_category::melee)) d.set_splash_chance(1, ec);
-                    break;
-                case battle_weather::bright_sunshine:
-                    hp = product_floor(hp, 1.2);
-                    break;
-                case battle_weather::heavy_fog:
-                    t.set_ability(special_ability::attack_weakest_target, true);
-                    break;
-                case battle_weather::hurricane:
-                    d.reset(
-                        product_floor(d.low(), 1.2),
-                        product_floor(d.high(), 1.2));
-                    break;
-            } // switch (...)
-            t.set_hit_points(hp, ec);
-            t.set_damage(d, ec);
+            t.apply_weather(w);
             g.set_unit(t); // Apply new type.
         } // for (...)
     } // army::weather(...)

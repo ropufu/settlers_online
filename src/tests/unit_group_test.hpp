@@ -69,7 +69,7 @@ namespace ropufu
                 if (!type::is_match(g, u, count, total_hit_popints, metagroup_id)) return false;
                 
                 // ~~ Test Damage ~~
-                std::size_t damage_full = u.hit_points();
+                std::size_t damage_full = u.effective_hit_points();
                 std::size_t damage_overflow = 2 * damage_full;
                 std::size_t damage_half = damage_full / 2;
                 

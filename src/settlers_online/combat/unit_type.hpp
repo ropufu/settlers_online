@@ -72,6 +72,8 @@ namespace ropufu::settlers_online
 
         detail::damage_pair<std::size_t> m_damage_additive_bonus = {}; // Additive bonus to the damage.
         detail::damage_pair<double> m_damage_rate_bonus = {}; // Multiplicative modifier to the damage. Rates themselves stack additively: two 10% bonuses will result in 20% rather than 21% = (1 + 10%)(1 + 10%) - 100%.
+        std::size_t m_hit_points_additive_bonus = 0;
+        double m_hit_points_rate_bonus = 0;
 
         bool validate(std::error_code& ec) const noexcept
         {
@@ -246,6 +248,19 @@ namespace ropufu::settlers_online
             if (!this->validate(ec)) this->coerce();
         } // set_hit_points(...)
 
+        /** Effective damage of the unit. */
+        std::size_t effective_hit_points() const noexcept
+        {
+            // Multiplicative bonus: affects base hit points.
+            std::size_t bonus = this->m_hit_points;
+            bonus = product_floor(bonus, this->m_hit_points_rate_bonus);
+            // Additive bonus comes next.
+            bonus += this->m_hit_points_additive_bonus;
+            // Apply the bonus to base hit points.
+            bonus += this->m_hit_points;
+            return bonus;
+        } // effective_hit_points(...)
+
         /** Offensive capabilities of the unit. */
         const damage_type& damage() const noexcept { return this->m_damage; }
         /** Offensive capabilities of the unit. */
@@ -287,9 +302,31 @@ namespace ropufu::settlers_online
             // If one is weak, and another is not.
             if (is_x_not_weak ^ is_y_not_weak) return is_y_not_weak;
             // Otherwise do hit points comparison.
-            if (x.m_hit_points == y.m_hit_points) return type::compare_by_id(x, y); // If hit points are the same, fall back to \c id comparison.
-            return x.m_hit_points < y.m_hit_points;
+            if (x.effective_hit_points() == y.effective_hit_points()) return type::compare_by_id(x, y); // If hit points are the same, fall back to \c id comparison.
+            return x.effective_hit_points() < y.effective_hit_points();
         } // compare_by_hit_points(...)
+
+        void apply_weather(battle_weather weather) noexcept
+        {
+            std::error_code ec {};
+            switch (weather)
+            {
+                case battle_weather::hard_frost:
+                    if (this->is(unit_category::melee)) this->m_damage.set_splash_chance(1, ec);
+                    break;
+                case battle_weather::bright_sunshine:
+                    this->m_hit_points_rate_bonus += 0.2;
+                    break;
+                case battle_weather::heavy_fog:
+                    this->set_ability(special_ability::attack_weakest_target, true);
+                    break;
+                case battle_weather::hurricane:
+                    this->m_damage_rate_bonus.low += 0.2;
+                    this->m_damage_rate_bonus.high += 0.2;
+                    break;
+                default: break;
+            } // switch (...)
+        } // apply_weather(...)
 
         /** @brief Apply the firendly army's skill to a unit.
          *  @param level The number of books invested in this skill.
@@ -376,8 +413,8 @@ namespace ropufu::settlers_online
             if (level > 3) level = 3;
 
             // Misc.
-            const std::array<std::size_t, 4> overrun_percentage_table { 0, 8, 16, 25 };
-            const std::size_t overrun_percentage = 100 - overrun_percentage_table[level];
+            const std::array<double, 4> overrun_rate_table { 0, 0.08, 0.16, 0.25 };
+            const double overrun_rate = overrun_rate_table[level];
             constexpr std::size_t hundred = static_cast<std::size_t>(100);
 
             switch (skill)
@@ -387,7 +424,7 @@ namespace ropufu::settlers_online
                 break;
             case battle_skill::overrun: // Decreases the HP of enemy bosses by 8/16/25%.
                 if (!this->has(special_ability::overrun)) return;
-                this->m_hit_points = fraction_ceiling(this->m_hit_points * overrun_percentage, hundred);
+                this->m_hit_points_rate_bonus -= overrun_rate;
                 break;
             default: break;
             } // switch (...)

@@ -76,7 +76,7 @@ namespace ropufu::settlers_online
                     // Optimize when attacking units with low hit points: each non-splash hit will always kill exactly 1 defending unit.
                     std::size_t effective_min_damage = damage_cast(t.effective_damage(0).low, damage_factor);
                     // Even though defender has not been conditioned, hit point reduction occurs only for bosses that typically don't come in large groups.
-                    bool is_one_to_one = is_never_splash && (effective_min_damage >= defender.unit().hit_points());
+                    bool is_one_to_one = is_never_splash && (effective_min_damage >= defender.unit().effective_hit_points());
 
                     distinct_factors.insert(damage_factor);
                     this->m_reduction_factor(i, j) = damage_factor;
