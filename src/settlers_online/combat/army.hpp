@@ -46,7 +46,7 @@ namespace ropufu::settlers_online
         aftermath::algebra::permutation<std::size_t> m_order_by_id = {}; // Permutation when defending agains units with \c do_attack_weakest_target.
         aftermath::algebra::permutation<std::size_t> m_order_by_hp = {}; // Permutation when defending agains units with \c do_attack_weakest_target.
         // ~~ Battle modifiers and traits ~~
-        double m_frenzy_bonus = 0; // Increases (multiplicative) the attack damage of this army for every combat round past the first.
+        std::size_t m_frenzy_bonus = 0; // Percentage of increases (multiplicative) in the attack damage of this army for every combat round past the first.
         aftermath::enum_array<battle_skill, std::size_t> m_skills = {}; // Skills affecting various aspects of the battle.
         aftermath::flags_t<battle_trait> m_traits = {}; // If at least one unit in the army has this trait, it kicks in.
 
@@ -117,14 +117,14 @@ namespace ropufu::settlers_online
         void set_camp(const camp_type& value) noexcept { this->m_camp = value; }
 
         /** Increases (multiplicative) the attack damage of this army for every combat round past the first. */
-        double frenzy_bonus() const noexcept { return this->m_frenzy_bonus; }
+        std::size_t frenzy_bonus() const noexcept { return this->m_frenzy_bonus; }
         /** @brief Increases (multiplicative) the attack damage of this army for every combat round past the first.
          *  @param ec Set to std::errc::invalid_argument if \p value is negative.
          */
-        void set_frenzy_bonus(double value, std::error_code& ec)
+        void set_frenzy_bonus(std::size_t percentage, std::error_code& ec)
         {
-            if (value < 0) return aftermath::detail::on_error(ec, std::errc::invalid_argument, "Frenzy bonus cannot be negative.");
-            this->m_frenzy_bonus = value;
+            if (percentage < 0) return aftermath::detail::on_error(ec, std::errc::invalid_argument, "Frenzy bonus cannot be negative.");
+            this->m_frenzy_bonus = percentage;
         } // set_frenzy_bonus(...)
 
         /** Skills affecting various aspects of the battle. */
@@ -282,46 +282,21 @@ namespace ropufu::settlers_online
         {
             unit_type t = g.unit(); // Copy of unit type to adjust.
 
-            // First, go through skills.
+            // First, go through friendly skills.
             for (const auto& pair : result.skills())
             {
                 t.apply_friendly_skill(pair.key(), pair.value());
                 // Increases the attack damage of this army by 10/20/30% for every combat round past the first.
-                if (pair.key() == battle_skill::battle_frenzy) result.set_frenzy_bonus(0.1 * pair.value(), ec);
+                if (pair.key() == battle_skill::battle_frenzy) result.set_frenzy_bonus(10 * pair.value(), ec);
                 if (ec) return a; // Error: panic, do nothing!
             }
+            // Second, go through enemy skills.
             for (const auto& pair : other.skills()) t.apply_enemy_skill(pair.key(), pair.value());
+            // Third, go through friendly traits.
+            for (battle_trait trait : result.traits()) t.apply_friendly_trait(trait);
+            // Fourth, go through enemy traits.
+            for (battle_trait trait : other.traits()) t.apply_enemy_trait(trait);
 
-            // Second, go through traits.
-            damage d = t.damage(); // Damage to modify.
-            // ~~ Traits ~~
-            // Friendly trait: explosive ammunition.
-            if (result.has(battle_trait::explosive_ammunition) && t.is(unit_category::ranged))
-            {
-                t.set_ability(special_ability::attack_weakest_target, true);
-                d.set_splash_chance(1, ec);
-            } // if (...)
-            // Friendly trait: bombastic.
-            if (result.has(battle_trait::bombastic) && t.is(unit_category::artillery))
-            {
-                // <bombastic_damage_factor> is defined in <battle_trait.hpp>.
-                d.reset(
-                    bombastic_damage_factor * d.low(),
-                    bombastic_damage_factor * d.high());
-            } // if (...)
-            // Enemy trait: intercept.
-            if (other.has(battle_trait::intercept))
-            {
-                t.set_ability(special_ability::attack_weakest_target, false);
-                // <intercept_damage_percent> is defined in <battle_trait.hpp>.
-                d.reset(
-                    fraction_ceiling(intercept_damage_percent * d.low(), static_cast<std::size_t>(100)),
-                    fraction_ceiling(intercept_damage_percent * d.high(), static_cast<std::size_t>(100)));
-            } // if (...)
-            // Enemy trait: dazzle.
-            if (other.has(battle_trait::dazzle)) d.set_accuracy(0, ec);
-
-            t.set_damage(d, ec); // Apply new damage.
             g.set_unit(t); // Apply new type.
             if (ec) return a; // Error: panic, do nothing!
         } // for (...)

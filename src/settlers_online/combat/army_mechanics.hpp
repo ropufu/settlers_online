@@ -115,7 +115,7 @@ namespace ropufu::settlers_online
 
         /** Initiates and attack by this army on its opponent \c defender. */
         template <typename t_sequence_type, typename t_logger_type>
-        void initiate_phase(army_mechanics& defender, battle_phase phase, double frenzy_rate, army_sequence<t_sequence_type>& sequencer, battle_clock& clock, t_logger_type& logger) const noexcept
+        void initiate_phase(army_mechanics& defender, battle_phase phase, std::size_t frenzy_percentage, army_sequence<t_sequence_type>& sequencer, battle_clock& clock, t_logger_type& logger) const noexcept
         {
             std::size_t m = this->m_underlying.count_groups();
 
@@ -131,11 +131,11 @@ namespace ropufu::settlers_online
                 if (this->m_uniform_splash_factor[i].has_value())
                 {
                     double damage_factor = this->m_uniform_splash_factor[i].value(); // Adjusted damage factor for current round.
-                    this->uniform_splash_at(i, defender, damage_factor, frenzy_rate, sequencer, clock, logger);
+                    this->uniform_splash_at(i, defender, damage_factor, frenzy_percentage, sequencer, clock, logger);
                 } // if (...)
                 else
                 {
-                    this->unoptimized_attack_at(i, defender, frenzy_rate, sequencer, clock, logger);
+                    this->unoptimized_attack_at(i, defender, frenzy_percentage, sequencer, clock, logger);
                 } // else (...)
             } // for (...)
         } // initiate_phase(...)
@@ -179,12 +179,12 @@ namespace ropufu::settlers_online
          */
         template <typename t_sequence_type, typename t_logger_type>
         void uniform_splash_at(std::size_t i, army_mechanics& defender,
-            double damage_factor, double frenzy_rate, army_sequence<t_sequence_type>& sequencer, battle_clock& clock, t_logger_type& logger) const noexcept
+            double damage_factor, std::size_t frenzy_percentage, army_sequence<t_sequence_type>& sequencer, battle_clock& clock, t_logger_type& logger) const noexcept
         {
             std::size_t n = defender.m_underlying.count_groups();
             const unit_group& attacking_group = this->m_underlying[i]; // Attacking group.
             const unit_type& attacker_type = attacking_group.unit(); // Attacking group type.
-            detail::damage_pair<std::size_t> attacker_damage = attacker_type.effective_damage(frenzy_rate);
+            detail::damage_pair<std::size_t> attacker_damage = attacker_type.effective_damage(frenzy_percentage);
 
             std::size_t count_attackers = attacking_group.count_attacker();
             std::size_t count_high_damage = sequencer[i].peek_count_high_damage(count_attackers, clock); // Count the number of units in this stack that do maximum damage.
@@ -236,7 +236,7 @@ namespace ropufu::settlers_online
          */
         template <typename t_sequence_type, typename t_logger_type>
         void unoptimized_attack_at(std::size_t i, army_mechanics& defender,
-            double frenzy_rate, army_sequence<t_sequence_type>& sequencer, battle_clock& clock, t_logger_type& logger) const noexcept
+            std::size_t frenzy_percentage, army_sequence<t_sequence_type>& sequencer, battle_clock& clock, t_logger_type& logger) const noexcept
         {
             std::size_t n = defender.m_underlying.count_groups();
             const unit_group& attacking_group = this->m_underlying[i]; // Attacking group.
@@ -268,7 +268,7 @@ namespace ropufu::settlers_online
 
                 // Optimize when attacking units with low hit points: each non-splash hit will always kill exactly 1 defending unit.
                 if (is_one_to_one) attacking_unit_index = technical_combat::one_to_one(defending_group, attacking_group, attacking_unit_index, logger); // technical_combat.hpp.
-                else attacking_unit_index = technical_combat::hit(defending_group, attacking_group, attacking_unit_index, damage_factor, frenzy_rate, sequencer[i], clock, logger, pure_overshoot_damage); // technical_combat.hpp.
+                else attacking_unit_index = technical_combat::hit(defending_group, attacking_group, attacking_unit_index, damage_factor, frenzy_percentage, sequencer[i], clock, logger, pure_overshoot_damage); // technical_combat.hpp.
 
                 if (attacking_unit_index == attacking_group.count_attacker()) break;
                 if (attacking_unit_index > attacking_group.count_attacker()) // <attacking_unit_index> overflow.

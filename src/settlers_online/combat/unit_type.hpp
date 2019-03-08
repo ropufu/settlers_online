@@ -11,6 +11,7 @@
 #include "../enums.hpp"
 
 #include "arithmetic.hpp"
+#include "bonus_modifier.hpp"
 #include "damage.hpp"
 
 #include <array>      // std::array
@@ -35,6 +36,7 @@ namespace ropufu::settlers_online
     {
         using type = unit_type;
         using damage_type = ropufu::settlers_online::damage;
+        using bonus_type = ropufu::settlers_online::detail::bonus_modifier;
 
         // ~~ Json names ~~
         static constexpr char jstr_id[] = "id";
@@ -70,15 +72,16 @@ namespace ropufu::settlers_online
         aftermath::flags_t<special_ability> m_abilities = {};  // Special abilities.
         aftermath::flags_t<battle_trait> m_traits = {};        // Special traits that affect the entire battle.
 
-        detail::damage_pair<std::size_t> m_damage_additive_bonus = {}; // Additive bonus to the damage.
-        detail::damage_pair<double> m_damage_rate_bonus = {}; // Multiplicative modifier to the damage. Rates themselves stack additively: two 10% bonuses will result in 20% rather than 21% = (1 + 10%)(1 + 10%) - 100%.
-        std::size_t m_hit_points_additive_bonus = 0;
-        double m_hit_points_rate_bonus = 0;
+        bonus_type m_low_damage_bonus = {};
+        bonus_type m_high_damage_bonus = {};
+        bonus_type m_hit_points_bonus = {};
 
         bool validate(std::error_code& ec) const noexcept
         {
             if (this->m_hit_points == 0) return aftermath::detail::on_error(ec, std::errc::invalid_argument, "Hit points cannot be zero.", false);
-            if (this->m_damage_rate_bonus.low < -1 || this->m_damage_rate_bonus.high < -1) return aftermath::detail::on_error(ec, std::errc::invalid_argument, "Damage rate cannot less than -100%.", false);
+            if (!this->m_low_damage_bonus.validate(ec)) return false;
+            if (!this->m_high_damage_bonus.validate(ec)) return false;
+            if (!this->m_hit_points_bonus.validate(ec)) return false;
             if (!this->m_damage.validate(ec)) return false;
             return true;
         } // validate(...)
@@ -86,9 +89,10 @@ namespace ropufu::settlers_online
         void coerce() noexcept
         {
             if (this->m_hit_points == 0) this->m_hit_points = 1;
-            if (this->m_damage_rate_bonus.low < -1) this->m_damage_rate_bonus.low = -1;
-            if (this->m_damage_rate_bonus.high < -1) this->m_damage_rate_bonus.high = -1;
 
+            this->m_low_damage_bonus.coerce();
+            this->m_high_damage_bonus.coerce();
+            this->m_hit_points_bonus.coerce();
             this->m_damage.coerce();
             this->m_display_name = this->m_names.empty() ? "??" : this->m_names.front();
 
@@ -249,17 +253,7 @@ namespace ropufu::settlers_online
         } // set_hit_points(...)
 
         /** Effective damage of the unit. */
-        std::size_t effective_hit_points() const noexcept
-        {
-            // Multiplicative bonus: affects base hit points.
-            std::size_t bonus = this->m_hit_points;
-            bonus = product_floor(bonus, this->m_hit_points_rate_bonus);
-            // Additive bonus comes next.
-            bonus += this->m_hit_points_additive_bonus;
-            // Apply the bonus to base hit points.
-            bonus += this->m_hit_points;
-            return bonus;
-        } // effective_hit_points(...)
+        std::size_t effective_hit_points() const noexcept { return this->m_hit_points_bonus.apply_to(this->m_hit_points); }
 
         /** Offensive capabilities of the unit. */
         const damage_type& damage() const noexcept { return this->m_damage; }
@@ -271,21 +265,15 @@ namespace ropufu::settlers_online
         } // set_damage(...)
 
         /** @brief Effective damage of the unit.
-         *  @warning \p frenzy_rate is not checked, and could potentially lead to infinite execution when effective damage is set to zero.
+         *  @warning \p frenzy_percentage is not checked, and could potentially lead to infinite execution when effective damage is set to zero.
          */
-        detail::damage_pair<std::size_t> effective_damage(double frenzy_rate) const noexcept
+        detail::damage_pair<std::size_t> effective_damage(std::size_t frenzy_percentage) const noexcept
         {
-            // Multiplicative bonus: affects base damage.
-            detail::damage_pair<std::size_t> bonus = this->m_damage.value();
-            bonus.low = product_floor(bonus.low, this->m_damage_rate_bonus.low + frenzy_rate);
-            bonus.high = product_floor(bonus.high, this->m_damage_rate_bonus.high + frenzy_rate);
-            // Additive bonus comes next.
-            bonus.low += this->m_damage_additive_bonus.low;
-            bonus.high += this->m_damage_additive_bonus.high;
-            // Apply the bonus to base damage.
-            bonus.low += this->m_damage.low();
-            bonus.high += this->m_damage.high();
-            return bonus;
+            bonus_type low_bonus = this->m_low_damage_bonus;
+            bonus_type high_bonus = this->m_high_damage_bonus;
+            low_bonus.append_rate(frenzy_percentage);
+            high_bonus.append_rate(frenzy_percentage);
+            return { low_bonus.apply_to(this->m_damage.low()), high_bonus.apply_to(this->m_damage.high())};
         } // effective_damage(...)
 
         /** Determines whether the two objects are in order by id. */
@@ -315,18 +303,58 @@ namespace ropufu::settlers_online
                     if (this->is(unit_category::melee)) this->m_damage.set_splash_chance(1, ec);
                     break;
                 case battle_weather::bright_sunshine:
-                    this->m_hit_points_rate_bonus += 0.2;
+                    this->m_hit_points_bonus.append_rate(+20);
                     break;
                 case battle_weather::heavy_fog:
                     this->set_ability(special_ability::attack_weakest_target, true);
                     break;
                 case battle_weather::hurricane:
-                    this->m_damage_rate_bonus.low += 0.2;
-                    this->m_damage_rate_bonus.high += 0.2;
+                    this->m_low_damage_bonus.append_rate(+20);
+                    this->m_high_damage_bonus.append_rate(+20);
                     break;
                 default: break;
             } // switch (...)
         } // apply_weather(...)
+
+        void apply_friendly_trait(battle_trait trait) noexcept
+        {
+            std::error_code ec {};
+            switch (trait)
+            {
+                case battle_trait::explosive_ammunition:
+                    if (this->is(unit_category::ranged))
+                    {
+                        this->set_ability(special_ability::attack_weakest_target, true);
+                        this->m_damage.set_splash_chance(1, ec);
+                    } // if (...)
+                    break;
+                case battle_trait::bombastic:
+                    if (this->is(unit_category::artillery))
+                    {
+                        this->m_low_damage_bonus.append_rate(bombastic_damage_percentage);
+                        this->m_high_damage_bonus.append_rate(bombastic_damage_percentage);
+                    } // if (...)
+                    break;
+                default: break;
+            } // switch (...)
+        } // apply_friendly_trait(...)
+
+        void apply_enemy_trait(battle_trait trait) noexcept
+        {
+            std::error_code ec {};
+            switch (trait)
+            {
+                case battle_trait::intercept:
+                    this->set_ability(special_ability::attack_weakest_target, false);
+                    this->m_low_damage_bonus.append_rate(intercept_damage_percentage);
+                    this->m_high_damage_bonus.append_rate(intercept_damage_percentage);
+                    break;
+                case battle_trait::dazzle:
+                    this->m_damage.set_accuracy(0, ec);
+                    break;
+                default: break;
+            } // switch (...)
+        } // apply_enemy_trait(...)
 
         /** @brief Apply the firendly army's skill to a unit.
          *  @param level The number of books invested in this skill.
@@ -345,54 +373,54 @@ namespace ropufu::settlers_online
             const double thirds = fraction_floor(100 * level, three) / 100.0;
 
             // Misc.
-            const std::array<double, 4> sniper_bonus_table { 0, 0.45, 0.85, 1.30 };
-            const double sniper_bonus = sniper_bonus_table[level];
+            const std::array<typename bonus_type::modifier_type, 4> sniper_bonus_table { 0, 45, 85, 130 };
+            const typename bonus_type::modifier_type sniper_bonus = sniper_bonus_table[level];
 
             switch (skill)
             {
-            case battle_skill::juggernaut: // Increases the general's (faction: general) attack damage by 20/40/60. These attacks have a 33/66/100% chance of dealing splash damage.
-                if (!this->is(unit_faction::general)) return;
-                this->m_damage_additive_bonus.low += 20 * level;
-                this->m_damage_additive_bonus.high += 20 * level;
-                splash_bonus = thirds;
-                break;
-            case battle_skill::garrison_annex: // Increases the unit capacity (faction: general) by 5/10/15.
-                if (!this->is(unit_faction::general)) return;
-                this->m_capacity += 5 * level;
-                break;
-            case battle_skill::lightning_slash: // The general (faction: general) attacks twice per round. That second attack's initiative is \c last_strike.
-                if (!this->is(unit_faction::general)) return;
-                this->m_attack_phases[battle_phase::last_strike] = true;
-                break;
-            case battle_skill::unstoppable_charge: // Increases the maximum attack damage of your swift units (faction: cavalry) by 1/2/3 and their attacks have a 33/66/100% chance of dealing splash damage.
-                if (!this->is(unit_category::cavalry)) return;
-                this->m_damage_additive_bonus.high += level;
-                splash_bonus = thirds;
-                break;
-            case battle_skill::weekly_maintenance: // Increases the attack damage of your heavy units (faction: artillery) by 10/20/30.
-                if (!this->is(unit_category::artillery)) return;
-                this->m_damage_additive_bonus.low += 10 * level;
-                this->m_damage_additive_bonus.high += 10 * level;
-                break;
-            case battle_skill::master_planner: // Adds 10% to this army's accuracy.
-                accuracy_bonus = 0.1;
-                break;
-            case battle_skill::rapid_fire: // Increases the maximum attack damage of your Bowmen by 5/10/15.
-                if (!this->has(special_ability::rapid_fire)) return;
-                this->m_damage_additive_bonus.high += 5 * level;
-                break;
-            case battle_skill::sniper_training: // Increases your Longbowmen's and regular Marksmen's minimum attack damage by 45/85/130% and the maximum by 5/10/15%.
-                if (!this->has(special_ability::sniper_training)) return;
-                this->m_damage_rate_bonus.low += sniper_bonus;
-                this->m_damage_rate_bonus.high += ((5 * level) / 100.0);
-                break;
-            case battle_skill::cleave: // Increases the attack damage of Elite Soldiers by 4/8/12 and their attacks have a 33/66/100% chance of dealing splash damage.
-                if (!this->has(special_ability::cleave)) return;
-                this->m_damage_additive_bonus.low += 4 * level;
-                this->m_damage_additive_bonus.high += 4 * level;
-                splash_bonus = thirds;
-                break;
-            default: break;
+                case battle_skill::juggernaut: // Increases the general's (faction: general) attack damage by 20/40/60. These attacks have a 33/66/100% chance of dealing splash damage.
+                    if (!this->is(unit_faction::general)) return;
+                    this->m_low_damage_bonus.append_additive(20 * level);
+                    this->m_high_damage_bonus.append_additive(20 * level);
+                    splash_bonus = thirds;
+                    break;
+                case battle_skill::garrison_annex: // Increases the unit capacity (faction: general) by 5/10/15.
+                    if (!this->is(unit_faction::general)) return;
+                    this->m_capacity += 5 * level;
+                    break;
+                case battle_skill::lightning_slash: // The general (faction: general) attacks twice per round. That second attack's initiative is \c last_strike.
+                    if (!this->is(unit_faction::general)) return;
+                    this->m_attack_phases[battle_phase::last_strike] = true;
+                    break;
+                case battle_skill::unstoppable_charge: // Increases the maximum attack damage of your swift units (faction: cavalry) by 1/2/3 and their attacks have a 33/66/100% chance of dealing splash damage.
+                    if (!this->is(unit_category::cavalry)) return;
+                    this->m_high_damage_bonus.append_additive(level);
+                    splash_bonus = thirds;
+                    break;
+                case battle_skill::weekly_maintenance: // Increases the attack damage of your heavy units (faction: artillery) by 10/20/30.
+                    if (!this->is(unit_category::artillery)) return;
+                    this->m_low_damage_bonus.append_additive(10 * level);
+                    this->m_high_damage_bonus.append_additive(10 * level);
+                    break;
+                case battle_skill::master_planner: // Adds 10% to this army's accuracy.
+                    accuracy_bonus = 0.1;
+                    break;
+                case battle_skill::rapid_fire: // Increases the maximum attack damage of your Bowmen by 5/10/15.
+                    if (!this->has(special_ability::rapid_fire)) return;
+                    this->m_high_damage_bonus.append_additive(5 * level);
+                    break;
+                case battle_skill::sniper_training: // Increases your Longbowmen's and regular Marksmen's minimum attack damage by 45/85/130% and the maximum by 5/10/15%.
+                    if (!this->has(special_ability::sniper_training)) return;
+                    this->m_low_damage_bonus.append_rate(sniper_bonus);
+                    this->m_high_damage_bonus.append_rate(5 * level);
+                    break;
+                case battle_skill::cleave: // Increases the attack damage of Elite Soldiers by 4/8/12 and their attacks have a 33/66/100% chance of dealing splash damage.
+                    if (!this->has(special_ability::cleave)) return;
+                    this->m_low_damage_bonus.append_additive(4 * level);
+                    this->m_high_damage_bonus.append_additive(4 * level);
+                    splash_bonus = thirds;
+                    break;
+                default: break;
             } // switch(...)
 
             double new_accuracy = this->m_damage.accuracy() + accuracy_bonus;
@@ -413,20 +441,20 @@ namespace ropufu::settlers_online
             if (level > 3) level = 3;
 
             // Misc.
-            const std::array<double, 4> overrun_rate_table { 0, 0.08, 0.16, 0.25 };
-            const double overrun_rate = overrun_rate_table[level];
+            const std::array<typename bonus_type::modifier_type, 4> overrun_rate_table { 0, -8, -16, -25 };
+            const typename bonus_type::modifier_type overrun_rate = overrun_rate_table[level];
             constexpr std::size_t hundred = static_cast<std::size_t>(100);
 
             switch (skill)
             {
-            case battle_skill::fast_learner: // Increases the XP gained from enemy units defeated by this army by 10/20/30%.
-                this->m_experience = fraction_floor(this->m_experience * (100 + 10 * level), hundred);
-                break;
-            case battle_skill::overrun: // Decreases the HP of enemy bosses by 8/16/25%.
-                if (!this->has(special_ability::overrun)) return;
-                this->m_hit_points_rate_bonus -= overrun_rate;
-                break;
-            default: break;
+                case battle_skill::fast_learner: // Increases the XP gained from enemy units defeated by this army by 10/20/30%.
+                    this->m_experience = fraction_floor(this->m_experience * (100 + 10 * level), hundred);
+                    break;
+                case battle_skill::overrun: // Decreases the HP of enemy bosses by 8/16/25%.
+                    if (!this->has(special_ability::overrun)) return;
+                    this->m_hit_points_bonus.append_rate(overrun_rate);
+                    break;
+                default: break;
             } // switch (...)
         } // apply_enemy_skill(...)
 

@@ -107,18 +107,18 @@ namespace ropufu::settlers_online
                 return 0;
             } // if (...)
             
-            double left_frenzy_bonus = this->m_left.underlying().frenzy_bonus();
-            double right_frenzy_bonus = this->m_right.underlying().frenzy_bonus();
-            double left_frenzy_rate = 0;
-            double right_frenzy_rate = 0;
+            const std::size_t left_frenzy_bonus = this->m_left.underlying().frenzy_bonus();
+            const std::size_t right_frenzy_bonus = this->m_right.underlying().frenzy_bonus();
+            std::size_t left_frenzy_rate = 0;
+            std::size_t right_frenzy_rate = 0;
 
             while (this->m_left.underlying().alive() && this->m_right.underlying().alive())
             {
                 if constexpr (t_logger_type::is_enabled)
                 {
                     logger << "Begin round " << (1 + this->m_clock.round_index()) << "." << nullptr;
-                    if (left_frenzy_rate != 0) logger << "Left frenzy bonus: " << static_cast<std::size_t>(100 * left_frenzy_rate) << "%." << nullptr;
-                    if (right_frenzy_rate != 0) logger << "Right frenzy bonus: " << static_cast<std::size_t>(100 * right_frenzy_rate) << "%." << nullptr;
+                    if (left_frenzy_rate != 0) logger << "Left frenzy bonus: " << left_frenzy_rate << "%." << nullptr;
+                    if (right_frenzy_rate != 0) logger << "Right frenzy bonus: " << right_frenzy_rate << "%." << nullptr;
                 } // if constexpr (...)
 
                 for (battle_phase phase : this->m_phases)

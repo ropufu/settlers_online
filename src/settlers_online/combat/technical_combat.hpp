@@ -21,7 +21,7 @@ namespace ropufu::settlers_online
          */
         template <typename t_sequence_type, typename t_logger_type>
         static std::size_t hit(unit_group& defending_group,
-            const unit_group& attacking_group, std::size_t attacking_unit_index, double damage_factor, double frenzy_rate,
+            const unit_group& attacking_group, std::size_t attacking_unit_index, double damage_factor, std::size_t frenzy_percentage,
             t_sequence_type& sequencer, battle_clock& clock, t_logger_type& logger, std::size_t& overshoot_damage) noexcept
         {
             const unit_type& attacker_type = attacking_group.unit();
@@ -40,7 +40,7 @@ namespace ropufu::settlers_online
 
             // Proceed to next attaking unit.
             std::size_t attacking_units_remaining = attacking_group.count_attacker() - attacking_unit_index;
-            detail::damage_pair<std::size_t> attacker_damage = attacker_type.effective_damage(frenzy_rate);
+            detail::damage_pair<std::size_t> attacker_damage = attacker_type.effective_damage(frenzy_percentage);
 
             std::size_t effective_min_damage = damage_cast(attacker_damage.low, damage_factor); // Potential effective minumum damage dealt by one attacking unit.
             std::size_t effective_max_damage = damage_cast(attacker_damage.high, damage_factor); // Potential effective mamimum damage dealt by one attacking unit.

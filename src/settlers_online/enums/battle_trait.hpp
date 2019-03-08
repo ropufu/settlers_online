@@ -6,12 +6,12 @@
 
 #include <cstddef>     // std::size_t
 #include <string>      // std::string, std::to_string
-#include <type_traits> // std::underlying_type_t
+#include <type_traits> // std::underlying_type_t, std::make_signed_t
 
 namespace ropufu::settlers_online
 {
-    static constexpr std::size_t intercept_damage_percent = 95;
-    static constexpr std::size_t bombastic_damage_factor = 2;
+    static constexpr std::make_signed_t<std::size_t> intercept_damage_percentage = -5;
+    static constexpr std::make_signed_t<std::size_t> bombastic_damage_percentage = +100;
 
     /** @brief Traits that some units may have that modify the course of the entire battle.
      *  @remark Used internally as an indexer for \c enum_array, so don't go too high or negative. 

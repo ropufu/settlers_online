@@ -60,7 +60,7 @@ namespace ropufu::aftermath::detail
         {
             if (from == "none") { to = enum_type::none; return true; }
             if (from == "hard frost" || from == "frost") { to = enum_type::hard_frost; return true; }
-            if (from == "bright sunshine" || from == "sunshine") { to = enum_type::bright_sunshine; return true; }
+            if (from == "bright sunshine" || from == "sunshine" || from == "sun" || from == "bright sun") { to = enum_type::bright_sunshine; return true; }
             if (from == "heavy fog" || from == "fog") { to = enum_type::heavy_fog; return true; }
             if (from == "hurricane") { to = enum_type::hurricane; return true; }
             return false;
