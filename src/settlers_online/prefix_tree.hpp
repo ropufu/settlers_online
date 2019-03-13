@@ -42,7 +42,7 @@ namespace ropufu::settlers_online
         using word_type = t_word_type;
         using key_type = t_key_type;
 
-        friend struct prefix_tree<t_letter_type, t_word_type, t_key_type>;
+        friend prefix_tree<t_letter_type, t_word_type, t_key_type>;
 
     private:
         using index_type = std::size_t;

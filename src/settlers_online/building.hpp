@@ -13,12 +13,14 @@
 
 namespace ropufu::settlers_online
 {
+    struct island_map;
+
     struct building : public blueprint<building, bool, island_vertex>
     {
         using type = building;
         using index_type = ropufu::aftermath::algebra::matrix_index<std::size_t>;
         
-        friend struct island_map;
+        friend island_map;
 
     private:
         // Cached position of entrance vertices.

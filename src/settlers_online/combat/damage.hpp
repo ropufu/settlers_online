@@ -15,6 +15,8 @@
 
 namespace ropufu::settlers_online
 {
+    struct unit_type;
+
     namespace detail
     {
         template <typename t_value_type>
@@ -41,7 +43,7 @@ namespace ropufu::settlers_online
         static constexpr char jstr_accuracy[] = "accuracy";
         static constexpr char jstr_splash_chance[] = "splash chance";
 
-        friend struct unit_type;
+        friend unit_type;
 
     private:
         detail::damage_pair<std::size_t> m_value = {};

@@ -32,7 +32,7 @@ namespace ropufu::settlers_online
         using key_type = std::size_t; //std::decay_t<decltype(std::declval<unit_type>().id())>;
         using name_type = std::string;
 
-        friend struct name_database<unit_database, unit_type, std::size_t>;
+        friend name_database<unit_database, unit_type, std::size_t>;
 
     protected:
         /** @brief Retrieves the database key. */

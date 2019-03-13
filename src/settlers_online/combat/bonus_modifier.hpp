@@ -13,6 +13,8 @@
 
 namespace ropufu::settlers_online
 {
+    struct unit_type;
+
     namespace detail
     {
         struct bonus_modifier
@@ -22,7 +24,7 @@ namespace ropufu::settlers_online
             using modifier_type = signed_size_t;
             static constexpr signed_size_t hundred = 100;
 
-            friend struct unit_type;
+            friend unit_type;
 
         private:
             signed_size_t m_additive_bonus = 0; // Additive bonus (in absolute value).

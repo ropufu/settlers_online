@@ -12,6 +12,8 @@
 
 namespace ropufu::settlers_online
 {
+    struct island_map;
+
     namespace detail
     {
         struct path_anchor
@@ -131,7 +133,7 @@ namespace ropufu::settlers_online
         using index_type = ropufu::aftermath::algebra::matrix_index<std::size_t>;
         using mask_type = ropufu::aftermath::algebra::matrix<bool>;
         
-        friend struct island_map;
+        friend island_map;
 
     private:
         std::vector<index_type> m_path{};
