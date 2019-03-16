@@ -3,6 +3,7 @@
 #include "combat_mechanics_test.hpp"
 #include "unit_group_test.hpp"
 #include "unit_type_test.hpp"
+#include "balancer_test.hpp"
 
 #include <chrono>  // std::chrono::steady_clock, std::chrono::duration_cast
 #include <cstddef> // std::size_t
@@ -14,6 +15,7 @@ using army_test = ropufu::settlers_online_test::army_test;
 using combat_mechanics_test = ropufu::settlers_online_test::combat_mechanics_test;
 using unit_type_test = ropufu::settlers_online_test::unit_type_test;
 using unit_group_test = ropufu::settlers_online_test::unit_group_test;
+using balancer_test = ropufu::settlers_online_test::balancer_test;
 
 template <typename t_test_type>
 bool run_test(t_test_type test, const std::string& name)
@@ -49,6 +51,8 @@ std::int32_t main()
         // ~~ Combat tests ~~
         run_test(combat_mechanics_test::test_deterministic, "<combat_mechanics> deterministic");
         run_test(combat_mechanics_test::test_randomized, "<combat_mechanics> randomized");
+        // ~~ Balances tests ~~
+        run_test(balancer_test::test_farms_1, "<balancer> Farms 1");
     } // try
     catch (const std::exception& ex)
     {

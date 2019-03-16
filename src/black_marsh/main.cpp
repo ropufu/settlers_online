@@ -163,7 +163,7 @@ command_name parse_command(const std::string& expression, std::string& argument)
     if (command == "weather" || command == "w") return command_name::weather;
     if (command == "n") return command_name::n;
     if (command == "log") return command_name::log;
-    if (command == "run") return command_name::run;
+    if (command == "run" || command == "x") return command_name::run;
 
     return command_name::not_recognized;
 } // parse_command(...)
@@ -195,7 +195,7 @@ void help(const std::string& argument) noexcept
     weather, w     | Get or set weather conditions.
     n              | Gets or sets the number of simulations.
     log            | Displays one battle report.
-    run            | Executes the simulations.
+    run, x         | Executes the simulations.
 ==============================================================
 Following the left / right command, one could use:
     Command Name   | Description
