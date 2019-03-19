@@ -5,9 +5,12 @@
 #include <ropufu/on_error.hpp>
 
 #include <cstddef> // std::size_t
+#include <chrono>  // std::chrono::seconds
+#include <limits>  // std::numeric_limits::is_integer
 #include <numeric> // std::lcm
 #include <string>  // std::string
 #include <system_error> // std::error_code
+#include <type_traits>  // std::is_same_v
 #include <vector> // std::vector
 
 namespace ropufu::settlers_online
@@ -21,23 +24,40 @@ namespace ropufu::settlers_online
         mask_type mask;
     }; // struct balancer_token
 
-    /** Balances production and consumption of intermediate resource to maximize output of the final resource. */
+    /** @brief Balances production and consumption of intermediate resource to maximize output of the final resource. */
+    template <typename t_duration_type = std::chrono::seconds>
+    struct balancer;
+
+    /** @brief Balances production and consumption of intermediate resource to maximize output of the final resource.
+     *  @remark This is the default implementation of \c balancer<...> struct, namely \c balancer<>.
+     */
+    using balancer_t = balancer<>;
+
+    /** @brief Balances production and consumption of intermediate resource to maximize output of the final resource. */
+    template <typename t_duration_type>
     struct balancer
     {
-        using type = balancer;
+        using type = balancer<t_duration_type>;
+        using duration_type = t_duration_type;
         using mask_type = std::size_t;
         using token_type = balancer_token<mask_type>;
-        /** 12 hours expressed in seconds. */
-        static constexpr std::size_t default_time_interval = 60 * 60 * 12;
 
     private:
         std::error_code m_error_code = {};
+        duration_type m_common_time = {}; // Time interval in which both consumption and production cycles fit perfectly (whole number of times).
         std::vector<std::size_t> m_intermediate_production_frequencies = {}; // Number of intermediate resource production cycles per /c m_common_time.
         std::vector<std::size_t> m_intermediate_consumption_frequencies = {}; // Number of intermediate resource consumption cycles per /c m_common_time.
-        std::size_t m_common_time = 0; // Time interval in which both consumption and production cycles fit perfectly (whole number of times).
         std::size_t m_intermediate_produced = 1;
         std::size_t m_intermediate_consumed = 1;
         std::size_t m_final_produced = 1;
+
+        static constexpr void traits_check()
+        {
+            using rep_type = typename duration_type::rep;
+            using period_type = typename duration_type::period;
+            static_assert(std::is_same_v<duration_type, std::chrono::duration<rep_type, period_type>>, "t_duration_type has to be std::chrono::duration.");
+            static_assert(std::numeric_limits<rep_type>::is_integer, "Tick count has to be an integer type.");
+        } // traits_check(...)
 
         static mask_type two_pow(std::size_t power)
         {
@@ -71,30 +91,53 @@ namespace ropufu::settlers_online
             return result;
         } // which_bits_set(...)
 
-        balancer() noexcept { }
+        balancer() noexcept { type::traits_check(); }
 
-        balancer(const std::vector<std::size_t>& intermediate_times) noexcept
+        /** @todo Template on an iterable collection with \c size() method, rather than have std::vector. */
+        balancer(const std::vector<duration_type>& intermediate_times) noexcept
             : balancer(intermediate_times, intermediate_times, this->m_error_code)
         {
         } // balancer(...)
 
-        balancer(const std::vector<std::size_t>& intermediate_production_times, const std::vector<std::size_t>& intermediate_consumption_times, std::error_code& ec) noexcept
-            : m_intermediate_production_frequencies(intermediate_production_times), m_intermediate_consumption_frequencies(intermediate_consumption_times)
+        /** @todo Template on an iterable collection with \c size() method, rather than have std::vector. */
+        balancer(
+            const std::vector<duration_type>& intermediate_production_times,
+            const std::vector<duration_type>& intermediate_consumption_times,
+            std::error_code& ec) noexcept
         {
+            type::traits_check();
             if (intermediate_production_times.size() != intermediate_consumption_times.size())
             {
-                /** @todo Replace with aftermath \c on_error call. */
                 aftermath::detail::on_error(ec, std::errc::invalid_argument, "Number of slots should be the same for production and consumption buildings.");
                 this->m_error_code = ec;
                 return;
             } // if (...)
 
-            this->m_common_time = 1;
-            for (std::size_t x : intermediate_production_times) this->m_common_time = std::lcm(this->m_common_time, x);
-            for (std::size_t x : intermediate_consumption_times) this->m_common_time = std::lcm(this->m_common_time, x);
+            for (const duration_type& x : intermediate_production_times)
+                if (x.count() <= 0)
+                {
+                    aftermath::detail::on_error(ec, std::errc::invalid_argument, "Production times should be positive.");
+                    this->m_error_code = ec;
+                    return;
+                } // if (...)
+            for (const duration_type& x : intermediate_consumption_times)
+                if (x.count() <= 0)
+                {
+                    aftermath::detail::on_error(ec, std::errc::invalid_argument, "Consumption times should be positive.");
+                    this->m_error_code = ec;
+                    return;
+                } // if (...)
 
-            for (std::size_t& x : this->m_intermediate_production_frequencies) x = this->m_common_time / x;
-            for (std::size_t& x : this->m_intermediate_consumption_frequencies) x = this->m_common_time / x;
+            this->m_intermediate_production_frequencies.reserve(intermediate_production_times.size());
+            this->m_intermediate_consumption_frequencies.reserve(intermediate_consumption_times.size());
+
+            std::size_t common_time = 1;
+            for (const duration_type& x : intermediate_production_times) common_time = std::lcm(common_time, x.count());
+            for (const duration_type& x : intermediate_consumption_times) common_time = std::lcm(common_time, x.count());
+            this->m_common_time = duration_type { static_cast<typename duration_type::rep>(common_time) };
+
+            for (const duration_type& x : intermediate_production_times) this->m_intermediate_production_frequencies.push_back(common_time / x.count());
+            for (const duration_type& x : intermediate_consumption_times) this->m_intermediate_consumption_frequencies.push_back(common_time / x.count());
         } // balancer(...)
 
         /** Indicates if the \c balancer is well-formed. */
@@ -107,7 +150,7 @@ namespace ropufu::settlers_online
         const std::vector<std::size_t>& intermediate_consumption_frequencies() const noexcept { return this->m_intermediate_consumption_frequencies; }
 
         /** Time interval in which both consumption and production cycles fit perfectly (whole number of times). */
-        std::size_t common_time() const noexcept { return this->m_common_time; }
+        const duration_type& common_time() const noexcept { return this->m_common_time; }
 
         /** Amount of intermediate resource produced per cycle. */
         std::size_t intermediate_produced() const noexcept { return this->m_intermediate_produced; }
@@ -152,7 +195,8 @@ namespace ropufu::settlers_online
         } // run(...)
 
         /** Calculates the production rate of the final resource over a specified time interval. */
-        double final_production_rate(token_type token, std::size_t time_interval_in_seconds = type::default_time_interval) const noexcept
+        template <typename t_rep_type, typename t_period_type>
+        double final_production_rate(token_type token, std::chrono::duration<t_rep_type, t_period_type> time_interval) const noexcept
         {
             if (this->m_error_code.value() != 0) return 0; // Panic, do nothing!
 
@@ -165,7 +209,13 @@ namespace ropufu::settlers_online
                 [&] (std::size_t position) { final_balance += this->m_final_produced * this->m_intermediate_consumption_frequencies[position]; }
             );
 
-            return (final_balance * time_interval_in_seconds) / static_cast<double>(this->m_common_time);
+            using duration_type_a = std::chrono::duration<double, typename duration_type::period>;
+            using duration_type_b = std::chrono::duration<double, t_period_type>;
+            using duration_type_c = std::common_type_t<duration_type_a, duration_type_b>;
+
+            double common_time = std::chrono::duration_cast<duration_type_c>(this->m_common_time).count();
+            double requested_time = std::chrono::duration_cast<duration_type_c>(time_interval).count();
+            return (final_balance * requested_time) / common_time;
         } // final_production_rate(...)
     }; // struct balancer
 } // namespace ropufu::settlers_online
