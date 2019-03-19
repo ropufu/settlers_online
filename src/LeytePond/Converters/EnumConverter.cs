@@ -12,7 +12,10 @@ namespace Ropufu.LeytePond.Converters
         public Object Convert(Object value, Type targetType, Object parameter, System.Globalization.CultureInfo culture)
         {
             var e = (Enum)value;
-            return e?.ToString().ToReadable() ?? String.Empty;
+            if (Object.ReferenceEquals(e, null)) return String.Empty;
+
+            if (Object.Equals(parameter, true)) return EnumDescriptor.Describe(e);
+            return e.ToString().ToReadable();
         }
 
         public Object ConvertBack(Object value, Type targetType, Object parameter, System.Globalization.CultureInfo culture)

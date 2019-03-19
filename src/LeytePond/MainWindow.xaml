@@ -101,7 +101,10 @@
                         <Setter Property="ToolTip">
                             <Setter.Value>
                                 <ToolTip>
-                                    <TextBlock Text='{Binding Converter={StaticResource EnumConverter}}' />
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock Text='{Binding Converter={StaticResource EnumConverter}}' FontWeight="Bold" />
+                                        <TextBlock Text='{Binding Converter={StaticResource EnumConverter}, ConverterParameter={StaticResource True}}' />
+                                    </StackPanel>
                                 </ToolTip>
                             </Setter.Value>
                         </Setter>

@@ -132,4 +132,26 @@ namespace Ropufu.LeytePond.Bridge
         HeavyFog = 3,          // All units (including enemy units) gain \c do_attack_weakest_target.
         Hurricane = 4          // The minimum and maximum damage of all units (including enemy units) is increased by 20%.
     }
+
+    static class EnumDescriptor
+    {
+        public static String Describe(Enum e)
+        {
+            if (e.GetType() == typeof(BattleWeather)) return EnumDescriptor.Describe((BattleWeather)e);
+            return "??";
+        }
+
+        public static String Describe(BattleWeather weather)
+        {
+            switch (weather)
+            {
+                case BattleWeather.None: return "No weather modifiers.";
+                case BattleWeather.HardFrost: return "All melee units (including enemy melee units) gain splash damage.";
+                case BattleWeather.BrightSunshine: return "The HP of all units (including enemy units) are increased by 20%.";
+                case BattleWeather.HeavyFog: return "All units (including enemy units) gain the attack weakest target ability.";
+                case BattleWeather.Hurricane: return "The minimum and maximum damage of all units (including enemy units) is increased by 20%.";
+                default: return String.Empty;
+            }
+        }
+    }
 }
