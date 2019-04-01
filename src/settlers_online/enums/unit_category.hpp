@@ -20,7 +20,8 @@ namespace ropufu::settlers_online
         ranged = 2,
         cavalry = 3,
         artillery = 4,
-        elite = 5
+        elite = 5,
+        boss = 6
     }; // struct unit_category
 } // namespace ropufu::settlers_online
 
@@ -37,6 +38,7 @@ namespace std
             case argument_type::cavalry: return "cavalry";
             case argument_type::artillery: return "artillery";
             case argument_type::elite: return "elite";
+            case argument_type::boss: return "boss";
             default: return "unknown <unit_category> " + std::to_string(static_cast<std::size_t>(x));
         } // switch (...)
     } // to_string(...)
@@ -50,7 +52,7 @@ namespace ropufu::aftermath::detail
     {
         using underlying_type = std::underlying_type_t<ropufu::settlers_online::unit_category>;
         static constexpr underlying_type first_index = 0;
-        static constexpr underlying_type past_the_last_index = 6;
+        static constexpr underlying_type past_the_last_index = 7;
     }; // struct enum_array_keys<...>
 
     template <>
@@ -62,13 +64,13 @@ namespace ropufu::aftermath::detail
 
         static bool try_parse(const std::string& from, enum_type& to) noexcept
         {
-            if (from == "none") { to = enum_type::unknown; return true; }
-            if (from == "unknown") { to = enum_type::unknown; return true; }
+            if (from == "none" || from == "unknown") { to = enum_type::unknown; return true; }
             if (from == "melee") { to = enum_type::melee; return true; }
             if (from == "ranged") { to = enum_type::ranged; return true; }
             if (from == "cavalry") { to = enum_type::cavalry; return true; }
             if (from == "artillery") { to = enum_type::artillery; return true; }
             if (from == "elite") { to = enum_type::elite; return true; }
+            if (from == "boss") { to = enum_type::boss; return true; }
             return false;
         } // try_parse(...)
     }; // struct enum_parser<...>

@@ -32,7 +32,7 @@ namespace ropufu::settlers_online
 
         trivial_attack_sequence(const unit_group& g, std::size_t /*group_index*/, std::error_code& /*ec*/) noexcept
         {
-            const damage& d = g.unit().damage();
+            const damage& d = g.unit().base_damage();
 
             if (d.accuracy() == 0) this->m_is_always_high = false;
             if (d.accuracy() == 1) this->m_is_always_high = true;

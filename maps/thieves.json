@@ -3,102 +3,95 @@
         {
             "id": 848,
             "names": [ "Shrewd Thief" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "normal" ],
             "hit points": 1000,
             "damage": { "low": 250, "high": 500, "accuracy": 0.8, "splash chance": 1 },
-            "experience when killed": 52,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 52
         },
         {
             "id": 850,
             "names": [ "Scarred Thief" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "first strike" ],
             "hit points": 500,
             "damage": { "low": 150, "high": 300, "accuracy": 0.8, "splash chance": 1 },
             "experience when killed": 39,
-            "special abilities": [ "attack weakest target", "overrun" ]
+            "special abilities": [ "attack weakest target" ]
         },
         {
             "id": 852,
             "names": [ "Smart Thief" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "normal" ],
             "hit points": 5000,
             "damage": { "low": 500, "high": 1000, "accuracy": 0.8, "splash chance": 1 },
-            "experience when killed": 200,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 200
         },
         {
             "id": 854,
             "names": [ "Snooty Thief" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "normal" ],
             "hit points": 150000,
             "damage": { "low": 500, "high": 1000, "accuracy": 0.8, "splash chance": 1 },
-            "experience when killed": 5000,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 5000
         },
         {
             "id": 856,
             "names": [ "Silly Thief" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 50000,
             "damage": { "low": 2000, "high": 4000, "accuracy": 0.8, "splash chance": 1 },
-            "experience when killed": 1800,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 1800
         },
         {
             "id": 862,
             "names": [ "Greedy Thief" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 10000,
             "damage": { "low": 2500, "high": 5000, "accuracy": 0.8, "splash chance": 1 },
             "experience when killed": 470,
-            "special abilities": [ "attack weakest target", "overrun" ]
+            "special abilities": [ "attack weakest target" ]
         },
         {
             "id": 864,
             "names": [ "Mysterious Thief" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "normal" ],
             "hit points": 20000,
             "damage": { "low": 1000, "high": 2000, "accuracy": 0.8, "splash chance": 1 },
-            "experience when killed": 740,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 740
         },
         {
             "id": 865,
             "names": [ "Grayed Thief" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "normal" ],
             "hit points": 500,
             "damage": { "low": 375, "high": 750, "accuracy": 0.8, "splash chance": 1 },
             "experience when killed": 53,
-            "special abilities": [ "attack weakest target", "overrun" ]
+            "special abilities": [ "attack weakest target" ]
         },
         {
             "id": 866,
             "names": [ "Treacherous Thief" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "normal" ],
             "hit points": 50000,
             "damage": { "low": 250, "high": 500, "accuracy": 0.8, "splash chance": 1 },
-            "experience when killed": 1700,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 1700
         },
         {
             "id": 867,
             "names": [ "Sneaking Thief" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "first strike" ],
             "hit points": 1000,
             "damage": { "low": 250, "high": 500, "accuracy": 0.8, "splash chance": 1 },
-            "experience when killed": 62,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 62
         }
     ]
 }

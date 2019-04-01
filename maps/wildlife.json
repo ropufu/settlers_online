@@ -3,7 +3,7 @@
         {
             "id": 81,
             "names": [ "Grey Wolf" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 10,
             "damage": { "low": 2, "high": 3, "accuracy": 0.8 },
@@ -30,7 +30,7 @@
         {
             "id": 502,
             "names": [ "Wolf" ],
-            "category": "melee",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 40,
             "damage": { "low": 60, "high": 100, "accuracy": 0.85 },
@@ -39,7 +39,7 @@
         {
             "id": 503,
             "names": [ "Wolf Packleader" ],
-            "category": "melee",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 60,
             "damage": { "low": 80, "high": 120, "accuracy": 0.95, "splash chance": 1 },
@@ -48,7 +48,7 @@
         {
             "id": 504,
             "names": [ "Fox" ],
-            "category": "melee",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 30,
             "damage": { "low": 10, "high": 40, "accuracy": 0.95 },
@@ -58,7 +58,7 @@
         {
             "id": 520,
             "names": [ "Giant" ],
-            "category": "melee",
+            "category": "artillery",
             "phases": [ "last strike" ],
             "hit points": 160,
             "damage": { "low": 60, "high": 90, "accuracy": 0.95, "splash chance": 1 },
@@ -67,7 +67,7 @@
         {
             "id": 705,
             "names": [ "Deer" ],
-            "category": "melee",
+            "category": "none",
             "phases": [ "normal" ],
             "hit points": 15,
             "damage": { "low": 5, "high": 10, "accuracy": 0.8 }
@@ -75,52 +75,48 @@
         {
             "id": 530,
             "names": [ "Black Bull" ],
-            "category": "melee",
+            "category": "boss",
             "phases": [ "normal" ],
             "hit points": 60000,
             "damage": { "low": 250, "high": 300, "accuracy": 0.9, "splash chance": 1 },
-            "experience when killed": 500,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 500
         },
         {
             "id": 531,
             "names": [ "Unicorn" ],
-            "category": "melee",
+            "category": "boss",
             "phases": [ "normal" ],
             "hit points": 30000,
             "damage": { "low": 250, "high": 400, "accuracy": 0.9, "splash chance": 1 },
-            "experience when killed": 300,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 300
         },
         {
             "id": 532,
             "names": [ "Furious Boar" ],
-            "category": "melee",
+            "category": "boss",
             "phases": [ "normal" ],
             "hit points": 50000,
             "damage": { "low": 200, "high": 300, "accuracy": 0.9, "splash chance": 1 },
-            "experience when killed": 400,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 400
         },
         {
             "id": 533,
             "names": [ "Giant Bear" ],
-            "category": "melee",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 55000,
             "damage": { "low": 400, "high": 750, "accuracy": 0.6, "splash chance": 1 },
-            "experience when killed": 600,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 600
         },
         {
             "id": 534,
             "names": [ "Lying Goat" ],
-            "category": "melee",
+            "category": "boss",
             "phases": [ "normal" ],
             "hit points": 25000,
             "damage": { "low": 100, "high": 150, "accuracy": 0.85, "splash chance": 1 },
             "experience when killed": 100,
-            "special abilities": [ "attack weakest target", "overrun" ]
+            "special abilities": [ "attack weakest target" ]
         }
     ]
 }

@@ -6,10 +6,10 @@
 #include <ropufu/enum_array.hpp>
 #include <ropufu/on_error.hpp>
 
+#include "../arithmetic.hpp"
 #include "../enums.hpp"
 #include "../char_string.hpp"
 
-#include "arithmetic.hpp"
 #include "camp.hpp"
 #include "combat_result.hpp"
 #include "damage.hpp"
@@ -35,6 +35,7 @@ namespace ropufu::settlers_online
         using type = army;
         using camp_type = ropufu::settlers_online::camp;
         using mask_type = typename ropufu::settlers_online::detail::combat_result::mask_type;
+        using damage_percentage_type = typename damage_bonus_type::percentage_type;
 
         static constexpr std::size_t capacity = ropufu::settlers_online::detail::combat_result::army_capacity;
 
@@ -46,7 +47,7 @@ namespace ropufu::settlers_online
         aftermath::algebra::permutation<std::size_t> m_order_by_id = {}; // Permutation when defending agains units with \c do_attack_weakest_target.
         aftermath::algebra::permutation<std::size_t> m_order_by_hp = {}; // Permutation when defending agains units with \c do_attack_weakest_target.
         // ~~ Battle modifiers and traits ~~
-        std::size_t m_frenzy_bonus = 0; // Percentage of increases (multiplicative) in the attack damage of this army for every combat round past the first.
+        damage_percentage_type m_frenzy_bonus = {}; // Percentage of increases (multiplicative) in the attack damage of this army for every combat round past the first.
         aftermath::enum_array<battle_skill, std::size_t> m_skills = {}; // Skills affecting various aspects of the battle.
         aftermath::flags_t<battle_trait> m_traits = {}; // If at least one unit in the army has this trait, it kicks in.
 
@@ -117,14 +118,14 @@ namespace ropufu::settlers_online
         void set_camp(const camp_type& value) noexcept { this->m_camp = value; }
 
         /** Increases (multiplicative) the attack damage of this army for every combat round past the first. */
-        std::size_t frenzy_bonus() const noexcept { return this->m_frenzy_bonus; }
+        const damage_percentage_type& frenzy_bonus() const noexcept { return this->m_frenzy_bonus; }
         /** @brief Increases (multiplicative) the attack damage of this army for every combat round past the first.
          *  @param ec Set to std::errc::invalid_argument if \p value is negative.
          */
-        void set_frenzy_bonus(std::size_t percentage, std::error_code& ec)
+        void set_frenzy_bonus(const damage_percentage_type& value, std::error_code& ec)
         {
-            if (percentage < 0) return aftermath::detail::on_error(ec, std::errc::invalid_argument, "Frenzy bonus cannot be negative.");
-            this->m_frenzy_bonus = percentage;
+            if (value.numerator() < 0) return aftermath::detail::on_error(ec, std::errc::invalid_argument, "Frenzy bonus cannot be negative.");
+            this->m_frenzy_bonus = value;
         } // set_frenzy_bonus(...)
 
         /** Skills affecting various aspects of the battle. */
@@ -195,7 +196,7 @@ namespace ropufu::settlers_online
         mask_type compute_alive_mask() const noexcept
         {
             mask_type result {};
-            aftermath::algebra::elementwise::to_binary_mask(this->m_groups, [] (const unit_group& g) { return g.alive_attacker(); }, result);
+            aftermath::algebra::elementwise::to_binary_mask(this->m_groups, [] (const unit_group& g) { return g.alive_as_attacker(); }, result);
             return result;
         } // compute_alive_mask(...)
 
@@ -259,7 +260,7 @@ namespace ropufu::settlers_online
             group_names.reserve(this->m_groups.size());
             for (const unit_group& g : this->m_groups)
             {
-                group_names.push_back(std::to_string(g.count_attacker()) + format(g.unit()));
+                group_names.push_back(std::to_string(g.count_as_attacker()) + format(g.unit()));
             } // for (...)
             return char_string::join(group_names, " ");
         } // to_string(...)
@@ -285,9 +286,17 @@ namespace ropufu::settlers_online
             // First, go through friendly skills.
             for (const auto& pair : result.skills())
             {
+                damage_percentage_type frenzy_bonus {};
                 t.apply_friendly_skill(pair.key(), pair.value());
                 // Increases the attack damage of this army by 10/20/30% for every combat round past the first.
-                if (pair.key() == battle_skill::battle_frenzy) result.set_frenzy_bonus(10 * pair.value(), ec);
+                switch (pair.key())
+                {
+                    case battle_skill::battle_frenzy:
+                        frenzy_bonus.set_numerator(static_cast<typename damage_percentage_type::integer_type>(10 * pair.value()));
+                        result.set_frenzy_bonus(frenzy_bonus, ec);
+                        break;
+                    default: break;
+                } // switch (...)
                 if (ec) return a; // Error: panic, do nothing!
             }
             // Second, go through enemy skills.
@@ -397,7 +406,7 @@ namespace ropufu::settlers_online
     {
         std::vector<std::size_t> result {};
         result.reserve(this->m_groups.size());
-        for (const unit_group& g : this->m_groups) result.push_back(g.count_attacker());
+        for (const unit_group& g : this->m_groups) result.push_back(g.count_as_attacker());
         result.shrink_to_fit();
         return result;
     } // army::group_counts(...)
@@ -405,7 +414,7 @@ namespace ropufu::settlers_online
     std::size_t army::count_units() const noexcept
     {
         std::size_t value = 0;
-        for (const unit_group& g : this->m_groups) value += g.count_attacker();
+        for (const unit_group& g : this->m_groups) value += g.count_as_attacker();
         return value;
     } // army::count_units(...)
 

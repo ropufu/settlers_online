@@ -3,7 +3,7 @@
         {
             "id": 71,
             "names": [ "Jomsviking" ],
-            "category": "unknown",
+            "category": "artillery",
             "phases": [ "last strike" ],
             "hit points": 140,
             "damage": { "low": 60, "high": 80, "accuracy": 0.95 },
@@ -12,7 +12,7 @@
         {
             "id": 72,
             "names": [ "HouseCarl" ],
-            "category": "unknown",
+            "category": "artillery",
             "phases": [ "last strike" ],
             "hit points": 140,
             "damage": { "low": 40, "high": 50, "accuracy": 0.9 },
@@ -21,7 +21,7 @@
         {
             "id": 73,
             "names": [ "Karl" ],
-            "category": "unknown",
+            "category": "artillery",
             "phases": [ "last strike" ],
             "hit points": 80,
             "damage": { "low": 40, "high": 50, "accuracy": 0.9 },
@@ -30,7 +30,7 @@
         {
             "id": 74,
             "names": [ "Thrall" ],
-            "category": "unknown",
+            "category": "artillery",
             "phases": [ "last strike" ],
             "hit points": 60,
             "damage": { "low": 20, "high": 25, "accuracy": 0.85 },
@@ -39,7 +39,7 @@
         {
             "id": 75,
             "names": [ "Valkyrie" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 10,
             "damage": { "low": 20, "high": 40, "accuracy": 0.6 },
@@ -48,11 +48,37 @@
         {
             "id": 76,
             "names": [ "Berserk" ],
-            "category": "unknown",
+            "category": "artillery",
             "phases": [ "last strike" ],
             "hit points": 90,
             "damage": { "low": 20, "high": 40, "accuracy": 0.7, "splash chance": 1 },
             "experience when killed": 20
+        },
+        {
+            "id": 46099,
+            "names": [ "Steel Beard" ],
+            "category": "boss",
+            "phases": [ "last strike" ],
+            "hit points": 30000,
+            "damage": {
+                "low": 1500,
+                "high": 3000,
+                "accuracy": 0.5,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 46100,
+            "names": [ "Bandit Lord Bjorn" ],
+            "category": "boss",
+            "phases": [ "normal" ],
+            "hit points": 35000,
+            "damage": {
+                "low": 3000,
+                "high": 4000,
+                "accuracy": 0.9,
+                "splash chance": 1
+            }
         }
     ]
 }

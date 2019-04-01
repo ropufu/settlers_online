@@ -3,7 +3,7 @@
         {
             "id": 800,
             "names": [ "Sword Clasher" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 100,
             "damage": { "low": 75, "high": 150, "accuracy": 0.8, "splash chance": 1 },
@@ -12,7 +12,7 @@
         {
             "id": 801,
             "names": [ "Sword Wielder" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 300,
             "damage": { "low": 25, "high": 50, "accuracy": 0.8, "splash chance": 1 },
@@ -21,7 +21,7 @@
         {
             "id": 802,
             "names": [ "Sword Master" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 500,
             "damage": { "low": 25, "high": 50, "accuracy": 0.8, "splash chance": 1 },
@@ -30,7 +30,7 @@
         {
             "id": 803,
             "names": [ "Horseman" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 50,
             "damage": { "low": 50, "high": 100, "accuracy": 0.8, "splash chance": 1 },
@@ -39,7 +39,7 @@
         {
             "id": 804,
             "names": [ "Dune Marksman" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 30,
             "damage": { "low": 100, "high": 200, "accuracy": 0.8, "splash chance": 1 },
@@ -48,7 +48,7 @@
         {
             "id": 805,
             "names": [ "Desert Marksman" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 80,
             "damage": { "low": 50, "high": 100, "accuracy": 0.8, "splash chance": 1 },
@@ -58,7 +58,7 @@
         {
             "id": 806,
             "names": [ "Mounted Bowman" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 70,
             "damage": { "low": 35, "high": 70, "accuracy": 0.8, "splash chance": 1 },
@@ -68,7 +68,7 @@
         {
             "id": 807,
             "names": [ "Stone Cannon" ],
-            "category": "unknown",
+            "category": "artillery",
             "phases": [ "last strike" ],
             "hit points": 100,
             "damage": { "low": 150, "high": 300, "accuracy": 0.8, "splash chance": 1 },
@@ -77,12 +77,12 @@
         {
             "id": 868,
             "names": [ "Bandit Lord" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "normal" ],
             "hit points": 30000,
             "damage": { "low": 3500, "high": 7000, "accuracy": 0.9, "splash chance": 1 },
             "experience when killed": 1400,
-            "special abilities": [ "attack weakest target", "overrun" ]
+            "special abilities": [ "attack weakest target" ]
         }
     ]
 }

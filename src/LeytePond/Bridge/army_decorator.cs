@@ -54,6 +54,8 @@ namespace Ropufu.LeytePond.Bridge
     public class ArmyDecorator : INotifyPropertyChanged
     {
         private Boolean isListening = false;
+        private Camp defaultCamp = null;
+        private Camp tempCamp = null;
 
         [JsonProperty("camp"), JsonConverter(typeof(JsonCampConverter))]
         private Camp camp = new Camp();
@@ -69,12 +71,24 @@ namespace Ropufu.LeytePond.Bridge
             this.skills.CollectionChanged += (s, e) => this.PropertyChanged?.Invoke(s, new PropertyChangedEventArgs(nameof(this.Skills)));
         }
 
+        public void HoldCamp()
+        {
+            this.tempCamp = this.camp;
+            this.camp = this.defaultCamp;
+        }
+
+        public void ReleaseCamp()
+        {
+            this.camp = this.tempCamp;
+        }
+
         public Camp Camp
         {
             get => this.camp;
             set
             {
                 if (Object.ReferenceEquals(this.camp, value)) return;
+                if (Object.ReferenceEquals(this.defaultCamp, null)) this.defaultCamp = this.camp;
                 this.camp = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Camp)));
             }

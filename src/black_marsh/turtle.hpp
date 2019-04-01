@@ -87,8 +87,8 @@ namespace ropufu
 
                         //worst_case[k].kill(losses[k].max());
                         //best_case[k].kill(losses[k].min());
-                        worst_case[k].reset_count_defender(worst_case[k].count_defender() - losses[k].max());
-                        best_case[k].reset_count_defender(best_case[k].count_defender() - losses[k].min());
+                        worst_case[k].reset_count_defender(worst_case[k].count_as_defender() - losses[k].max());
+                        best_case[k].reset_count_defender(best_case[k].count_as_defender() - losses[k].min());
                     }
                     worst_case.snapshot();
                     best_case.snapshot();
@@ -224,11 +224,11 @@ namespace ropufu
 
                     // ~~ Bounds ~~
                     combat_favor_right.execute(no_logger, ec);
-                    std::vector<std::size_t> left_losses_upper_bound = combat_favor_right.left_mechanics().calculate_losses();
-                    std::vector<std::size_t> right_losses_lower_bound = combat_favor_right.right_mechanics().calculate_losses();
+                    std::vector<std::size_t> left_losses_upper_bound = combat_favor_right.calculate_left_losses();
+                    std::vector<std::size_t> right_losses_lower_bound = combat_favor_right.calculate_right_losses();
                     combat_favor_left.execute(no_logger, ec);
-                    std::vector<std::size_t> left_losses_lower_bound = combat_favor_left.left_mechanics().calculate_losses();
-                    std::vector<std::size_t> right_losses_upper_bound = combat_favor_left.right_mechanics().calculate_losses();
+                    std::vector<std::size_t> left_losses_lower_bound = combat_favor_left.calculate_left_losses();
+                    std::vector<std::size_t> right_losses_upper_bound = combat_favor_left.calculate_right_losses();
                     
                     empirical_measure combat_rounds {};
                     empirical_measure destruction_rounds {};
@@ -240,8 +240,8 @@ namespace ropufu
                         std::size_t count_combat_rounds = combat.execute(logger, ec);
                         //const ropufu::settlers_online::combat_result& result = combat.outcome();
 
-                        std::vector<std::size_t> x = combat.left_mechanics().calculate_losses();
-                        std::vector<std::size_t> y = combat.right_mechanics().calculate_losses();
+                        std::vector<std::size_t> x = combat.calculate_left_losses();
+                        std::vector<std::size_t> y = combat.calculate_right_losses();
                         for (std::size_t k = 0; k < x.size(); ++k) left_losses[k].observe(x[k]);
                         for (std::size_t k = 0; k < y.size(); ++k) right_losses[k].observe(y[k]);
                 

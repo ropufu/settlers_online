@@ -13,6 +13,8 @@ namespace Ropufu.LeytePond.Bridge
     {
         [JsonProperty("name")]
         private String name = String.Empty;
+        [JsonProperty("description")]
+        private String description = String.Empty;
         [JsonProperty("is player")]
         private Boolean isSuggestedAsPlayer = false;
         [JsonProperty("maps")]
@@ -70,6 +72,8 @@ namespace Ropufu.LeytePond.Bridge
         public IList<String> UnitNames => this.unitNames;
 
         public String MapsString => String.Join(", ", this.maps);
+
+        public String Description => String.IsNullOrWhiteSpace(this.description) ? this.MapsString : this.description;
 
         public List<String> Keys => this.keys;
         public IList<UnitType> Units => this.units;

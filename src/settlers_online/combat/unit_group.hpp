@@ -2,7 +2,8 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_UNIT_GROUP_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_UNIT_GROUP_HPP_INCLUDED
 
-#include "arithmetic.hpp"
+#include "../arithmetic.hpp"
+
 #include "unit_type.hpp"
 
 #include <cstddef>    // std::size_t
@@ -31,7 +32,7 @@ namespace ropufu::settlers_online
         unit_group(const unit_type& type, std::size_t count, std::int_fast32_t metagroup_id = 0) noexcept
             : m_type(type), m_metagroup_id(metagroup_id),
             m_count_at_snapshot(count),
-            m_current_hit_points(count * type.effective_hit_points())
+            m_current_hit_points(count * type.hit_points())
         {
         } // unit_group(...)
 
@@ -40,8 +41,8 @@ namespace ropufu::settlers_online
         /** Common unit type for the group. */
         void set_unit(const unit_type& value) noexcept
         {
-            std::size_t damage_taken = this->m_count_at_snapshot * this->m_type.effective_hit_points() - this->m_current_hit_points;
-            std::size_t updated_hit_points = this->m_count_at_snapshot * value.effective_hit_points();
+            std::size_t damage_taken = this->m_count_at_snapshot * this->m_type.hit_points() - this->m_current_hit_points;
+            std::size_t updated_hit_points = this->m_count_at_snapshot * value.hit_points();
             if (damage_taken > updated_hit_points) updated_hit_points = 0;
             else updated_hit_points -= damage_taken;
 
@@ -53,20 +54,20 @@ namespace ropufu::settlers_online
         std::int_fast32_t metagroup_id() const noexcept { return this->m_metagroup_id; }
 
         /** Number of units capable of attacking. */
-        std::size_t count_attacker() const noexcept { return this->m_count_at_snapshot; }
+        std::size_t count_as_attacker() const noexcept { return this->m_count_at_snapshot; }
 
         /** Number of units capable of defending. */
-        std::size_t count_defender() const noexcept
+        std::size_t count_as_defender() const noexcept
         {
-            const std::size_t h = this->m_type.effective_hit_points();
+            const std::size_t h = this->m_type.hit_points();
             return fraction_ceiling(this->m_current_hit_points, h);
         } // count_defender(...)
 
-        bool alive_attacker() const noexcept { return this->m_count_at_snapshot > 0; }
-        bool alive_defender() const noexcept { return this->m_current_hit_points > 0; }
+        bool alive_as_attacker() const noexcept { return this->m_count_at_snapshot > 0; }
+        bool alive_as_defender() const noexcept { return this->m_current_hit_points > 0; }
 
         /** Discard the latest \c snapshot and record the current state of the group. */
-        void snapshot() noexcept { this->m_count_at_snapshot = this->count_defender(); }
+        void snapshot() noexcept { this->m_count_at_snapshot = this->count_as_defender(); }
 
         /* Total number of hit points left in the group. */
         std::size_t total_hit_points_defender() const noexcept { return this->m_current_hit_points; }
@@ -74,7 +75,7 @@ namespace ropufu::settlers_online
         /* Number of hit points of the top unit in the group (zero if the group has been eliminated). */
         std::size_t top_hit_points_defender() const noexcept
         {
-            const std::size_t h = this->m_type.effective_hit_points();
+            const std::size_t h = this->m_type.hit_points();
             std::size_t trivial_indicator = fraction_ceiling(this->m_current_hit_points, this->m_current_hit_points + 1); // 0 if the group has been killed, 1 otherwise.
             std::size_t fractional_indicator = fraction_ceiling(this->m_current_hit_points, h) - fraction_floor(this->m_current_hit_points, h); // 0 if all units have full hp, 1 otherwise.
             std::size_t damage_cap = (fractional_indicator) * (this->m_current_hit_points % h) + (1 - fractional_indicator) * h;
@@ -91,14 +92,14 @@ namespace ropufu::settlers_online
         /** Resets the number of defending units in the group. */
         void reset_count_defender(std::size_t count) noexcept
         {
-            const std::size_t h = this->m_type.effective_hit_points();
+            const std::size_t h = this->m_type.hit_points();
             this->m_current_hit_points = count * h;
         } // reset_count_defender(...)
 
         /** Heal the top unit in the group. */
         void heal_top_defender() noexcept
         {
-            const std::size_t h = this->m_type.effective_hit_points();
+            const std::size_t h = this->m_type.hit_points();
             std::size_t count = fraction_ceiling(this->m_current_hit_points, h);
             this->m_current_hit_points = count * h;
         } // heal_top_defender(...)
@@ -166,7 +167,7 @@ namespace std
             return
                 int_fast32_hash(x.metagroup_id()) ^
                 std::hash<ropufu::settlers_online::unit_type>()(x.unit()) ^
-                size_hash(x.count_attacker());
+                size_hash(x.count_as_attacker());
         } // operator ()(...)
     }; // struct hash
 } // namespace std

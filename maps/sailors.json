@@ -3,7 +3,7 @@
         {
             "id": 810,
             "names": [ "Sailor" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 100,
             "damage": { "low": 50, "high": 100, "accuracy": 0.8, "splash chance": 1 },
@@ -12,7 +12,7 @@
         {
             "id": 811,
             "names": [ "Battle Hardened Sailor" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 200,
             "damage": { "low": 25, "high": 50, "accuracy": 0.8, "splash chance": 1 },
@@ -21,7 +21,7 @@
         {
             "id": 812,
             "names": [ "Mounted Sailor" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 50,
             "damage": { "low": 35, "high": 70, "accuracy": 0.8, "splash chance": 1 },
@@ -30,7 +30,7 @@
         {
             "id": 813,
             "names": [ "Boatswain" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 40,
             "damage": { "low": 25, "high": 50, "accuracy": 0.8, "splash chance": 1 },
@@ -40,7 +40,7 @@
         {
             "id": 814,
             "names": [ "Petty Officer Second Class" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 70,
             "damage": { "low": 35, "high": 70, "accuracy": 0.8, "splash chance": 1 },
@@ -50,7 +50,7 @@
         {
             "id": 815,
             "names": [ "Cannon Master" ],
-            "category": "unknown",
+            "category": "artillery",
             "phases": [ "last strike" ],
             "hit points": 100,
             "damage": { "low": 100, "high": 200, "accuracy": 0.8, "splash chance": 1 },
@@ -59,32 +59,29 @@
         {
             "id": 894,
             "names": [ "Steersman" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "normal" ],
             "hit points": 250000,
             "damage": { "low": 250, "high": 500, "accuracy": 0.8, "splash chance": 1 },
-            "experience when killed": 8300,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 8300
         },
         {
             "id": 896,
             "names": [ "Mutineer" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "first strike" ],
             "hit points": 5000,
             "damage": { "low": 2500, "high": 5000, "accuracy": 0.8, "splash chance": 1 },
-            "experience when killed": 450,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 450
         },
         {
             "id": 898,
             "names": [ "Captain" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 10000,
             "damage": { "low": 4000, "high": 8000, "accuracy": 0.8, "splash chance": 1 },
-            "experience when killed": 560,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 560
         }
     ]
 }

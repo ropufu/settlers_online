@@ -98,32 +98,30 @@
         {
             "id": 1721,
             "names": [ "Denis the Delinquent" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "first strike" ],
             "hit points": 5000,
             "damage": { "low": 100, "high": 200, "accuracy": 0.8 },
             "experience when killed": 2,
-            "special abilities": [ "attack weakest target", "overrun" ]
+            "special abilities": [ "attack weakest target" ]
         },
         {
             "id": 1722,
             "names": [ "Alex the Troublemaker" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 17000,
             "damage": { "low": 700, "high": 1500, "accuracy": 0.9, "splash chance": 1 },
-            "experience when killed": 2,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 2
         },
         {
             "id": 1723,
             "names": [ "Bob the Miscreant" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 35000,
             "damage": { "low": 1250, "high": 2500, "accuracy": 0.7, "splash chance": 1 },
-            "experience when killed": 2,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 2
         }
     ]
 }

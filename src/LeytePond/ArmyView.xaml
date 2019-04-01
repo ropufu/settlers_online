@@ -41,7 +41,8 @@
         <!--Text representation-->
         <DockPanel LastChildFill="True">
             <Button DockPanel.Dock="Left" Style='{StaticResource LibraryIcon}' ToolTip="Skills" Click="SkillsHandler" Margin="5,0,0,0" Padding="5" />
-            <Button DockPanel.Dock="Right" Style='{StaticResource FirewallIcon}' ToolTip="Camp" Click="CampsHandler" Margin="0,0,5,0" Padding="5" />
+            <Button DockPanel.Dock="Right" Style='{StaticResource FirewallIcon}' ToolTip="Camp" Click="CampsHandler" Margin="0,0,5,0" Padding="5"
+                    Visibility="{Binding ElementName=self, Path=IsNonPlayerArmy, Converter={StaticResource VisibilityConverter}}" />
             <ComboBox DockPanel.Dock="Right" x:Name="campList" ItemsSource="{local:CampDatabaseBinding Path=All}" Margin="0" Padding="0" Width="0"
                       SelectedItem="{Binding ElementName=self, Path=Decorator.Camp}"
                       Visibility="{Binding ElementName=self, Path=IsNonPlayerArmy, Converter={StaticResource VisibilityConverter}}">
@@ -97,7 +98,7 @@
                                     </MultiBinding>
                                 </Setter.Value>
                             </Setter>
-                            <Setter Property="ToolTip" Value="{Binding Path=MapsString}" />
+                            <Setter Property="ToolTip" Value="{Binding Path=Description}" />
                         </Style>
                     </ComboBox.ItemContainerStyle>
                     <ComboBox.ItemTemplate>

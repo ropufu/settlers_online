@@ -3,7 +3,7 @@
         {
             "id": 30,
             "names": [ "Caltrop" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 4,
             "damage": { "low": 0, "high": 20, "accuracy": 0.33 },
@@ -13,7 +13,7 @@
         {
             "id": 31,
             "names": [ "Deckscrubber" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 15,
             "damage": { "low": 10, "high": 15, "accuracy": 0.5 },
@@ -22,7 +22,7 @@
         {
             "id": 32,
             "names": [ "Sabrerattler" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 30,
             "damage": { "low": 10, "high": 20, "accuracy": 0.5 },
@@ -31,17 +31,16 @@
         {
             "id": 33,
             "names": [ "Crazy Cook" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "first strike" ],
             "hit points": 5000,
             "damage": { "low": 200, "high": 300, "accuracy": 0.66, "splash chance": 1 },
-            "experience when killed": 200,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 200
         },
         {
             "id": 36,
             "names": [ "Gunman" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 5,
             "damage": { "low": 20, "high": 30, "accuracy": 0.5 },
@@ -51,7 +50,7 @@
         {
             "id": 37,
             "names": [ "Knifethrower" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 5,
             "damage": { "low": 10, "high": 20, "accuracy": 0.5 },
@@ -61,7 +60,7 @@
         {
             "id": 38,
             "names": [ "Petty Officer" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 60,
             "damage": { "low": 40, "high": 60, "accuracy": 0.7, "splash chance": 1 },

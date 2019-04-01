@@ -6,13 +6,15 @@
 #include <ropufu/json_traits.hpp>
 #include <ropufu/on_error.hpp>
 
-#include <cstddef>    // std::size_t
-#include <functional> // std::hash
-#include <ostream>    // std::ostream
-#include <stdexcept>  // std::runtime_error
-#include <string>     // std::string
+#include "../arithmetic.hpp"
+
+#include <cstddef>      // std::size_t
+#include <functional>   // std::hash
+#include <ostream>      // std::ostream
+#include <stdexcept>    // std::runtime_error
+#include <string>       // std::string
 #include <system_error> // std::error_code, std::errc
-#include <vector>     // std::vector
+#include <vector>       // std::vector
 
 namespace ropufu::settlers_online
 {
@@ -26,6 +28,8 @@ namespace ropufu::settlers_online
     struct camp
     {
         using type = camp;
+        using damage_percentage_type = typename damage_bonus_type::percentage_type;
+
         // ~~ Json names ~~
         static constexpr char jstr_names[] = "names";
         static constexpr char jstr_hit_points[] = "hit points";
@@ -35,19 +39,19 @@ namespace ropufu::settlers_online
         std::string m_display_name = "??";
         std::vector<std::string> m_names = {}; // Names.
         std::size_t m_hit_points = 0;  // Hit points.
-        double m_damage_reduction = 0; // Damage reduction.
+        damage_percentage_type m_damage_reduction = {}; // Damage factor.
 
         bool validate(std::error_code& ec) const noexcept
         {
-            if (this->m_damage_reduction < 0 || this->m_damage_reduction > 1) 
-                return aftermath::detail::on_error(ec, std::errc::invalid_argument, "Damage reduction must be between zero and one.", false);
+            if (this->m_damage_reduction.numerator() < 0 || this->m_damage_reduction.numerator() > 100) 
+                return aftermath::detail::on_error(ec, std::errc::invalid_argument, "Damage reduction must be between 0% and 100%.", false);
             return true;
         } // validate(...)
 
         void coerce() noexcept
         {
-            if (this->m_damage_reduction < 0) this->m_damage_reduction = 0;
-            if (this->m_damage_reduction > 1) this->m_damage_reduction = 1;
+            if (this->m_damage_reduction.numerator() < 0) this->m_damage_reduction.set_numerator(0);
+            if (this->m_damage_reduction.numerator() > 100) this->m_damage_reduction.set_numerator(100);
             this->m_display_name = this->m_names.empty() ? "??" : this->m_names.front();
             this->m_names.shrink_to_fit();
         } // coerce(...)
@@ -69,7 +73,7 @@ namespace ropufu::settlers_online
          *  @param damage_reduction Damage reduction for units that have \c tower_bonus.
          *  @param ec Set to std::errc::invalid_argument if \p damage_reduction is outside the interval [0, 1].
          */
-        camp(std::size_t hit_points, double damage_reduction, std::error_code& ec) noexcept
+        camp(std::size_t hit_points, const damage_percentage_type& damage_reduction, std::error_code& ec) noexcept
             : m_hit_points(hit_points), m_damage_reduction(damage_reduction)
         {
             this->validate(ec);
@@ -83,7 +87,7 @@ namespace ropufu::settlers_online
             {
                 std::string value = j.get<std::string>();
                 if (!(value == "none" || value == "empty"))
-                    aftermath::detail::on_error(ec, std::errc::illegal_byte_sequence, "Camp literal ot recognized");
+                    aftermath::detail::on_error(ec, std::errc::illegal_byte_sequence, "Camp literal ot recognized.");
                 return;
             } // if (...)
             
@@ -102,13 +106,13 @@ namespace ropufu::settlers_online
         void set_hit_points(std::size_t value) noexcept { this->m_hit_points = value; }
 
         /** Damage reduction for units that have \c tower_bonus. */
-        double damage_reduction() const noexcept { return this->m_damage_reduction; }
+        const damage_percentage_type& damage_reduction() const noexcept { return this->m_damage_reduction; }
         /** Damage reduction for units that have \c tower_bonus. */
-        void set_damage_reduction(double value, std::error_code& ec) noexcept
+        void set_damage_reduction(const damage_percentage_type& value, std::error_code& ec) noexcept
         {
             this->m_damage_reduction = value;
             if (!this->validate(ec)) this->coerce();
-        } // set_accuracy(...)
+        } // set_damage_reduction(...)
 
         /** Names of the unit type. */
         const std::vector<std::string>& names() const noexcept { return this->m_names; }
@@ -144,28 +148,6 @@ namespace ropufu::settlers_online
         {
             return !(this->operator ==(other));
         } // operator !=(...)
-
-        // /** Component-wise addition. */
-        // type& operator +=(const type& other) noexcept
-        // {
-        //     this->m_hit_points += other.m_hit_points;
-        //     this->m_damage_reduction += other.m_damage_reduction;
-        //     this->coerce();
-        //     return *this;
-        // } // operator +=(...)
-
-        // /** Component-wise addition. */
-        // type& operator -=(const type& other) noexcept
-        // {
-        //     this->m_hit_points = (this->m_hit_points < other.m_hit_points) ? 0 : (this->m_hit_points - other.m_hit_points);
-        //     this->m_damage_reduction -= other.m_damage_reduction;
-        //     this->coerce();
-        //     return *this;
-        // } // operator -=(...)
-
-        // /** Something clever taken from http://en.cppreference.com/w/cpp/language/operators */
-        // friend type operator +(type left, const type& right) noexcept { left += right; return left; }
-        // friend type operator -(type left, const type& right) noexcept { left -= right; return left; }
 
         friend std::ostream& operator <<(std::ostream& os, const type& self) noexcept
         {
@@ -210,11 +192,11 @@ namespace std
         result_type operator ()(const argument_type& x) const noexcept
         {
             std::hash<std::size_t> size_hash = {};
-            std::hash<double> double_hash = {};
+            std::hash<typename ropufu::settlers_online::camp::damage_percentage_type> damage_reduction_hash = {};
 
             return
                 size_hash(x.hit_points()) ^
-                double_hash(x.damage_reduction());
+                damage_reduction_hash(x.damage_reduction());
         } // operator ()(...)
     }; // struct hash<...>
 } // namespace std

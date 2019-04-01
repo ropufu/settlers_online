@@ -20,10 +20,9 @@ namespace ropufu::settlers_online
         not_weak = 2,              // This unit will be not be affected by attacker's \c do_attack_weakest_target, if any.
         tower_bonus = 3,           // This unit gets damage reduction in towers.
         ignore_tower_bonus = 4,    // When attacking, inflicted damage will not be affected by defenders' possible \c tower_bonus.
-        rapid_fire = 5,            // Indicates that this unis is affected by friendly skill \c battle_skill::rapid_fire.
-        sniper_training = 6,       // Indicates that this unis is affected by friendly skill \c battle_skill::sniper_training.
-        cleave = 7,                // Indicates that this unis is affected by friendly skill \c battle_skill::cleave.
-        overrun = 8                // Indicates that this unis is affected by enemy skill \c battle_skill::overrun.
+        archer = 5,                // Indicates that this unis is affected by friendly skill \c battle_skill::rapid_fire.
+        sniper = 6,                // Indicates that this unis is affected by friendly skill \c battle_skill::sniper_training.
+        butcher = 7                // Indicates that this unis is affected by friendly skill \c battle_skill::cleave.
     }; // struct special_ability
 } // namespace ropufu::settlers_online
 
@@ -39,10 +38,9 @@ namespace std
             case argument_type::not_weak: return "not weak";
             case argument_type::tower_bonus: return "tower bonus";
             case argument_type::ignore_tower_bonus: return "ignore tower bonus";
-            case argument_type::rapid_fire: return "rapid fire";
-            case argument_type::sniper_training: return "sniper training";
-            case argument_type::cleave: return "cleave";
-            case argument_type::overrun: return "overrun";
+            case argument_type::archer: return "archer";
+            case argument_type::sniper: return "sniper";
+            case argument_type::butcher: return "butcher";
             default: return "unknown <special_ability> " + std::to_string(static_cast<std::size_t>(x));
         } // switch (...)
     } // to_string(...)
@@ -56,7 +54,7 @@ namespace ropufu::aftermath::detail
     {
         using underlying_type = std::underlying_type_t<ropufu::settlers_online::special_ability>;
         static constexpr underlying_type first_index = 0;
-        static constexpr underlying_type past_the_last_index = 9;
+        static constexpr underlying_type past_the_last_index = 8;
     }; // struct enum_array_keys<...>
 
     template <>
@@ -69,15 +67,13 @@ namespace ropufu::aftermath::detail
         static bool try_parse(const std::string& from, enum_type& to) noexcept
         {
             if (from == "none") { to = enum_type::none; return true; }
-            if (from == "attack weakest target") { to = enum_type::attack_weakest_target; return true; }
+            if (from == "attack weakest target" || from == "flanking") { to = enum_type::attack_weakest_target; return true; }
             if (from == "not weak") { to = enum_type::not_weak; return true; }
             if (from == "tower bonus") { to = enum_type::tower_bonus; return true; }
             if (from == "ignore tower bonus") { to = enum_type::ignore_tower_bonus; return true; }
-            if (from == "rapid fire") { to = enum_type::rapid_fire; return true; }
-            if (from == "sniper training") { to = enum_type::sniper_training; return true; }
-            if (from == "cleave") { to = enum_type::cleave; return true; }
-            if (from == "overrun") { to = enum_type::overrun; return true; }
-            if (from == "boss") { to = enum_type::overrun; return true; }
+            if (from == "archer") { to = enum_type::archer; return true; }
+            if (from == "sniper") { to = enum_type::sniper; return true; }
+            if (from == "butcher") { to = enum_type::butcher; return true; }
             return false;
         } // try_parse(...)
     }; // struct enum_parser<...>

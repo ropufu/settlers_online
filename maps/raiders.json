@@ -3,7 +3,7 @@
         {
             "id": 61,
             "names": [ "Nomad" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 30,
             "damage": { "low": 10, "high": 20, "accuracy": 0.6 },
@@ -12,7 +12,7 @@
         {
             "id": 63,
             "names": [ "Lance Rider" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 20,
             "damage": { "low": 5, "high": 20, "accuracy": 0.9 },
@@ -22,7 +22,7 @@
         {
             "id": 64,
             "names": [ "Riding Bowman" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 20,
             "damage": { "low": 30, "high": 40, "accuracy": 0.9 },
@@ -32,7 +32,7 @@
         {
             "id": 65,
             "names": [ "Riding Amazonian Guard" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 20,
             "damage": { "low": 40, "high": 60, "accuracy": 0.9 },
@@ -42,7 +42,7 @@
         {
             "id": 66,
             "names": [ "Cataphract" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 20,
             "damage": { "low": 90, "high": 90, "accuracy": 1 },
@@ -52,17 +52,16 @@
         {
             "id": 67,
             "names": [ "Uproarious Bull" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "first strike" ],
             "hit points": 2000,
             "damage": { "low": 120, "high": 120, "accuracy": 1 },
-            "experience when killed": 50,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 50
         },
         {
             "id": 68,
             "names": [ "Composite Bowman" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "last strike" ],
             "hit points": 20,
             "damage": { "low": 20, "high": 40, "accuracy": 0.8 },

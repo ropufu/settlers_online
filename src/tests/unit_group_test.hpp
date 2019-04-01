@@ -47,7 +47,7 @@ namespace ropufu
                 if (g1 != g2) return false; // Make sure the two groups are equal.
 
                 g2.kill_all_defender();
-                g2.reset_count_defender(g1.count_defender()); // Revert to the case when they were equal.
+                g2.reset_count_defender(g1.count_as_defender()); // Revert to the case when they were equal.
                 if (g1 != g2) return false;
 
                 return !static_cast<bool>(ec);
@@ -69,7 +69,7 @@ namespace ropufu
                 if (!type::is_match(g, u, count, total_hit_popints, metagroup_id)) return false;
                 
                 // ~~ Test Damage ~~
-                std::size_t damage_full = u.effective_hit_points();
+                std::size_t damage_full = u.hit_points();
                 std::size_t damage_overflow = 2 * damage_full;
                 std::size_t damage_half = damage_full / 2;
                 
@@ -105,7 +105,7 @@ namespace ropufu
                 const settlers_online::unit_type& u, std::size_t count, std::size_t total_hit_points, std::int_fast32_t metagroup_id)
             {
                 if (g.unit() != u) return false;
-                if (g.count_defender() != count) return false;
+                if (g.count_as_defender() != count) return false;
                 if (g.total_hit_points_defender() != total_hit_points) return false;
                 if (g.metagroup_id() != metagroup_id) return false;
                 

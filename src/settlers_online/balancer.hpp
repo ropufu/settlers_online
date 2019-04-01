@@ -205,7 +205,7 @@ namespace ropufu::settlers_online
 
             // ~~ Consumption of intermediate resource is production of final resource ~~
             type::for_bit_mask(token.mask, n,
-                [&] (std::size_t position) { },
+                [&] (std::size_t /*position*/) { },
                 [&] (std::size_t position) { final_balance += this->m_final_produced * this->m_intermediate_consumption_frequencies[position]; }
             );
 

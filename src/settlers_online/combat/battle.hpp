@@ -5,13 +5,14 @@
 #include <ropufu/algebra.hpp> // aftermath::algebra::permutation
 #include <ropufu/enum_array.hpp> // aftermath::enum_array
 
+#include "../arithmetic.hpp"
 #include "../enums.hpp"
 
-#include "arithmetic.hpp"
 #include "army.hpp"
+#include "army_mechanics.hpp"
 #include "attack_sequence.hpp"
 #include "battle_clock.hpp"
-#include "army_mechanics.hpp"
+#include "battle_invariant.hpp"
 #include "combat_result.hpp"
 
 #include <cstddef> // std::size_t
@@ -37,8 +38,8 @@ namespace ropufu::settlers_online
                 : m_weathered_left(a, weather), m_weathered_right(b, weather),
                 m_conditioned_army_left(army::condition(this->m_weathered_left, this->m_weathered_right, ec)),
                 m_conditioned_army_right(army::condition(this->m_weathered_right, this->m_weathered_left, ec)),
-                m_mechanics_left(this->m_conditioned_army_left, this->m_conditioned_army_right),
-                m_mechanics_right(this->m_conditioned_army_right, this->m_conditioned_army_left)
+                m_mechanics_left(this->m_conditioned_army_left),
+                m_mechanics_right(this->m_conditioned_army_right)
             {
             } // battle_snapshot(...)
 
@@ -52,6 +53,7 @@ namespace ropufu::settlers_online
     struct battle
     {
         using type = battle<t_left_sequence_type, t_right_sequence_type>;
+        using damage_percentage_type = typename damage_bonus_type::percentage_type;
 
     private:
         aftermath::enum_array<battle_phase, void> m_phases = {};
@@ -60,6 +62,8 @@ namespace ropufu::settlers_online
         army_mechanics m_right; // Right army mechanics.
         army_sequence<t_left_sequence_type> m_left_sequence;   // Left sequence.
         army_sequence<t_right_sequence_type> m_right_sequence; // Right sequence.
+        battle_invariant m_left_invariant;  // Left battle invariants.
+        battle_invariant m_right_invariant; // Right battle invariants.
 
         detail::combat_result m_outcome = {};
         battle_clock m_clock = {};
@@ -70,7 +74,9 @@ namespace ropufu::settlers_online
             : m_ground_zero(left, right, weather, ec),
             m_left(this->m_ground_zero.mechanics_left()),
             m_right(this->m_ground_zero.mechanics_right()),
-            m_left_sequence(this->m_left.underlying()), m_right_sequence(this->m_right.underlying())
+            m_left_sequence(this->m_left.underlying()), m_right_sequence(this->m_right.underlying()),
+            m_left_invariant(this->m_left.underlying(), this->m_right.underlying()),
+            m_right_invariant(this->m_right.underlying(), this->m_left.underlying())
         {
         } // battle(...)
 
@@ -90,6 +96,9 @@ namespace ropufu::settlers_online
         const army_mechanics& left_mechanics() const noexcept { return this->m_left; }
         const army_mechanics& right_mechanics() const noexcept { return this->m_right; }
 
+        std::vector<std::size_t> calculate_left_losses() const noexcept { return this->m_left.calculate_losses(this->m_left_invariant); }
+        std::vector<std::size_t> calculate_right_losses() const noexcept { return this->m_right.calculate_losses(this->m_right_invariant); }
+
         const battle_clock& clock() const noexcept { return this->m_clock; }
 
         /** @todo Think: where do we actually need it? */
@@ -106,27 +115,25 @@ namespace ropufu::settlers_online
                 ec = std::make_error_code(std::errc::operation_not_permitted);
                 return 0;
             } // if (...)
-            
-            const std::size_t left_frenzy_bonus = this->m_left.underlying().frenzy_bonus();
-            const std::size_t right_frenzy_bonus = this->m_right.underlying().frenzy_bonus();
-            std::size_t left_frenzy_rate = 0;
-            std::size_t right_frenzy_rate = 0;
 
             while (this->m_left.underlying().alive() && this->m_right.underlying().alive())
             {
                 if constexpr (t_logger_type::is_enabled)
                 {
+                    damage_percentage_type left_frenzy_rate { static_cast<typename damage_percentage_type::integer_type>(this->m_clock.round_index()) * this->m_left.underlying().frenzy_bonus() };
+                    damage_percentage_type right_frenzy_rate { static_cast<typename damage_percentage_type::integer_type>(this->m_clock.round_index()) * this->m_right.underlying().frenzy_bonus() };
+
                     logger << "Begin round " << (1 + this->m_clock.round_index()) << "." << nullptr;
-                    if (left_frenzy_rate != 0) logger << "Left frenzy bonus: " << left_frenzy_rate << "%." << nullptr;
-                    if (right_frenzy_rate != 0) logger << "Right frenzy bonus: " << right_frenzy_rate << "%." << nullptr;
+                    if (left_frenzy_rate.numerator() != 0) logger << "Left frenzy bonus: " << left_frenzy_rate.numerator() << "%." << nullptr;
+                    if (right_frenzy_rate.numerator() != 0) logger << "Right frenzy bonus: " << right_frenzy_rate.numerator() << "%." << nullptr;
                 } // if constexpr (...)
 
                 for (battle_phase phase : this->m_phases)
                 {
                     if constexpr (t_logger_type::is_enabled) logger << "Begin " << std::to_string(phase) << " phase." << nullptr;
 
-                    this->m_left.initiate_phase(this->m_right, phase, left_frenzy_rate, this->m_left_sequence, this->m_clock, logger);
-                    this->m_right.initiate_phase(this->m_left, phase, right_frenzy_rate, this->m_right_sequence, this->m_clock, logger);
+                    this->m_left.initiate_phase(this->m_left_invariant, this->m_right, phase, this->m_left_sequence, this->m_clock, logger);
+                    this->m_right.initiate_phase(this->m_right_invariant, this->m_left, phase, this->m_right_sequence, this->m_clock, logger);
 
                     this->m_left.snapshot();
                     this->m_right.snapshot();
@@ -134,9 +141,6 @@ namespace ropufu::settlers_online
                     this->m_clock.next_phase();
                     if constexpr (t_logger_type::is_enabled) logger << "End " << std::to_string(phase) << " phase." << nullptr;
                 } // for (...)
-
-                left_frenzy_rate = (1 + this->m_clock.round_index()) * left_frenzy_bonus;
-                right_frenzy_rate = (1 + this->m_clock.round_index()) * right_frenzy_bonus;
 
                 this->m_clock.next_round();
                 if constexpr (t_logger_type::is_enabled) logger << "End round " << (1 + this->m_clock.round_index()) << "." << nullptr;

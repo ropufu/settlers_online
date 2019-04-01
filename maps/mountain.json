@@ -1,0 +1,245 @@
+{
+    "units": [
+        {
+            "id": 45029,
+            "names": [ "Frost Bear Matriarch" ],
+            "category": "boss",
+            "phases": [ "first strike" ],
+            "hit points": 600000,
+            "damage": {
+                "low": 300,
+                "high": 600,
+                "accuracy": 0.85,
+                "splash chance": 1
+            },
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 45039,
+            "names": [ "Ravaging Ox" ],
+            "category": "boss",
+            "phases": [ "first strike" ],
+            "hit points": 100000,
+            "damage": {
+                "low": 600,
+                "high": 800,
+                "accuracy": 0.5,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45041,
+            "names": [ "Gargantuan Lynx" ],
+            "category": "boss",
+            "phases": [ "first strike" ],
+            "hit points": 20000,
+            "damage": {
+                "low": 2500,
+                "high": 3500,
+                "accuracy": 0.5,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45049,
+            "names": [ "Frost Bear" ],
+            "category": "melee",
+            "phases": [ "normal" ],
+            "hit points": 350,
+            "damage": {
+                "low": 160,
+                "high": 200,
+                "accuracy": 0.9,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45050,
+            "names": [ "Frost Ibex" ],
+            "category": "melee",
+            "phases": [ "normal" ],
+            "hit points": 250,
+            "damage": {
+                "low": 120,
+                "high": 150,
+                "accuracy": 0.85,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45051,
+            "names": [ "Frost Fox" ],
+            "category": "cavalry",
+            "phases": [ "first strike" ],
+            "hit points": 75,
+            "damage": {
+                "low": 80,
+                "high": 100,
+                "accuracy": 0.90,
+                "splash chance": 1
+            },
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 45052,
+            "names": [ "Frost Eagle" ],
+            "category": "cavalry",
+            "phases": [ "first strike" ],
+            "hit points": 100,
+            "damage": {
+                "low": 90,
+                "high": 150,
+                "accuracy": 0.95,
+                "splash chance": 1
+            },
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 45053,
+            "names": [ "Frost Wolf" ],
+            "category": "ranged",
+            "phases": [ "normal" ],
+            "hit points": 100,
+            "damage": {
+                "low": 200,
+                "high": 250,
+                "accuracy": 0.85,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45054,
+            "names": [ "Frost Leopard" ],
+            "category": "ranged",
+            "phases": [ "normal" ],
+            "hit points": 150,
+            "damage": {
+                "low": 240,
+                "high": 300,
+                "accuracy": 0.90,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45058,
+            "names": [ "Frost Giant" ],
+            "category": "artillery",
+            "phases": [ "last strike" ],
+            "hit points": 500,
+            "damage": {
+                "low": 280,
+                "high": 350,
+                "accuracy": 0.90,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45069,
+            "names": [ "Ghastly Wolf" ],
+            "category": "boss",
+            "phases": [ "first strike" ],
+            "hit points": 10000,
+            "damage": {
+                "low": 5000,
+                "high": 6000,
+                "accuracy": 0.5,
+                "splash chance": 1
+            },
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 45079,
+            "names": [ "Enormous Ibex" ],
+            "category": "boss",
+            "phases": [ "first strike" ],
+            "hit points": 80000,
+            "damage": {
+                "low": 1000,
+                "high": 1500,
+                "accuracy": 0.5,
+                "splash chance": 1
+            },
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 45089,
+            "names": [ "Smilodon" ],
+            "category": "boss",
+            "phases": [ "first strike" ],
+            "hit points": 45000,
+            "damage": {
+                "low": 17000,
+                "high": 18000,
+                "accuracy": 0.35,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45099,
+            "names": [ "Paragon Elk" ],
+            "category": "boss",
+            "phases": [ "last strike" ],
+            "hit points": 250000,
+            "damage": {
+                "low": 5000,
+                "high": 6000,
+                "accuracy": 0.75,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45109,
+            "names": [ "Colossal Eagle" ],
+            "category": "boss",
+            "phases": [ "first strike" ],
+            "hit points": 150000,
+            "damage": {
+                "low": 6400,
+                "high": 6500,
+                "accuracy": 0.85,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45119,
+            "names": [ "Risi" ],
+            "category": "boss",
+            "phases": [ "first strike" ],
+            "hit points": 1000000,
+            "damage": {
+                "low": 550,
+                "high": 600,
+                "accuracy": 0.95,
+                "splash chance": 1
+            },
+            "special abilities": [ "attack weakest target" ]
+        },
+        {
+            "id": 45129,
+            "names": [ "Mammoth" ],
+            "category": "boss",
+            "phases": [ "first strike" ],
+            "hit points": 750000,
+            "damage": {
+                "low": 1400,
+                "high": 1600,
+                "accuracy": 0.90,
+                "splash chance": 1
+            }
+        },
+        {
+            "id": 45139,
+            "names": [ "Winter Terror" ],
+            "category": "boss",
+            "phases": [ "first strike" ],
+            "hit points": 45000,
+            "damage": {
+                "low": 9500,
+                "high": 10000,
+                "accuracy": 0.75,
+                "splash chance": 1
+            },
+            "special abilities": [ "attack weakest target" ]
+        }
+    ]
+}

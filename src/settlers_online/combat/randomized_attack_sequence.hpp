@@ -49,11 +49,11 @@ namespace ropufu::settlers_online
 
         randomized_attack_sequence(const unit_group& g, std::size_t group_index, std::error_code& ec) noexcept
             : m_engine(),
-            m_splash_sampler(bernoulli_distribution_type(g.unit().damage().splash_chance(), ec)),
-            m_accuracy_sampler(bernoulli_distribution_type(g.unit().damage().accuracy(), ec)),
+            m_splash_sampler(bernoulli_distribution_type(g.unit().base_damage().splash_chance(), ec)),
+            m_accuracy_sampler(bernoulli_distribution_type(g.unit().base_damage().accuracy(), ec)),
             m_accuracy_lookup(
-                binomial_distribution_type(1, g.unit().damage().accuracy(), ec),
-                binomial_distribution_type(g.alive_attacker() ? g.count_attacker() : 1, g.unit().damage().accuracy(), ec), ec)
+                binomial_distribution_type(1, g.unit().base_damage().accuracy(), ec),
+                binomial_distribution_type(g.alive_as_attacker() ? g.count_as_attacker() : 1, g.unit().base_damage().accuracy(), ec), ec)
         {
             std::int32_t seed_offset = static_cast<std::int32_t>(group_index);
             auto now = std::chrono::high_resolution_clock::now();

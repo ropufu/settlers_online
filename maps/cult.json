@@ -3,17 +3,17 @@
         {
             "id": 51,
             "names": [ "Spawn of Hell" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "first strike" ],
             "hit points": 35000,
             "damage": { "low": 700, "high": 800, "accuracy": 0.75, "splash chance": 1 },
             "experience when killed": 500,
-            "special abilities": [ "attack weakest target", "overrun" ]
+            "special abilities": [ "attack weakest target" ]
         },
         {
             "id": 52,
             "names": [ "Cultist" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 40,
             "damage": { "low": 15, "high": 30, "accuracy": 0.8 },
@@ -22,17 +22,16 @@
         {
             "id": 53,
             "names": [ "Witch of the Swamp" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "first strike" ],
             "hit points": 13000,
             "damage": { "low": 400, "high": 600, "accuracy": 0.75, "splash chance": 1 },
-            "experience when killed": 250,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 250
         },
         {
             "id": 54,
             "names": [ "Shadowsneaker" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 5,
             "damage": { "low": 0, "high": 5, "accuracy": 0.6 },
@@ -42,7 +41,7 @@
         {
             "id": 55,
             "names": [ "Fanatic" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 20,
             "damage": { "low": 30, "high": 60, "accuracy": 0.9 },
@@ -52,7 +51,7 @@
         {
             "id": 56,
             "names": [ "Dark Priest" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 20,
             "damage": { "low": 40, "high": 80, "accuracy": 1 },
@@ -62,7 +61,7 @@
         {
             "id": 57,
             "names": [ "Firedancer" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 30,
             "damage": { "low": 60, "high": 120, "accuracy": 1 },
@@ -72,7 +71,7 @@
         {
             "id": 58,
             "names": [ "Dancing Dervish" ],
-            "category": "unknown",
+            "category": "artillery",
             "phases": [ "last strike" ],
             "hit points": 90,
             "damage": { "low": 60, "high": 120, "accuracy": 0.9, "splash chance": 1 },
@@ -81,21 +80,20 @@
         {
             "id": 59,
             "names": [ "Dark High Priest" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 15000,
             "damage": { "low": 800, "high": 1000, "accuracy": 0.75, "splash chance": 1 },
-            "experience when killed": 350,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 350
         },
         {
             "id": 60,
             "names": [ "Preacher of Flames" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 11000,
             "damage": { "low": 500, "high": 700, "accuracy": 0.75, "splash chance": 1 },
-            "special abilities": [ "attack weakest target", "overrun" ]
+            "special abilities": [ "attack weakest target" ]
         }
     ]
 }

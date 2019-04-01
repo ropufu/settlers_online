@@ -59,10 +59,9 @@ namespace Ropufu.LeytePond.Bridge
         NotWeak = 2,             // This unit will be not be affected by attacker's \c do_attack_weakest_target, if any.
         TowerBonus = 3,          // This unit gets damage reduction in towers.
         IgnoreTowerBonus = 4,    // When attacking, inflicted damage will not be affected by defenders' possible \c tower_bonus.
-        RapidFire = 5,           // Indicates that this unis is affected by friendly skill \c battle_skill::rapid_fire.
-        SniperTraining = 6,      // Indicates that this unis is affected by friendly skill \c battle_skill::sniper_training.
-        Cleave = 7,              // Indicates that this unis is affected by friendly skill \c battle_skill::cleave.
-        Overrun = 8              // Indicates that this unis is affected by enemy skill \c battle_skill::overrun.
+        Archer = 5,              // Indicates that this unis is affected by friendly skill \c battle_skill::rapid_fire.
+        Sniper = 6,              // Indicates that this unis is affected by friendly skill \c battle_skill::sniper_training.
+        Butcher = 7              // Indicates that this unis is affected by friendly skill \c battle_skill::cleave.
     }
 
     /** Mirrors \c battle_trait.hpp. */
@@ -72,7 +71,8 @@ namespace Ropufu.LeytePond.Bridge
         Dazzle = 1,              // Enemy accuracy is reduced to 0%.
         Intercept = 2,           // Enemy units deal 5% less damage and their ability \c do_attack_weakest_target is ignored.
         ExplosiveAmmunition = 3, // Ranged units get \c do_attack_weakest_target and 100\% \c splash_chance.
-        Bombastic = 4            // Doubles the damage of \c artillery units.
+        Bombastic = 4,           // Doubles the damage of \c artillery units.
+        AstuteStrategist = 5     // Increases the damage of friendly \c cavalry units by 50%, decreases the damage of enemy \c cavalry units by 50%, increases XP gain by 50%.
     }
 
     /** Mirrors \c battle_phase.hpp. */
@@ -116,11 +116,13 @@ namespace Ropufu.LeytePond.Bridge
     public enum UnitCategory
     {
         Unknown = 0,
+        None = 0,
         Melee = 1,
         Ranged = 2,
         Cavalry = 3,
         Artillery = 4,
-        Elite = 5
+        Elite = 5,
+        Boss = 6
     }
 
     /** Mirrors \c battle_weather.hpp. */
@@ -128,8 +130,11 @@ namespace Ropufu.LeytePond.Bridge
     {
         None = 0,
         HardFrost = 1,         // All \c melee units (including enemy \c melee units) gain splash damage.
+        //Frost = 1,
         BrightSunshine = 2,    // The HP of all units (including enemy units) are increased by 20%.
+        //Sunshine = 2,
         HeavyFog = 3,          // All units (including enemy units) gain \c do_attack_weakest_target.
+        //Fog = 3,
         Hurricane = 4          // The minimum and maximum damage of all units (including enemy units) is increased by 20%.
     }
 

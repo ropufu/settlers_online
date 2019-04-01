@@ -4,12 +4,17 @@
 
 #include <ropufu/enum_array.hpp>
 
+#include "../arithmetic.hpp"
+
 #include <cstddef>     // std::size_t
 #include <string>      // std::string, std::to_string
 #include <type_traits> // std::underlying_type_t
 
 namespace ropufu::settlers_online
 {
+    static constexpr typename hit_points_bonus_type::percentage_type sunshine_hit_points_percentage { +20 };
+    static constexpr typename damage_bonus_type::percentage_type hurricane_damage_percentage { +20 };
+
     /** @brief Changes battle_weather conditions affecting the entire adventure. **/
     enum struct battle_weather : char
     {

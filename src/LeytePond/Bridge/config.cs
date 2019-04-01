@@ -112,7 +112,11 @@ namespace Ropufu.LeytePond.Bridge
 
             try
             {
+                this.left.HoldCamp();
+                this.right.HoldCamp();
                 var json = JsonConvert.SerializeObject(this, Formatting.Indented);
+                this.left.ReleaseCamp();
+                this.right.ReleaseCamp();
                 System.IO.File.WriteAllText(this.fileName, json);
             }
             catch (JsonWriterException)

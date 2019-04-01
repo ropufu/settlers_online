@@ -57,7 +57,7 @@ namespace ropufu::settlers_online
             for (const auto& pair : this->m_skills)
             {
                 bool is_match = false;
-                for (const unit_group& g : a.groups()) if (g.count_attacker() > 0) for (const std::string& name : g.unit().names()) if (name == pair.first) is_match = true;
+                for (const unit_group& g : a.groups()) if (g.count_as_attacker() > 0) for (const std::string& name : g.unit().names()) if (name == pair.first) is_match = true;
                 if (!is_match) continue;
                 
                 std::vector<std::string> skill_names {};

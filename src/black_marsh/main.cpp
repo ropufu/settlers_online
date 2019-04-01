@@ -21,6 +21,7 @@ using unit_faction = ropufu::settlers_online::unit_faction;
 using unit_database = ropufu::settlers_online::unit_database;
 using char_string = ropufu::settlers_online::char_string;
 using battle_weather = ropufu::settlers_online::battle_weather;
+using damage_percentage_type = typename ropufu::settlers_online::damage_bonus_type::percentage_type;
 
 template <typename t_collection_type>
 void print_elements(const t_collection_type& container, const std::string& delimiter = ", ")
@@ -99,8 +100,8 @@ command_name parse_camp_clause(const std::string& expression, std::string& argum
     std::string command = "";
     split_in_two(expression, command, argument);
 
-    if (command == "hitpoints" || command == "hp") return command_name::hit_points;
-    if (command == "reduction" || command == "r") return command_name::damage_reduction;
+    if (command == "hitpoints" || command == "hit" || command == "hp") return command_name::hit_points;
+    if (command == "reduction" || command == "red" || command == "r") return command_name::damage_reduction;
 
     return command_name::not_recognized;
 } // parse_camp_clause(...)
@@ -185,38 +186,42 @@ void help(const std::string& argument) noexcept
             break;
         default:
         std::cout << R"?(
-    Command Name   | Description
-==============================================================
-    quit, q, exit  | Exit the program.
-    help, h, ?     | Display help.
-    units, u       | Lists units from a specified faction.
-    left, l        | Get or set left army.
-    right, r       | Get or set right army.
-    weather, w     | Get or set weather conditions.
-    n              | Gets or sets the number of simulations.
-    log            | Displays one battle report.
-    run, x         | Executes the simulations.
-==============================================================
+    Command Name        | Description
+===================================================================
+    quit, q, exit       | Exit the program.
+    help, h, ?          | Display help.
+    units, u            | Lists units from a specified faction.
+    left, l             | Get or set left army.
+    right, r            | Get or set right army.
+    weather, w          | Get or set weather conditions.
+    n                   | Gets or sets the number of simulations.
+    log                 | Displays one battle report.
+    run, x              | Executes the simulations.
+===================================================================
 Following the left / right command, one could use:
-    Command Name   | Description
-==============================================================
-... camp, c        | Get or set camp.
-... skills, s      | Get skills.
-==============================================================
+    Command Name        | Description
+===================================================================
+... camp, c             | Get or set camp.
+... skills, s           | Get skills.
+===================================================================
 Following the left / right camp command, one could use:
-    Command Name   | Description
-==============================================================
-... hitpoints, hp  | Get or set camp hit points.
-... reduction, r   | Get or set camp damage reduction.
-==============================================================
-Commands with get or set option will take an optional argument to set the
-value of corresponding parameter.
+    Command Name        | Description
+===================================================================
+... hitpoints, hit, hp  | Get or set camp hit points.
+... reduction, red, r   | Get or set camp damage reduction.
+===================================================================
+Commands with get or set option will take an optional argument to set
+the value of corresponding parameter.
 
-You can also run the program with arguments: "left army" "string army" [/s]
+You can also run the program with arguments:
+    "left army" "string army" ([/l] | [/r]) [/w "weather"]
 The first two are required (don't omit the quotation marks) and will
 automatically populate the left and right armies.
-The third is optional and may be one of: /l /r. When provided, the program
-will automatically execute "log" for /l, or "run" for 'r', and then quit. 
+One of the optional arguments can be either /l or /r. When provided,
+the program will automatically execute "log" for /l, or "run" for /r,
+and then quit.
+You can also set the weather by using the /w argument followed by the
+weather description.
 )?";
             break;
     }
@@ -341,7 +346,7 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
                 std::cout << "Weather conditions: " << std::to_string(lucy.weather()) << std::endl;
                 break;
             case command_name::left_camp:
-                std::cout << "Left campt: " << config.left().camp() << std::endl;
+                std::cout << "Left camp: " << config.left().camp() << std::endl;
                 break;
             case command_name::right_camp:
                 std::cout << "Right camp: " << config.right().camp() << std::endl;
@@ -351,20 +356,22 @@ std::int32_t main(std::int32_t argc, char* argv[]/*, char* envp[]*/)
                 {
                     std::error_code ec {};
                     auto camp = config.left().camp();
-                    camp.set_damage_reduction(std::stod(argument), ec);
+                    damage_percentage_type damage_reduction = damage_percentage_type::from_proportion(std::stod(argument));
+                    camp.set_damage_reduction(damage_reduction, ec);
                     config.left().set_camp(camp);
                 } // if (...)
-                std::cout << "Left camp damage recution: " << config.left().camp().damage_reduction() << std::endl;
+                std::cout << "Left camp damage recution: " << config.left().camp().damage_reduction().to_double() << std::endl;
                 break;
             case command_name::right_camp_reduction:
                 if (!argument.empty())
                 {
                     std::error_code ec {};
                     auto camp = config.right().camp();
-                    camp.set_damage_reduction(std::stod(argument), ec);
+                    damage_percentage_type damage_reduction = damage_percentage_type::from_proportion(std::stod(argument));
+                    camp.set_damage_reduction(damage_reduction, ec);
                     config.right().set_camp(camp);
                 } // if (...)
-                std::cout << "Right camp damage recution: " << config.right().camp().damage_reduction() << std::endl;
+                std::cout << "Right camp damage recution: " << config.right().camp().damage_reduction().to_double() << std::endl;
                 break;
             case command_name::left_camp_hit_points:
                 if (!argument.empty())

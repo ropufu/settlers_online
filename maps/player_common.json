@@ -55,7 +55,7 @@
                 "accuracy": 0.9
             },
             "experience when killed": 20,
-            "special abilities": [ "cleave" ]
+            "special abilities": [ "butcher" ]
         },
         {
             "id": 5,
@@ -87,7 +87,7 @@
                 "accuracy": 0.8
             },
             "experience when killed": 3,
-            "special abilities": [ "tower bonus", "rapid fire" ]
+            "special abilities": [ "tower bonus", "archer" ]
         },
         {
             "id": 7,
@@ -103,7 +103,7 @@
                 "accuracy": 0.8
             },
             "experience when killed": 8,
-            "special abilities": [ "tower bonus", "sniper training" ]
+            "special abilities": [ "tower bonus", "sniper" ]
         },
         {
             "id": 8,

@@ -3,7 +3,7 @@
         {
             "id": 40,
             "names": [ "Recruit Deserter" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 40,
             "damage": { "low": 15, "high": 30, "accuracy": 0.6 },
@@ -12,7 +12,7 @@
         {
             "id": 41,
             "names": [ "Militia Deserter" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 60,
             "damage": { "low": 20, "high": 40, "accuracy": 0.6 },
@@ -21,7 +21,7 @@
         {
             "id": 42,
             "names": [ "Cavalry Deserter" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 5,
             "damage": { "low": 5, "high": 10, "accuracy": 0.6 },
@@ -31,7 +31,7 @@
         {
             "id": 43,
             "names": [ "Soldier Deserter" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 90,
             "damage": { "low": 20, "high": 40, "accuracy": 0.65 },
@@ -40,7 +40,7 @@
         {
             "id": 44,
             "names": [ "Elite Soldier Deserter", "Elite Deserter" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 120,
             "damage": { "low": 20, "high": 40, "accuracy": 0.7 },
@@ -49,7 +49,7 @@
         {
             "id": 45,
             "names": [ "Bowman Deserter" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 10,
             "damage": { "low": 20, "high": 40, "accuracy": 0.6 },
@@ -59,7 +59,7 @@
         {
             "id": 46,
             "names": [ "Longbowman Deserter" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 10,
             "damage": { "low": 30, "high": 60, "accuracy": 0.6 },
@@ -69,7 +69,7 @@
         {
             "id": 47,
             "names": [ "Crossbowman Deserter" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 10,
             "damage": { "low": 45, "high": 90, "accuracy": 0.6 },
@@ -89,22 +89,22 @@
         {
             "id": 49,
             "names": [ "Sir Robin" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "first strike" ],
             "hit points": 12000,
             "damage": { "low": 200, "high": 600, "accuracy": 0.8, "splash chance": 1 },
             "experience when killed": 200,
-            "special abilities": [ "attack weakest target", "overrun" ]
+            "special abilities": [ "attack weakest target" ]
         },
         {
             "id": 50,
             "names": [ "Big Bertha" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 40000,
             "damage": { "low": 50, "high": 150, "accuracy": 0.75, "splash chance": 1 },
             "experience when killed": 350,
-            "special abilities": [ "attack weakest target", "overrun" ]
+            "special abilities": [ "attack weakest target" ]
         }
     ]
 }

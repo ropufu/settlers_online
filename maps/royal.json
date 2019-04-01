@@ -50,7 +50,7 @@
         {
             "id": 517,
             "names": [ "Royal Cavalry" ],
-            "category": "melee",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 40,
             "damage": { "low": 10, "high": 60, "accuracy": 0.95 },
@@ -70,30 +70,27 @@
         {
             "id": 1444,
             "names": [ "Royal Huntsmen Leader" ],
-            "category": "melee",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 45000,
-            "damage": { "low": 200, "high": 700, "accuracy": 0.9, "splash chance": 1 },
-            "special abilities": [ "overrun" ]
+            "damage": { "low": 200, "high": 700, "accuracy": 0.9, "splash chance": 1 }
         },
         {
             "id": 1445,
             "names": [ "Royal Captain" ],
-            "category": "melee",
+            "category": "boss",
             "phases": [ "normal" ],
             "hit points": 45000,
             "damage": { "low": 300, "high": 500, "accuracy": 0.8, "splash chance": 1 },
-            "experience when killed": 1500,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 1500
         },
         {
             "id": 1446,
             "names": [ "Royal Juggernaut" ],
-            "category": "melee",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 70000,
-            "damage": { "low": 200, "high": 1000, "accuracy": 0.35, "splash chance": 1 },
-            "special abilities": [ "overrun" ]
+            "damage": { "low": 200, "high": 1000, "accuracy": 0.35, "splash chance": 1 }
         }
     ]
 }

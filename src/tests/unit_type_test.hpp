@@ -39,10 +39,10 @@ namespace ropufu
                 u2.set_names({ "baka", "dummy" });
                 if (u1 != u2) return false;
 
-                std::size_t low_damage = u1.damage().low();
-                std::size_t high_damage = u1.damage().high();
-                double accuracy = u1.damage().accuracy();
-                double splash_chance = u1.damage().splash_chance();
+                std::size_t low_damage = u1.damage({}).low();
+                std::size_t high_damage = u1.damage({}).high();
+                double accuracy = u1.damage({}).accuracy();
+                double splash_chance = u1.damage({}).splash_chance();
                 splash_chance = (splash_chance == 0) ? 0.5 : (splash_chance / 2);
 
                 u2.set_damage(settlers_online::damage(low_damage, high_damage, accuracy, splash_chance, ec), ec);

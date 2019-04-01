@@ -3,37 +3,34 @@
         {
             "id": 11,
             "names": [ "Wild Mary" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "first strike" ],
             "hit points": 60000,
             "damage": { "low": 740, "high": 800, "accuracy": 0.5, "splash chance": 1 },
-            "experience when killed": 430,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 430
         },
         {
             "id": 12,
             "names": [ "Chuck" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 9000,
             "damage": { "low": 2000, "high": 2500, "accuracy": 0.5, "splash chance": 1 },
-            "experience when killed": 250,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 250
         },
         {
             "id": 13,
             "names": [ "Metal Tooth" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 11000,
             "damage": { "low": 250, "high": 500, "accuracy": 0.5, "splash chance": 1 },
-            "experience when killed": 160,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 160
         },
         {
             "id": 14,
             "names": [ "Scavenger" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 40,
             "damage": { "low": 15, "high": 30, "accuracy": 0.6 },
@@ -42,7 +39,7 @@
         {
             "id": 15,
             "names": [ "Thug" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 60,
             "damage": { "low": 20, "high": 40, "accuracy": 0.6 },
@@ -51,7 +48,7 @@
         {
             "id": 16,
             "names": [ "Guard Dog" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 5,
             "damage": { "low": 5, "high": 10, "accuracy": 0.6 },
@@ -61,7 +58,7 @@
         {
             "id": 17,
             "names": [ "Roughneck" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 90,
             "damage": { "low": 20, "high": 40, "accuracy": 0.6 },
@@ -70,7 +67,7 @@
         {
             "id": 18,
             "names": [ "Stone Thrower" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 10,
             "damage": { "low": 20, "high": 40, "accuracy": 0.6 },
@@ -80,7 +77,7 @@
         {
             "id": 19,
             "names": [ "Ranger" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 10,
             "damage": { "low": 30, "high": 60, "accuracy": 0.6 },
@@ -90,22 +87,20 @@
         {
             "id": 20,
             "names": [ "Skunk" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 5000,
             "damage": { "low": 1, "high": 100, "accuracy": 0.5, "splash chance": 1 },
-            "experience when killed": 200,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 200
         },
         {
             "id": 21,
             "names": [ "One-Eyed Bert" ],
-            "category": "unknown",
+            "category": "boss",
             "phases": [ "last strike" ],
             "hit points": 6000,
             "damage": { "low": 300, "high": 500, "accuracy": 0.5, "splash chance": 1 },
-            "experience when killed": 100,
-            "special abilities": [ "overrun" ]
+            "experience when killed": 100
         }
     ]
 }
