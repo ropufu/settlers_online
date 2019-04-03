@@ -7,6 +7,7 @@
 \usepackage{paralist}  % for inparaenum
 \usepackage{blkarray}  % for block matrices
 \usepackage{pgf,tikz}
+\usepackage{MnSymbol}  % \lsem, \rsem.
 
 \usepackage[margin=0.8in]{geometry}
 \usepackage{hyperref}
@@ -20,6 +21,7 @@
 \newcommand{\slfrac}[2]{\left. #1 \middle/ #2 \right.}
 \newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
 \newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\round}[1]{\left\lsem\, #1 \,\right\rsem}
 
 % Probability notation
 \renewcommand{\mspace}[1]{\mathscr{#1}}
@@ -68,124 +70,167 @@
 \DeclareMathOperator{\He}{{\sf He}} % Health.
 \DeclareMathOperator{\DLow}{\underline{\sf Dm}} % Low damage.
 \DeclareMathOperator{\DHigh}{\overline{\sf Dm}} % High damage.
+\DeclareMathOperator{\A}{{\sf A}} % Generic attribute.
 \DeclareMathOperator{\Acc}{{\sf Acc}} % Accuracy.
 \DeclareMathOperator{\Spl}{{\sf Spl}} % Splash chance.
 \DeclareMathOperator{\Red}{{\sf Red}} % Damage reduction.
+\DeclareMathOperator{\Exp}{{\sf Exp}} % Experience.
 
 % Theorems
-\newtheorem{example}{Example}
+\newtheorem{assumption}{Assumption}
 \newtheorem{remark}{Remark}
 \newtheorem{proposition}{Proposition}
 \newtheorem{lemma}{Lemma}
 \newtheorem{algorithm}{Algorithm}
 \numberwithin{equation}{section}
 
+\newenvironment{example}
+  {\paragraph*{Example.}\begin{itemize}\item[]}
+  {\end{itemize}}
+
+\title{Divining the Combat System in the Settlers Online}
+\date{}
 
 %-------------------------------------------------------------------------------------------------%
 \begin{document}
 
+\maketitle
+
 \paragraph*{Foreword.}
-The authors consider the adventure combat model only, and discard the expedition combat model as trivial and uninteresting.
+This paper is a short summary of how the combat mechanics work in the Settlers Online---based on scattered and scarce pieces of information from the forums from the developers, as well as testing on the main and pre-staging servers. Whenever a certain piece of information is not verified, it will be explicitly noted.
 
-\section{Notation}
+As an aside, the authors consider the adventure combat model only, and discard the expedition combat model as trivial and uninteresting.
 
-For a unit, $u$ say, let $\He (u)$ and $\Red (u)$ denote its current hit points and damage reduction; let $\Acc _u$, $\Spl _u$, $\DHigh _u$, and $\DLow _u$ denote its accuracy, splash chance, maximum, and minimum damage. We will refer to the damage before reduction is taken into account as \emph{pure} damage.
-Furthermore, define a \emph{unit group}, or simply \emph{group}, as a collection of a certain number of units, $\set{u_1, \cdots , u_n}$, sharing the \emph{same unit type}.
-An \emph{army} is an ordered collection $(v_1, \cdots , v_n)$ of units of possibly different types.
+\section{Units}
+Each unit has a \emph{type}, prescribing the base attributes governing their behavior in a battle. These are:
+\begin{itemize}
+    \item hit points, which we will denote with $\He $;
+    \item experience, $\Exp $---the amount of experience points the attacker gets when this unit is killed;
+    \item low and high damage, denoted $\DLow $ and $\DHigh $, respectively;
+    \item accuracy, $\Acc $, which is the probability of dealing high damage rather than low damage;
+    \item splash chance, $\Spl $---probability that the inflicted damage will spill over to the next defender.
+\end{itemize}
+All of them, except for $\Acc $ and $\Spl $ are integer-valued.
 %
-If $G$ is a group, $\cA $ is an army, $v$ is a unit, $h$ is an integer, we write
+Furthermore, each of the attributes can have \emph{modifiers}. Modifiers come in two flavors: absolute value modifier (additive modifier), and relative/rate modifier (multiplicative modifier). If $\A $ is the base value of any attribute, and ($x$, $r$) is the pair additive modifier/multiplicative modifier, then
 \[
-    \binom{G}{\cA }; \quad \binom{G}{v}; \quad \binom{G}{h}
+    \A + \round{r \A } + x
 \]
-to denote the (combat) pairing of $G$ versus $\cA $; $G$ vs.\ a singleton group $\set{v}$; or $G$ vs.\ a unit with $h$ hit points, respectively. If $G_1, G_2$ are groups, and $\cA _1, \cA _2$ are armies, we write
+will be the effective value of the attribute (c.f.\ \cite{dev-halloween:2018}), where $(r \A )$ is rounded for integer-valued attributes. How exactly it is rounded may depending on what $r$ is and which attribute we are talking about.
+
+Based on some---not particularly extensive---testing (but with no reference to official sources) the authors believe that the rounding happens this way (here $r$ is the rate modifier):
+\begin{itemize}
+    \item $\He $ modifiers are rounded toward zero (down if $r > 0$, up if $r < 0$)---tested for $r > 0$, speculation otherwise;
+    \item $\Exp $ modifiers are applied to groups rather than individual units, and are rounded toward zero (down if $r > 0$, up if $r < 0$)---tested for $r > 0$, speculation otherwise;
+    \item $\DLow $ and $\DHigh $ modifiers are rounded away from zero (up if $r > 0$, down if $r < 0$)---tested for $r < 0$, speculation otherwise;
+    \item $\Acc $ is not rounded---pure speculation;
+    \item $\Spl $ is not rounded---pure speculation.
+\end{itemize}
+
+When there is more than one modifier, they stack as follows \cite{dev-halloween:2018}. If a base attribute $\A $ is being modified by two modifier pairs, $(x, r)$ and $(y, s)$, then
 \[
-    \binom{G_1}{\cA _1} \bigsqcup \binom{G_2}{\cA _2}; \quad \binom{G_1}{\cA _1} \bigcup \binom{G_2}{\cA _2}
+    \A + \round{(r + s) \A } + (x + y)
 \]
-to denote the pairing $(G_1 \cup G_2)$ vs.\ $(\cA _1 \cup \cA _2)$ when the corresponding sub-pairings can or cannot (resp.) be done independently.
+will be the effective value of the attribute.
 
-\section{Assumptions}
-
-The standing assumptions throughout this work are as follows:
-\begin{enumerate}
-    \item Units attack sequentially, one at a time.
-    \item Hit points are always non-negative integer-valued.
-    \item Damage is always non-negative integer-valued.
-\end{enumerate}
+The governing feature of the entire combat system is:
+\begin{assumption}
+    Units within an army attack sequentially, one at a time. 
+\end{assumption}
+\begin{assumption}
+    Opposing armies attack each other simultaneously: if a unit has survived to a stage when they are supposed to attack, they are guaranteed the opportunity to attack regardless of whether or not they are killed in this stage. 
+\end{assumption}
 
 \begin{example}
-    Three units, $u_1$, $u_2$, and $u_2$, attack $v_1$. Suppose $v_1$ has $21$ hit points, and damage reduction is $0.4$.
-    The first two attackers deal pure damage of $13$ each, the last attacker deals pure damage of $9$. The inflicted damage from $u_1$ and $u_2$ will be $\floor{13 \cdot (1 - 0.4)} = 7$ each. The inflicted damage from $u_3$ will be $\floor{9 \cdot (1 - 0.4)} = 5$, respectively. Thus the total damage will be $(7 + 7 + 5) = 19$, and $v_1$ will survive with $(21 - 19) = 2$ hit point remaining.
+    Two defending units---first with $4$ hit points, second with $6$ hit points---are attacked by a group with $\DHigh = 5$, $\DLow = 3$ and $\Spl = 0$.
+    We will illustrate the consequences of changing the order of attack. To that end, consider two scenarios: the attacker deals \begin{inparaenum}[(i)]\item high, low, low; and \item low, low, high \end{inparaenum}.
 
-    Note that if one dropped the assumption that units attacked sequentially, the inflicted damage would be
+    In the first case the defender's hit points will be $(4, 6) \to (0, 6) \to (0, 3) \to (0, 0)$.
+
+    In the second case the defender's hit points will be $(4, 6) \to (1, 6) \to (0, 6) \to (0, 1)$.
+\end{example}
+
+\begin{example}
+    Three units, $u_1$, $u_2$, and $u_2$, attack an enemy unit $v$. Let the attacker have $10\%$ damage bonus; let $v$ have $25$ hit points and damage reduction of $30\%$.
+    
+    Suppose first two attackers deal base high damage of $13$ each, and the last attacker deals base low damage of $6$. The inflicted damage from $u_1$ and $u_2$ will then be
     \[
-        \floor{(13 + 13 + 9) \cdot (1 - 0.4)} = 21
+        13 + \round{(0.1 - 0.3) \cdot 13} = 13 - \ceil{2.6} = 13 - 3 = 10
     \]
-    instead, and $v_1$ would be killed.
+    each. Similarly, the inflicted damage from $u_3$ will be
+    \[
+        6 - \ceil{(0.2) \cdot 6} = 4.
+    \]
+    Thus the total damage will be $(10 + 10 + 4) = 24$, and $v$ will survive with $1$ hit point left.
+
+    Note that if one dropped the assumption that units attacked sequentially, the inflicted damage would have been
+    \[
+        (13 + 13 + 6) - \ceil{(0.2) \cdot (13 + 13 + 6)} = 32 - 7 = 25
+    \]
+    instead, and $v$ would have died.
 \end{example}
 
-\section{Combat Mechanics}
+\section{To Splash or Not To Splash}\label{sec:splash}
 
-In what follows, we consider a group $G = \{ u_1, u_2, \cdots, u_n \}$ attacking an army $\cA = (v_1, v_2, \cdots , v_m)$. The enemy units are attacked in that order: $v_1$ first, while it is alive, then $v_2$, etc. Let $d_i$ denote the pure damage dealt by $u_i$ (if any), $1 \leq i \leq n$, and $h_j = \He (v_j)$, $r_j = \Red (v_j)$, $1 \leq j \leq m$.
+Splash damage (as opposed to truncated---usual---damage) is the case when overshoot damage is spilled over to the next defending unit.
 %
-\emph{Each} unit in the attacking group, $u_i, 1 \le i \le n$, can deal \emph{potential} damage
-\begin{align*}
-    \DHigh _u \quad &\text{with probability $\Acc _u$,} \\
-    \DLow _u  \quad &\text{with probability $1 - \Acc _u$.}
-\end{align*}
-The potential damage dealt by $i$-th unit can be written as $\DHigh _u \cdot B_i + \DLow _u \cdot \left( 1 - B_i \right)$, where $B_i$, $1 \le i \le n$ are i.i.d.\ Bernoulli random variables with probability of success $\Acc _u$.
-%
-The \emph{actual} damage $d_i$ might be different; to that end there are two distinct attacking patterns: splash damage, and truncated damage.
-
-Consider the following example: $u_1$ attacks $v_1$ with $100$ damage, and $v_1$ has only $20$ hit points left; in either case $v_1$ will be killed. If this was a \emph{splash damage} attack, the remaining $80$ damage will be inflicted onto $v_2$. If this was a \emph{truncated damage} attack, the remaining $80$ damage will be lost (discarded).
-
-When attacking, each unit will deal splash damage with probability $\Spl _u$; with probability $(1 - \Spl _u)$ it will be truncated damage.
-We will now consider two cases: \begin{inparaenum}[(i)]\item all units in the group deal splash damage; and \item the general case\end{inparaenum}.
-
-\paragraph*{Uniform splash damage.}
-
-This is the simplest case: the excess damage is always spread over consecutive units sharing the same damage reduction.
-We will start with an example emphasizing the importance of uniform damage reduction.
 \begin{example}
-    Two defending units: first with $2$ hit points and damage reduction of $0.5$, second with $6$ hit points and no damage reduction, are attacked by a group with $\DHigh = 5$, $\DLow = 3$, and $\Acc = 1$. To demonstrate that the order of attack matters, consider two scenarios: the attacker deals \begin{inparaenum}[(i)]\item high, low, low; and \item low, low, high \end{inparaenum}.
-
-    In the first case the defender's hit points will be $(2, 6) \to (0, 6) \to (0, 3) \to (0, 0)$.
-
-    In the second case the defender's hit points will be $(2, 6) \to (1, 6) \to (0, 6) \to (0, 1)$.
+    Suppose there are no damage modifiers, and $u$ attacks $v$---which has only $20$ hit points left---with $100$ damage. In either case $v$ will be killed. If this was a \emph{splash damage} attack, the remaining $80$ damage will be inflicted onto the next unit. If this was a \emph{truncated damage} attack, the remaining $80$ damage will be lost (discarded).
 \end{example}
 
 
-In the pure splash damage scenario with uniform damage reduction $r$, the actual damage dealt is the same as reduced potential damage, and it suffices to consider the total reduced damage dealt by the attacking group versus the total hit points of the defending army:
-\begin{align*}
-    d = \sum _{i = 1} ^{n} d_i = \floor{(1 - r) \DHigh _u} \cdot \left( \sum _{i = 1} ^{n} B_i \right) + \floor{(1 - r) \DLow _u} \cdot \left( n - \sum _{i = 1} ^{n} B_i \right)
-    \qquad \text{vs.} \qquad
-    h = \sum _{j = 1} ^{m} h_i.
-\end{align*}
-Put otherwise, $d = \floor{(1 - r) \DHigh _u} \cdot \, X + \floor{(1 - r) \DLow _u} \cdot \left( n - X \right)$, where $X$ is a binomial random variable with parameters $n$ and $\Acc _{u}$, since $B_i$ are i.i.d.: $X \sim \Binomial(n, \Acc _{u})$.
 
-\paragraph*{Mixture damage.}
+While this works nicely when damage modifiers are equal between groups, the moment damage modifiers are no longer homogeneous a big question arises: how does this difference affect overshoot damage?
 
-This is the general case: the excess damage is lost with probability $\Spl _u$. It implies that the actual damage dealt by two consecutive attacking units need not be independent.
+The answer to this question is, perhaps, the weakest point of this work: not only is it not documented officially (according to the authors' knowledge), but it has not been tested either (partly because watchtower damage reduction has been removed from the game, and coming up with a conclusive setup seemed too challenging). In short, the following is merely a description of how the authors chose to implement it, and may have little to no relevance to the game.
 
-On the other hand, if the defending unit has $h$ hit points, it will take at least $\ceil{h / \DHigh _u}$ units to eliminate it. The course of attack is outlined in the following algorithm.
-\begin{algorithm}[conservative]\label{alg:conservative}
-    Consider a group $G = \{ u_1, u_2, \cdots , u_n \}$ attacking an army $\cA = (v_1, v_2, \cdots , v_m)$.
+Suppose a unit $u$ attacks group $G$ followed by group $H$. Let $(\underline{d}_G, \overline{d}_G)$ and $(\underline{d}_H, \overline{d}_H)$ denote the effective (after all bonuses have been applied) damage of $u$ vs.\ $G$ and $H$, respectively.
+Denote the damage ratios with
+\[
+    \underline{r} = \frac{\underline{d}_H}{\underline{d}_G}
+    \qquad \text{and} \qquad
+    \overline{r} = \frac{\overline{d}_H}{\overline{d}_G}.
+\]
+Let $\o $ be the overshoot damage when $G$ is killed. If $G$ was killed with a low damage splash hit, then the damage spilled onto $H$ will be $\floor{\underline{r} \, \cdot \o }$. If the damage was high, the corresponding value will be $\floor{\overline{r} \, \cdot \o }$ instead.
+
+
+\section{Special Abilities and Battle Structure}
+In this section we briefly discuss battle or unit characteristics, modifiers, and abilities, that affect the normal course of the battle.
+
+All modifiers to $\He $, $\Exp $, $\DLow $, and $\DHigh $ are stored separately from the base values. Effective values for $\He $ are calculated before the battle begins. Effective values for $\DLow $ and $\DHigh $ are calculated prior to each combat round.
+Modifiers to $\Acc $ and $\Spl $, on the other hand, are applied before the battle directly to the base value which is then clipped to the interval $[0, 1]$.
+
+Before the battle starts, there are two stages:
+\begin{enumerate}[(i)]
+    \item Pre-battle bonus stage: each army's bonuses are applied.
+    \item Pre-battle penalty stage: each army's penalties are applied.
+\end{enumerate}
+This ordering ensures, for example, that if one army has explosive ammunition (granting friendly ranged units \emph{attack weakest target} ability) and the other has intercept (stripping enemy units of \emph{attack weakest target} ability), intercept will take precedence, and all of the units in the first army will \emph{not} have \emph{attack weakest target}.
+
+
+\section{Combat Sequence}
+
+In this section let $\He ^*$, $\DLow ^*$, $\DHigh ^*$, $\Acc ^*$, and $\Spl ^*$ denote the modified attributes (base values after the modifiers have been applied).
+
+While the base damage dealt by any unit is independent of any other unit, the effective damage is not. 
+However, if the defending unit has $h$ hit points, it will take at least $k = \ceil{h / \DHigh ^*}$ units to eliminate it, implying that the first $k$ attacks \emph{will} be independent.
+%
+Having said that, the course of attack is outlined in the following algorithm.
+\begin{algorithm}
+    Consider a group $G = (u_1, u_2, \cdots , u_n)$ attacking an army $\cA = (v_1, v_2, \cdots , v_m)$.
     %
-    Set $i = 1$ and $j = 1$, the (one-based) index of the attacking and defending units, respectively. Let $h = \He (v_1)$ and $r = \Red (v_1)$ be the health and damage reduction of the first defending unit.
+    Set $i = 1$ and $j = 1$, the (one-based) index of the attacking and defending units, respectively. Let $h = \He ^* (v_1)$ be the health of the first defending unit.
     %
     \begin{enumerate}
-        \item \label{step:first_conservative} Let $\DHigh _u ^* = \floor{(1 - r) \DHigh _u}$ and $\DLow _u ^* = \floor{(1 - r) \DLow _u}$ be the effective high and low damage, and $h^* = \ceil{h / (1 - r)}$ be the pure damage required to kill the current defending unit.
+        \item \label{step:first_conservative} Let $\DHigh _j ^*$ and $\DLow _j ^*$ be the effective high and low damage against the current defending unit, and let $k = \ceil{h / \DHigh _j ^*}$ be the least number of attacking units required to kill the defender.
 
-        \item Let $a = \ceil{h / \DHigh _u ^*}$ be the least number of units required to kill the current defending unit.
+        \item If $k$ is greater than $(n - i + 1)$---the remaining units in the attacking group---update $k \overwr (n - i + 1)$.
 
-        \item If $a$ is greater than $(n - i + 1)$, the remaining units in the attacking group, update $a \overwr (n - i + 1)$.
+        \item Generate $X \sim \mathrm{Bin} \left(k, \Acc ^* \right)$, the number of units dealing high damage, and let $d = \DHigh _j ^* \cdot \, X + \DLow _j ^* \cdot \, (k - X)$.
 
-        \item Generate $X \sim \mathrm{Bin} \left(a, \Acc _u \right)$, the number of units (out of the first $a$) dealing high damage.
-         
-        \item Let $d = \DHigh _u \cdot \, X + \DLow _u \cdot \, (a - X)$ and $d^* = \DHigh _u ^* \cdot \, X + \DLow _u ^* \cdot \, (a - X)$ be the pure and effective damage, respectively.
+        \item Update $i \overwr i + k$ (point to the next attacking unit).
 
-        \item Update $i \overwr i + a$ (point to the next attacking unit).
-
-        \item Update $h \overwr h - d^*$ (damage the current defending unit), and $d \overwr d - h^*$ (potential overshoot pure damage).
+        \item Update $(h, d) \overwr (h - d, d - h)$ (damage the current defending unit, and store potential overshoot damage).
 
         \item If $h < 0$ (the current defending unit has been killed and there is still leftover damage), generate $Y \sim \mathrm{Bin} \left(1, \Spl _u \right)$, the chance of splash damage (note that it is not necessary if $h = 0$). Otherwise set $Y = 0$.
             
@@ -195,9 +240,9 @@ On the other hand, if the defending unit has $h$ hit points, it will take at lea
         \begin{enumerate}
             \item update $j \overwr j + 1$ (proceed to the next defending unit);
             \item if $j = m + 1$, terminate: the entire army $\cA $ has been eliminated;
-            \item update $h \overwr \He (v_j)$, $r \overwr \Red (v_j)$;
-            \item update $d^* \overwr \floor{d \cdot (1 - r)}$ (effective damage) and $h^* \overwr \ceil{h / (1 - r)}$ (pure damage required to kill the next defending unit);
-            \item update $h \overwr h - d^*$ (damage the next defending unit), and $d \overwr d - h^*$ (overshoot pure damage).
+            \item let $r$ denote the splash ratio factor between $v_j$ and $v_{j - 1}$ as explained in section \ref{sec:splash};
+            \item update $h \overwr \He ^* (v_j)$ and $d \overwr \floor{r \cdot d}$;
+            \item update $(h, d) \overwr (h - d, d - h)$ (damage the next defending unit, and store potential overshoot damage).
         \end{enumerate}
 
         \item \label{step:last_conservative} If $i = n + 1$, terminate: the entire group $G$ has attacked, and exactly $(j - 1)$ units from $\cA $ have been killed; the $j$-th unit in $\cA $ has only $h$ hit points left.
@@ -206,134 +251,12 @@ On the other hand, if the defending unit has $h$ hit points, it will take at lea
     \end{enumerate}
 \end{algorithm}
 
-\ignore{
-The remainder of this section will aim at further optimizing Algorithm~\ref{alg:conservative} based on the following observation: it takes at most $b = \ceil{\He (v) / \DLow _u}$ units from $G$ to eliminate \emph{one} unit from $H$\ignore{, with or without splash damage}, thus one is \emph{guaranteed} to kill $\kappa = \min (m, \floor{ \slfrac{n}{b} })$ units from $H$. Those first $\kappa $ units from $H$ will be the focus of our discussion.
 
-Let us revisit the course of attack. While the defending unit is still alive, it does not matter whether the inflicted damage was splash damage or not. The first time it matters---and one has to generate $\mathrm{Bin} \left(1, \Spl _u \right)$---is when the defending unit is killed. This brings us to the first stage of partitioning $G$:
-%
-\begin{align*}
-    G = \{ u_1, u_2, \cdots, u_n \} &= \bigcup _{k = 0} ^{\kappa - 1}
-      \underbrace{ \big\{ u_{1 + k b}, \cdots, u_{(k + 1) b} \big\}}_{G_{k + 1}} \, \cup \,
-      \underbrace{ \big\{ u_{\kappa b + 1}, \cdots, u_n \big\}}_{G^\star }
-      = (G_1 \cup \cdots \cup G_\kappa ) \cup G^\star ,
-\end{align*}
-where $\kappa = \min (m, \floor{ \slfrac{n}{b} })$ is the number of blocks of size $b$ each, and $G^\star $ (possibly empty) contains the leftover units.
-Similarly, we will partition $H$\ignore{ (for notation simplicity we will write $v$ instead of $\set{v}$)}:
-\[
-    H = (v_1 \cup \cdots \cup v_\kappa ) \cup H^\star
-    \qquad \text{where} \quad H^\star = (v_{\kappa + 1}, \cdots , v_m).
-\]
-We arrive at the following deterministic pairing:
-\[
-    \binom{G}{H} = \binom{G_1}{h_1} \bigcup \binom{G_2}{h_2} \bigcup \cdots \bigcup \binom{G_\kappa }{h_\kappa } \bigcup \binom{G^\star }{H^\star }.
-\]
-Unfortunately, the partition elements described above are not mutually independent due to the possibility of splash damage. This brings us to the second (and last) stage of partitioning.
-
-Generate $Y_1, Y_2, \cdots , Y_{\kappa - 1} \sim \mathrm{Bin} \left(1, \Spl _u \right)$, independent Bernoulli random variables indicating whether the final attack in each block $G_j$, $1 \leq j\leq (\kappa - 1)$, is splash damage. If it is, ``glue'' the adjacent blocks together as follows: whenever $Y_{j_r} = \cdots = Y_{j_r + k_r} = 1$,
-\[
-    \binom{G_{j_r}}{h_{j_r}} \bigcup \cdots \bigcup \binom{G_{j_r + k_r + 1}}{h_{j_r + k_r + 1}} = \binom{G_{j_r} \cup \cdots \cup G_{j_r + k_r + 1}}{h_{j_r} + \cdots + h_{j_r + k_r + 1}} = \binom{\tilde{G}_r}{\tilde{h}_r}.
-\]
-The final pairing will be
-\[
-    \binom{G}{H} = \binom{\tilde{G}_1}{\tilde{h}_1} \bigsqcup \cdots \bigsqcup \binom{\tilde{G}_\lambda }{\tilde{h}_\lambda } \bigcup \binom{G^\star }{H^\star }.
-\]
-Note that one also needs $Y_\kappa \sim \mathrm{Bin} \left(1, \Spl _u \right)$ to determine whether $\tilde{G}_\lambda $ vs.\ $\tilde{h}_\lambda $ will have an overshoot.
+\begin{thebibliography}{9}
+    \bibitem{dev-halloween:2018} Official forums. \textit{[Dev Diary] Halloween 2018}, {https://forum.thesettlersonline.net/threads/25261\#post287808}.
+\end{thebibliography}
 
 
-\begin{figure}[!ht]
-    \begin{center}
-    \begin{tikzpicture}[scale=0.7]
-        \draw (0.0, 0) node {$\tilde{G}_1$}; \draw (0.0 - 0.1, 0.5) rectangle (0.0 + 0.1, 1.5); \draw (0.0, 1.5 + 0.5) node {$\tilde{h}_1$};
-        \draw (1.0, 0) node {$\tilde{G}_2$}; \draw (1.0 - 0.1, 0.5) rectangle (1.0 + 0.1, 2.5); \draw (1.0, 2.5 + 0.5) node {$\tilde{h}_2$};
-        \draw (2.0, 0) node {$\tilde{G}_3$}; \draw (2.0 - 0.1, 0.5) rectangle (2.0 + 0.1, 2.0); \draw (2.0, 2.0 + 0.5) node {$\tilde{h}_3$};
-        \draw (3.5, 0) node {$\cdots $};
-        \draw (5.0, 0) node {$\tilde{G}_\lambda $}; \draw (5.0 - 0.1, 0.5) rectangle (5.0 + 0.1, 1.7); \draw (5.0, 1.7 + 0.5) node {$\tilde{h}_\lambda $};
-    \end{tikzpicture}
-    \caption{Group partition}
-    \end{center}
-\end{figure}
-
-} % End of ignore.
-
-
-\section{Special Abilities and Battle Structure}
-In this section we will discuss all battle or unit characteristics, modifiers, and abilities, that affect the normal course of the battle.
-
-The key assumptions of the battle mechanics (as implemented by yours humbly) are as follows: damage can be fractional (or irrational even), hit points are always integer-valued. To allow for that, damage is always rounded \emph{up}. For example, when a group of units is hit with $31.416$ damage, the outcome would be exactly the same as if it was hit with $32$ damage.
-
-Before the battle starts, there are two stages. First, each army's bonuses are applied. Next, each army's penalties are applied.
-\begin{enumerate}
-    \item Pre-battle bonus stage.
-    \begin{enumerate}
-        \item Explosive ammunition: every friendly unit in \emph{ranged} category gains \emph{attack weakest target} ability. Note that this will be ignored if the enemy army has \emph{intercept}.
-        \item Accuracy bonus (additive): a given category of friendly unit's accuracy is increased by this amount. If the unmodified accuracy is $a$ and the accuracy bonus is $x$, the adjusted accuracy would be $(a + x)$, clipped to $[0.0, 1.0]$.
-        \item Splash bonus (additive): a given category of friendly unit's splash chance is increased by this amount. If the unmodified splash chance is $s$ and the accuracy bonus is $x$, the adjusted splash chance would be $(s + x)$, clipped to $[0.0, 1.0]$.
-        \item Minimum/maximum damage bonus (additive): a given category of friendly unit's minimum/maximum damage is increased by this amount. If the unmodified minimum/maximum damage is $d$ and the damage bonus is $x$, the adjusted damage would be $(d + x)$.
-    \end{enumerate}
-    \item Pre-battle penalty stage.
-    \begin{enumerate}
-        \item Boss health reduction (multiplicative): every enemy unit with \emph{boss} special ability will have a health penalty. If a boss unit has $h$ hit points and the boss health reduction is $x$, its actual hit points would become $\ceil{h \cdot (1 - x)}$.
-        \item Dazzle: every enemy unit's accuracy is set to $0.0$.
-        \item Intercept: every enemy unit is stripped of \emph{attack weakest target} ability.
-    \end{enumerate}
-\end{enumerate}
-
-Some modifiers are applied during the battle. Suppose the current round is $n \geq 1$.
-\begin{enumerate}
-    \item Direct damage reduction (multiplicative): every enemy unit's damage is reduced by this amount. If a unit has $d$ damage and the direct damage reduction is $x$, the actual damage would become $\ceil{d \cdot (1 - x)}$.
-    \item Tower damage reduction (multiplicative). If a friendly unit with \emph{tower bonus} special ability were to be hit with $d$ and the tower damage reduction is $x$, the actual inflicted damage would become $\ceil{d \cdot (1 - x)}$. Ignored if the attacking enemy unit has \emph{ignore tower bonus} ability.
-    \item Frenzy bonus (multiplicative): every friendly unit's damage is multiplied by this amount. If the unmodified damage is $d$ and the frenzy bonus is $x$, the adjusted damage would be $\ceil{d \cdot (1 + x)^{(n - 1)}}$.
-\end{enumerate}
-
-\section{Timing}
-
-Consider a battle between two armies\ignore{ $A_1$ and $A_2$}.
-Let $T_f$, $T_d$, $T$, and $S$ be random variables
-\begin{align*}
-    T_f &= \{ \text{fighting time in rounds} \}, \quad
-    T_d = \{ \text{destruction time in rounds} \}, \\
-    T &= \{ \text{total time in rounds} \} = T_f + T_d, \\
-    S &= \{ \text{loser's camp and surviving unit types} \}.
-\end{align*}
-%
-Note that $\cond{T_d \ci T_f}{S}$, and write $T_d^s \triangleq (\cond{T_d}{S = s})$.
-
-The result of fighting phase is the pair $(T_f, S)$. Given $s$, the observed value of $S$, the result of destruction phase is $T_d^s$.
-Ultimately, we are interested in distributions of $T_f$, $T_d$, and $T$.
-
-
-It is worth noting that destruction time, $T_s$, can be written as a stopping time. Let $m$ denote the number of surviving unit types, and write $s = \left( c, \{ u_i \} _{1 \le i \le m} \right)$. Let $h$ denote the number of hit points of the loser's camp, and $p_i$, $\overline{d_i}$, and $\underline{d_i}$ denote the accuracy, maximum, and minimum destruction damage of $u_i$. Let
-\[
-    D_t^s = \sum _{i = 1}^{m} \left( \overline{d_i} B_i^t + \underline{d_i} (1 - B_i^t) \right), \quad t \ge 1, \ignore{\quad D_0^s = 0,}
-\]
-be the damage per round inflicted by the survivors, where $\{ B_i^t \} _{1 \le i \le m, t \ge 1}$ are independent Bernoulli random variables, $B_i^t \sim \mathrm{Bernoulli}(p_i)$. Then
-\[
-    T_t^s = \inf \left\{ t \ge 0  \,:\, \sum _{k = 1}^t D_k^s \ge h \right\}.
-\]
-
-%+-----------------------------------------------------------------------------------------------+%
-\section{Monte-Carlo simulations}
-
-Let $n$ and $n_s$ denote the number of fighting phase simulations and destruction phase simulations, respectively. Then after simulating the fighting phase one can approximate
-\begin{align}
-    &\prob{P} (T_f = r, S = s) \approx \left( \sum _{i = 1} ^n \One \{ (t_{f, i}, s_i) = (r, s) \} \right) \Big\slash n, \quad
-    \prob{P} (S = s) \approx \left( \sum _{i = 1} ^n \One \{ (t_{f, i}, s_i) = (\cdot , s) \} \right) \Big\slash n, \nonumber \\
-    &\prob{P} (T_f = t) \approx \left( \sum _{i = 1} ^n \One \{ (t_{f, i}, s_i) = (t, \cdot ) \} \right) \Big\slash n. \label{eq:rounds_fight}
-\end{align}
-After simulating the destruction phase for every observed value of $s$, one gets
-\begin{align}
-    \prob{P} (T_d^s = t) &= \prob{P} (\cond{T_d = t}{S = s}) \approx \left( \sum _{i = 1} ^{n_s} \One \{ t_{d, i}^s = t \} \right) \Big\slash n_s, \nonumber \\
-    \prob{P} (T_d = t) &= \sum _{s \in \mathcal{S}} \prob{P} (\cond{T_d = t}{S = s}) \, \prob{P} (S = s)
-        = \sum _{s \in \mathcal{S}} \prob{P} (T_d^s = t) \, \prob{P} (S = s), \label{eq:rounds_destruct} \\
-    \prob{P} (T = t) &= \sum _{r = 0}^t \prob{P} (T_f = r, T_d = t - r)
-        = \sum _{s \in \mathcal{S}} \sum _{r = 0}^t \prob{P} (\cond{T_f = r, T_d = t - r}{S = s}) \, \prob{P} (S = s) \nonumber \\
-        &= \sum _{s \in \mathcal{S}} \sum _{r = 0}^t \prob{P} (\cond{T_f = r}{S = s}) \, \prob{P} (\cond{T_d = t - r}{S = s}) \, \prob{P} (S = s) \nonumber \\
-        &= \sum _{s \in \mathcal{S}} \sum _{r = 0}^t \prob{P} (T_f = r, S = s) \, \prob{P} (T_d^s = t - r) \label{eq:rounds_time}
-\end{align}
-
-% that's all folks
 \end{document}
 
-% $EOF$
-%-------------------------------------------------------------------------------------------------%
 

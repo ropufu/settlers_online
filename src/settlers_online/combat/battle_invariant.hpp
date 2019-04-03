@@ -45,7 +45,8 @@ namespace ropufu::settlers_online
     private:
         aftermath::algebra::matrix<std::size_t> m_attack_order = {}; // Order in which enemy groups are to be attacked.
         std::vector<std::size_t> m_original_counts = {}; // Unit counts before the battle.
-        std::vector<detail::damageplex> m_damage_tables = {}; // Damage agains defender groups (including frenzy bonus and damage reduction).
+        std::vector<detail::damageplex> m_damage_tables = {}; // Damage against defender groups (including frenzy bonus and damage reduction).
+        std::vector<damage> m_destruction_damage = {}; // Damage against enemy camp.
         // ~~ Optimization ~~
         aftermath::algebra::matrix<bool> m_is_one_to_one = {}; // Indicates that: (i) there is no splash damage; and (ii) the minimal effective damage is enough to kill one defending unit.
         aftermath::algebra::matrix<fraction_type> m_damage_ratio = {}; // Stores damage ratios between consecutive groups.
@@ -119,6 +120,7 @@ namespace ropufu::settlers_online
             std::size_t n = other.count_groups();
 
             this->m_damage_tables.reserve(type::default_capacity);
+            this->m_destruction_damage.reserve(m);
             this->m_is_uniform_splash.reserve(m);
             this->m_unit_types.reserve(m);
 
@@ -156,12 +158,19 @@ namespace ropufu::settlers_online
                     this->m_tower_damage_modifier(i, j) = damage_modifier;
                 } // for (...)
 
+                // Calculate destruction damage.
+                damage_percentage_type artillery_bonus {};
+                if (t.is(unit_category::artillery)) artillery_bonus.set_numerator(100);
+                damage destruction_damage = t.damage(artillery_bonus);
+                this->m_destruction_damage.push_back(destruction_damage);
+
                 // Populate single group properties.
                 bool is_uniform_splash = does_always_splash && (distinct_damage_modifiers.size() == 1);
                 this->m_is_uniform_splash.push_back(is_uniform_splash);
                 this->m_unit_types.push_back(t);
             } // for (...)
 
+            this->m_destruction_damage.shrink_to_fit();
             this->m_is_uniform_splash.shrink_to_fit();
             this->m_unit_types.shrink_to_fit();
 
@@ -178,6 +187,8 @@ namespace ropufu::settlers_online
             for (std::size_t k = this->m_damage_tables.size(); k <= round_index; ++k) this->build_damage_table_at(k);
             return this->m_damage_tables[round_index];
         } // at(...)
+
+        const std::vector<damage>& destruction_damage() const noexcept { return this->m_destruction_damage; }
 
         const aftermath::algebra::matrix<bool>& is_one_to_one() const noexcept { return this->m_is_one_to_one; }
 

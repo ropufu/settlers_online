@@ -2,7 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_ARMY_MECHANICS_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_ARMY_MECHANICS_HPP_INCLUDED
 
-#include <ropufu/algebra.hpp>    // aftermath::algebra::matrix
+#include <ropufu/algebra.hpp> // aftermath::algebra::matrix
 
 #include "../arithmetic.hpp"
 #include "../enums.hpp"
@@ -75,9 +75,10 @@ namespace ropufu::settlers_online
         
         /** Destruct \p other's camp. */
         template <typename t_sequence_type>
-        std::size_t destruct(const army_mechanics& defender, t_sequence_type& sequencer, battle_clock& clock) const noexcept
+        std::size_t destruct(const battle_invariant& invariant, const army_mechanics& defender, t_sequence_type& sequencer, battle_clock& clock) const noexcept
         {
             using hit_points_type = std::make_signed_t<std::size_t>;
+            const std::vector<damage>& destruction_damage = invariant.destruction_damage();
 
             std::size_t m = this->m_underlying.count_groups();
 
@@ -88,13 +89,9 @@ namespace ropufu::settlers_online
                 for (std::size_t i = 0; i < m; ++i)
                 {
                     const unit_group& g = this->m_underlying[i];
-                    const unit_type& t = g.unit();
                     if (!g.alive_as_attacker()) continue;
 
-                    damage_percentage_type artillery_bonus {};
-                    if (t.is(unit_category::artillery)) artillery_bonus.set_numerator(100);
-
-                    damage attacker_damage = t.damage(artillery_bonus);
+                    const damage& attacker_damage = destruction_damage[i];
                     bool do_high_damage = sequencer[i].peek_do_high_damage(clock);
                     std::size_t damage = do_high_damage ? attacker_damage.high() : attacker_damage.low();
 
@@ -170,6 +167,7 @@ namespace ropufu::settlers_online
         
         /** @brief Inflicts the reduced damage, \p reduced_damage, onto \p defender, assuming the attaker always deals splash damage and there is no effective tower bonus.
          *  @remark Attacking group is assumed to be alive.
+         *  @warning One-to-one optimization relies on the fact that damage can not go down as the battle progresses. It should be taken into account when more features are introduced to the game. 
          */
         template <typename t_sequence_type, typename t_logger_type>
         void unoptimized_attack_at(std::size_t i, battle_invariant& invariant, army_mechanics& defender,

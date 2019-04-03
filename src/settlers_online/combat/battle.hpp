@@ -167,8 +167,8 @@ namespace ropufu::settlers_online
             } // if (...)
             
             battle_clock destruction_clock = this->m_clock; // Make a copy of current clock.
-            if (this->m_outcome.is_left_victorious()) return this->m_left.destruct(this->m_right, this->m_left_sequence, destruction_clock);
-            if (this->m_outcome.is_rihgt_victorious()) return this->m_right.destruct(this->m_left, this->m_right_sequence, destruction_clock);
+            if (this->m_outcome.is_left_victorious()) return this->m_left.destruct(this->m_left_invariant, this->m_right, this->m_left_sequence, destruction_clock);
+            if (this->m_outcome.is_rihgt_victorious()) return this->m_right.destruct(this->m_right_invariant, this->m_left, this->m_right_sequence, destruction_clock);
             return 0;
         } // destruct(...)
     }; // struct battle

@@ -37,6 +37,7 @@ namespace ropufu::settlers_online
         using damage_type = ropufu::settlers_online::damage;
         using damage_percentage_type = typename damage_bonus_type::percentage_type;
         using hit_points_percentage_type = typename hit_points_bonus_type::percentage_type;
+        using experience_percentage_type = typename experience_bonus_type::percentage_type;
 
         // ~~ Json names ~~
         static constexpr char jstr_id[] = "id";
@@ -468,7 +469,7 @@ namespace ropufu::settlers_online
             // Misc.
             constexpr std::array<typename hit_points_bonus_type::integer_type, 4> overrun_rate_table { 0, -8, -16, -25 };
             const hit_points_percentage_type overrun_rate { overrun_rate_table[level] };
-            const damage_percentage_type experience_bonus { static_cast<typename damage_bonus_type::integer_type>(10 * level) };
+            const experience_percentage_type experience_bonus { static_cast<typename experience_percentage_type::integer_type>(10 * level) };
 
             switch (skill)
             {
