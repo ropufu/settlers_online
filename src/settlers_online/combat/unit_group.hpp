@@ -80,8 +80,8 @@ namespace ropufu::settlers_online
         std::size_t top_hit_points_defender() const noexcept
         {
             const std::size_t h = this->m_unit_hit_points;
-            std::size_t trivial_indicator = fraction_ceiling(this->m_current_hit_points, this->m_current_hit_points + 1); // 0 if the group has been killed, 1 otherwise.
-            std::size_t fractional_indicator = fraction_ceiling(this->m_current_hit_points, h) - fraction_floor(this->m_current_hit_points, h); // 0 if all units have full hp, 1 otherwise.
+            std::size_t trivial_indicator = indicator_is_non_zero(this->m_current_hit_points); // 0 if the group has been killed, 1 otherwise.
+            std::size_t fractional_indicator = indicator_is_fractional(this->m_current_hit_points, h); // 0 if all units have full hp, 1 otherwise.
             std::size_t damage_cap = (fractional_indicator) * (this->m_current_hit_points % h) + (1 - fractional_indicator) * h;
             damage_cap *= trivial_indicator;
             return damage_cap;
