@@ -1,18 +1,20 @@
 
-#ifndef ROPUFU_SETTLERS_ONLINE_ARITHMETIC_PERCENTAGE_HPP_INCLUDED
-#define ROPUFU_SETTLERS_ONLINE_ARITHMETIC_PERCENTAGE_HPP_INCLUDED
+#ifndef ROPUFU_SETTLERS_ONLINE_ALGEBRA_PERCENTAGE_HPP_INCLUDED
+#define ROPUFU_SETTLERS_ONLINE_ALGEBRA_PERCENTAGE_HPP_INCLUDED
 
 #include <nlohmann/json.hpp>
 #include <ropufu/json_traits.hpp>
 #include <ropufu/on_error.hpp>
 
-#include "core.hpp"
+#include "arithmetic.hpp"
 
-#include <cstddef>     // std::size_t
-#include <cmath>       // std::round
-#include <functional>  // std::hash
-#include <limits>      // std::numeric_limits<...>::is_integer
-#include <type_traits> // std::make_signed_t
+#include <cstddef>      // std::size_t
+#include <cmath>        // std::round
+#include <functional>   // std::hash
+#include <limits>       // std::numeric_limits<...>::is_integer
+#include <stdexcept>    // std::runtime_error
+#include <system_error> // std::error_code, std::errc
+#include <type_traits>  // std::make_signed_t
 
 namespace ropufu::settlers_online
 {
@@ -193,4 +195,4 @@ namespace std
     }; // struct hash<...>
 } // namespace std
 
-#endif // ROPUFU_SETTLERS_ONLINE_ARITHMETIC_PERCENTAGE_HPP_INCLUDED
+#endif // ROPUFU_SETTLERS_ONLINE_ALGEBRA_PERCENTAGE_HPP_INCLUDED

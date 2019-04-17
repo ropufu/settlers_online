@@ -3,10 +3,7 @@
         {
             "name": "Mac",
             "includePath": [
-                "/usr/local/Cellar/gcc/8.2.0/include/c++/8.2.0",
-                "/usr/include/c++/4.2.1",
-                "/usr/local/include",
-                "/usr/include",
+                "/usr/local/Cellar/gcc/8.3.0/include/c++/8.3.0",
                 "${workspaceRoot}",
                 "${workspaceRoot}/../opensource",
                 "${workspaceRoot}/../aftermath/src"
@@ -15,10 +12,7 @@
             "intelliSenseMode": "clang-x64",
             "browse": {
                 "path": [
-                    "/usr/local/Cellar/gcc/8.2.0/include/c++/8.2.0",
-                    "/usr/include/c++/4.2.1",
-                    "/usr/local/include",
-                    "/usr/include",
+                    "/usr/local/Cellar/gcc/8.3.0/include/c++/8.3.0",
                     "${workspaceRoot}",
                     "${workspaceRoot}/../opensource",
                     "${workspaceRoot}/../aftermath/src"

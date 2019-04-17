@@ -52,7 +52,7 @@ namespace ropufu::settlers_online
             m_splash_sampler(bernoulli_distribution_type(g.unit().base_damage().splash_chance(), ec)),
             m_accuracy_sampler(bernoulli_distribution_type(g.unit().base_damage().accuracy(), ec)),
             m_accuracy_lookup(
-                binomial_distribution_type(1, g.unit().base_damage().accuracy(), ec),
+                binomial_distribution_type(0, g.unit().base_damage().accuracy(), ec),
                 binomial_distribution_type(g.alive_as_attacker() ? g.count_as_attacker() : 1, g.unit().base_damage().accuracy(), ec), ec)
         {
             std::int32_t seed_offset = static_cast<std::int32_t>(group_index);

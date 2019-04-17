@@ -1,0 +1,148 @@
+{
+    "buildings": [
+        {
+            "names": [ "Gem Pit" ],
+            "category": "mine",
+            "attributes": [ "cannot be moved", "cannot be buffed", "cannot be demolished" ],
+            "cycle time": "13min 9s",
+            "production": [
+                { "resource": "Gem", "amount": 1 },
+                { "resource": "Gem Deposit", "amount": -1 }
+            ],
+            "inner deposit": { "resource": "Gem Deposit", "amount": 40000 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Endless Copper Mine" ],
+            "category": "mine",
+            "attributes": [ "cannot be moved", "placed on deposit", "storehouse" ],
+            "cycle time": "3min",
+            "production": [
+                { "resource": "Copper Ore", "amount": 1 },
+                { "resource": "Copper Deposit", "amount": -1 }
+            ],
+            "inner deposit": { "resource": "Copper Deposit", "amount": -1 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Copper Mine" ],
+            "category": "mine",
+            "attributes": [ "cannot be moved", "placed on deposit", "storehouse" ],
+            "cycle time": "3min",
+            "production": [
+                { "resource": "Copper Ore", "amount": 1 },
+                { "resource": "Copper Deposit", "amount": -1 }
+            ],
+            "inner deposit": { "resource": "Copper Deposit", "amount": 0 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Iron Mine" ],
+            "category": "mine",
+            "attributes": [ "cannot be moved", "placed on deposit", "storehouse" ],
+            "cycle time": "6min",
+            "production": [
+                { "resource": "Iron Ore", "amount": 1 },
+                { "resource": "Iron Deposit", "amount": -1 }
+            ],
+            "inner deposit": { "resource": "Iron Deposit", "amount": 0 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Arctic Mine" ],
+            "category": "mine",
+            "attributes": [ "cannot be moved", "placed on deposit", "storehouse" ],
+            "cycle time": "6min",
+            "production": [
+                { "resource": "Iron Ore", "amount": 5 },
+                { "resource": "Iron Deposit", "amount": -5 }
+            ],
+            "inner deposit": { "resource": "Iron Deposit", "amount": 0 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Coal Mine" ],
+            "category": "mine",
+            "attributes": [ "cannot be moved", "placed on deposit", "storehouse" ],
+            "cycle time": "1min 30s",
+            "production": [
+                { "resource": "Coal", "amount": 1 },
+                { "resource": "Coal Deposit", "amount": -1 }
+            ],
+            "inner deposit": { "resource": "Coal Deposit", "amount": 0 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Gold Mine" ],
+            "category": "mine",
+            "attributes": [ "cannot be moved", "placed on deposit", "storehouse" ],
+            "cycle time": "12min",
+            "production": [
+                { "resource": "Gold Ore", "amount": 1 },
+                { "resource": "Gold Deposit", "amount": -1 }
+            ],
+            "inner deposit": { "resource": "Gold Deposit", "amount": 0 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Special Gold Mine" ],
+            "category": "mine",
+            "attributes": [ "cannot be moved", "placed on deposit", "storehouse" ],
+            "cycle time": "12min",
+            "production": [
+                { "resource": "Gold Ore", "amount": 6 },
+                { "resource": "Gold Deposit", "amount": -6 }
+            ],
+            "inner deposit": { "resource": "Gold Deposit", "amount": 0 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Well" ],
+            "category": "mine",
+            "attributes": [ "cannot be moved" ],
+            "cycle time": "3min",
+            "production": [
+                { "resource": "Water", "amount": 1 },
+                { "resource": "Well", "amount": -1 }
+            ],
+            "inner deposit": { "resource": "Well", "amount": 1000 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Deep Well" ],
+            "category": "mine",
+            "attributes": [ "cannot be moved" ],
+            "cycle time": "3min",
+            "production": [
+                { "resource": "Water", "amount": 1 },
+                { "resource": "Well", "amount": -1 }
+            ],
+            "inner deposit": { "resource": "Well", "amount": 1500 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Bottomless Well" ],
+            "category": "mine",
+            "attributes": [ "cannot be moved" ],
+            "cycle time": "3min",
+            "production": [
+                { "resource": "Water", "amount": 1 },
+                { "resource": "Well", "amount": -1 }
+            ],
+            "inner deposit": { "resource": "Well", "amount": 3000 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Artesian Well" ],
+            "category": "mine",
+            "attributes": [ "cannot be moved" ],
+            "cycle time": "3min",
+            "production": [
+                { "resource": "Water", "amount": 1 },
+                { "resource": "Well", "amount": -1 }
+            ],
+            "inner deposit": { "resource": "Well", "amount": 6000 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        }
+    ]
+}

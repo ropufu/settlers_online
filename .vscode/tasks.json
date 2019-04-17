@@ -4,18 +4,15 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "taskName": "build on mac",
+            "label": "build on mac",
             "type": "shell",
             "command": "make",
             // Make this the default build command.
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
+            "group": "build",
             "options": {
-                "cwd": "${workspaceRoot}/black_marsh"
+                "cwd": "${workspaceRoot}/src/black_marsh"
             },
-            "args": ["-f", "Makefile"],
+            "args": [],
             // Use the standard less compilation problem matcher.
             "problemMatcher": {
                 "owner": "cpp",
@@ -31,15 +28,15 @@
             }
         },
         {
-            "taskName": "build tests on mac",
+            "label": "test on mac",
             "type": "shell",
             "command": "make",
             // Make this the default build command.
-            "group": "test",
+            "group": "build",
             "options": {
-                "cwd": "${workspaceRoot}/tests"
+                "cwd": "${workspaceRoot}/src/tests"
             },
-            "args": ["-f", "Makefile"],
+            "args": [],
             // Use the standard less compilation problem matcher.
             "problemMatcher": {
                 "owner": "cpp",

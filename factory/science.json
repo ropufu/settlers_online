@@ -1,0 +1,69 @@
+{
+    "buildings": [
+        {
+            "names": [ "Simple Papermill" ],
+            "category": "factory",
+            "cycle time": "10min 30s",
+            "production": [
+                { "resource": "Simple Paper", "amount": 1 },
+                { "resource": "Pinewood", "amount": -2 },
+                { "resource": "Water", "amount": -2 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Improved Papermill" ],
+            "category": "factory",
+            "cycle time": "11min 30s",
+            "production": [
+                { "resource": "Intermediate Paper", "amount": 1 },
+                { "resource": "Hardwood", "amount": -4 },
+                { "resource": "Water", "amount": -3 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Advanced Papermill" ],
+            "category": "factory",
+            "cycle time": "11min",
+            "production": [
+                { "resource": "Advanced Paper", "amount": 1 },
+                { "resource": "Exotic Wood", "amount": -6 },
+                { "resource": "Water", "amount": -4 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Finesmith" ],
+            "category": "factory",
+            "cycle time": "15min",
+            "production": [
+                { "resource": "Quill", "amount": 1 },
+                { "resource": "Copper Ore", "amount": -4 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Lettersmith" ],
+            "category": "factory",
+            "cycle time": "12min",
+            "production": [
+                { "resource": "Moveable Type", "amount": 1 },
+                { "resource": "Iron Ore", "amount": -4 },
+                { "resource": "Coal", "amount": -4 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Ornamentalsmith" ],
+            "category": "factory",
+            "cycle time": "16min",
+            "production": [
+                { "resource": "Book Fitting", "amount": 1 },
+                { "resource": "Titanium Ore", "amount": -4 },
+                { "resource": "Coal", "amount": -8 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        }
+    ]
+}

@@ -27,54 +27,49 @@ namespace ropufu::settlers_online
     struct unit_database : public name_database<unit_database, unit_type, std::size_t>
     {
         using type = unit_database;
-        using base_type = name_database<unit_database, unit_type, std::size_t>;
         using value_type = unit_type;
         using key_type = std::size_t; //std::decay_t<decltype(std::declval<unit_type>().id())>;
-        using name_type = std::string;
 
-        friend name_database<unit_database, unit_type, std::size_t>;
+        using base_type = name_database<type, value_type, key_type>;
+        using name_type = typename base_type::name_type;
+
+        friend name_database<type, value_type, key_type>;
 
     protected:
         /** @brief Retrieves the database key. */
-        key_type on_build_key(const value_type& unit) const noexcept
+        key_type on_build_key(const value_type& item) const noexcept
         {
-            return unit.id();
+            return item.id();
         } // on_build_key(...)
 
         /** @brief Retrieves the names of the database entry. */
-        std::set<name_type> on_build_names(const value_type& unit) const noexcept
+        std::set<name_type> on_build_names(const value_type& item) const noexcept
         {
             std::set<name_type> names {};
-            for (const name_type& x : unit.names()) names.insert(x);
+            for (const name_type& x : item.names()) names.insert(x);
             return names;
         } // on_build_names(...)
 
-        // /** @brief Happens before \c relax(...) is called. */
-        // void on_relaxing(const value_type& unit, bool& do_cancel) const noexcept
-        // {
-        // } // on_relaxing(...)
+        /** @brief Happens before \c relax(...) is called. */
+        void on_relaxing(const value_type& /*item*/, bool& /*do_cancel*/) const noexcept
+        {
+        } // on_relaxing(...)
 
         /** @brief Happens after \c relax(...) has been called. */
-        void on_relaxed(const value_type& unit, const std::set<name_type>& /*relaxed_names*/, std::set<name_type>& strict_names) const noexcept
+        void on_relaxed(const value_type& item, const std::set<name_type>& /*relaxed_names*/, std::set<name_type>& strict_names) const noexcept
         {
-            for (const name_type& code : unit.codenames()) strict_names.insert(code);
+            for (const name_type& code : item.codenames()) strict_names.insert(code);
         } // on_relaxed(...)
 
-        // /** @brief Happens when \c clear() is called. */
-        // void on_clear() noexcept
-        // {
-        // } // on_clear(...)
+        /** @brief Happens when \c clear() is called. */
+        void on_clear() noexcept { }
 
-        // /** @brief Happens when a unit is about to be loaded. */
-        // template <typename t_logger_type>
-        // void on_loading(const value_type& unit, bool& do_cancel, t_logger_type& logger) const noexcept
-        // {
-        // } // on_loading(...)
+        /** @brief Happens when an item is about to be loaded. */
+        template <typename t_logger_type>
+        void on_loading(const value_type& /*item*/, bool& /*do_cancel*/, t_logger_type& /*logger*/) const noexcept { }
 
-        // /** @brief Happens when a unit has been loaded. */
-        // void on_loaded(const value_type& unit) noexcept
-        // {
-        // } // on_loaded(...)
+        /** @brief Happens when an item has been loaded. */
+        void on_loaded(const value_type& /*item*/) noexcept { }
 
     public:
         unit_database() noexcept { }

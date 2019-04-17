@@ -1,0 +1,101 @@
+{
+    "buildings": [
+        {
+            "names": [ "Bronze Weaponsmith" ],
+            "category": "factory",
+            "cycle time": "6min",
+            "production": [
+                { "resource": "Bronze Sword", "amount": 1 },
+                { "resource": "Bronze", "amount": -1 },
+                { "resource": "Coal", "amount": -2 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Iron Weaponsmith" ],
+            "category": "factory",
+            "cycle time": "12min",
+            "production": [
+                { "resource": "Iron Sword", "amount": 1 },
+                { "resource": "Iron", "amount": -2 },
+                { "resource": "Coal", "amount": -8 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Steel Weaponsmith" ],
+            "category": "factory",
+            "cycle time": "16min 40s",
+            "production": [
+                { "resource": "Steel Sword", "amount": 1 },
+                { "resource": "Steel", "amount": -2 },
+                { "resource": "Coal", "amount": -16 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Damascene Weaponsmith" ],
+            "category": "factory",
+            "cycle time": "32min",
+            "production": [
+                { "resource": "Damascene Sword", "amount": 1 },
+                { "resource": "Titanium", "amount": -4 },
+                { "resource": "Coal", "amount": -32 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Cannon Forge" ],
+            "category": "factory",
+            "cycle time": "32min",
+            "production": [
+                { "resource": "Cannon", "amount": 1 },
+                { "resource": "Gunpowder", "amount": -6 },
+                { "resource": "Carriage", "amount": -1 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Bowmaker" ],
+            "category": "factory",
+            "cycle time": "12min",
+            "production": [
+                { "resource": "Bow", "amount": 1 },
+                { "resource": "Pinewood", "amount": -8 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Longbowmaker" ],
+            "category": "factory",
+            "cycle time": "24min",
+            "production": [
+                { "resource": "Longbow", "amount": 1 },
+                { "resource": "Hardwood", "amount": -16 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Crossbowsmith" ],
+            "category": "factory",
+            "cycle time": "32min",
+            "production": [
+                { "resource": "Crossbow", "amount": 1 },
+                { "resource": "Titanium", "amount": -6 },
+                { "resource": "Exotic Wood", "amount": -16 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Stables" ],
+            "category": "factory",
+            "cycle time": "6min",
+            "production": [
+                { "resource": "Horse", "amount": 1 },
+                { "resource": "Wheat", "amount": -2 },
+                { "resource": "Water", "amount": -4 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        }
+    ]
+}

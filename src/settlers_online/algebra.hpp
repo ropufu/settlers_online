@@ -1,10 +1,12 @@
 
-#ifndef ROPUFU_SETTLERS_ONLINE_ARITHMETIC_HPP_INCLUDED
-#define ROPUFU_SETTLERS_ONLINE_ARITHMETIC_HPP_INCLUDED
+#ifndef ROPUFU_SETTLERS_ONLINE_ALGEBRA_HPP_INCLUDED
+#define ROPUFU_SETTLERS_ONLINE_ALGEBRA_HPP_INCLUDED
 
-#include "arithmetic/bonus_modifier.hpp"
-#include "arithmetic/core.hpp"
-#include "arithmetic/percentage.hpp"
+#include "algebra/arithmetic.hpp"
+#include "algebra/blueprint_index.hpp"
+#include "algebra/blueprint_size.hpp"
+#include "algebra/bonus_modifier.hpp"
+#include "algebra/percentage.hpp"
 
 namespace ropufu::settlers_online
 {
@@ -13,4 +15,4 @@ namespace ropufu::settlers_online
     using experience_bonus_type = bonus_modifier<std::make_signed_t<std::size_t>, cast_direction::toward_zero>; // Experience points modifiers are rounded down.
 } // namespace ropufu::settlers_online
 
-#endif // ROPUFU_SETTLERS_ONLINE_ARITHMETIC_HPP_INCLUDED
+#endif // ROPUFU_SETTLERS_ONLINE_ALGEBRA_HPP_INCLUDED

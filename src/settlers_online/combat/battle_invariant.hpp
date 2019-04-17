@@ -4,7 +4,7 @@
 
 #include <ropufu/algebra.hpp> // aftermath::algebra::matrix, aftermath::algebra::permutation, aftermath::algebra::fraction
 
-#include "../arithmetic.hpp"
+#include "../algebra.hpp"
 #include "../enums.hpp"
 
 #include "army.hpp"

@@ -38,6 +38,9 @@ std::int32_t main()
 {
     try
     {
+        // ~~ Balances tests ~~
+        run_test(balancer_test::test_time_string, "<balancer> time formatting");
+        run_test(balancer_test::test_farms_1, "<balancer> Farms 1");
         //run_test([]() { return false; });
         // ~~ Unit type tests ~~
         run_test(unit_type_test::test_equality, "<unit_type> equality");
@@ -51,8 +54,6 @@ std::int32_t main()
         // ~~ Combat tests ~~
         run_test(combat_mechanics_test::test_deterministic, "<combat_mechanics> deterministic");
         run_test(combat_mechanics_test::test_randomized, "<combat_mechanics> randomized");
-        // ~~ Balances tests ~~
-        run_test(balancer_test::test_farms_1, "<balancer> Farms 1");
     } // try
     catch (const std::exception& ex)
     {

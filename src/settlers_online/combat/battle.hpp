@@ -5,7 +5,7 @@
 #include <ropufu/algebra.hpp> // aftermath::algebra::permutation
 #include <ropufu/enum_array.hpp> // aftermath::enum_array
 
-#include "../arithmetic.hpp"
+#include "../algebra.hpp"
 #include "../enums.hpp"
 
 #include "army.hpp"

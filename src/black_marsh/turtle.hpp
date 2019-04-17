@@ -7,22 +7,12 @@
 
 #include "config.hpp"
 
-#include "../settlers_online/combat/attack_sequence.hpp"
-#include "../settlers_online/combat/army.hpp"
-#include "../settlers_online/combat/army_mechanics.hpp"
-#include "../settlers_online/combat/battle.hpp"
-#include "../settlers_online/combat/camp.hpp"
-#include "../settlers_online/combat/battle.hpp"
-#include "../settlers_online/combat/combat_result.hpp"
-#include "../settlers_online/combat/randomized_attack_sequence.hpp"
-#include "../settlers_online/combat/trivial_attack_sequence.hpp"
-#include "../settlers_online/combat/unit_group.hpp"
-#include "../settlers_online/combat/unit_type.hpp"
+#include "../settlers_online/combat.hpp"
 
-#include "../settlers_online/text/army_parser.hpp"
-#include "../settlers_online/text/army_decorator.hpp"
-#include "../settlers_online/text/report_entry.hpp"
-#include "../settlers_online/text/unit_database.hpp"
+#include "../settlers_online/io/army_parser.hpp"
+#include "../settlers_online/io/army_decorator.hpp"
+#include "../settlers_online/io/report_entry.hpp"
+#include "../settlers_online/io/unit_database.hpp"
 
 #include "../settlers_online/char_string.hpp"
 #include "../settlers_online/enums.hpp"

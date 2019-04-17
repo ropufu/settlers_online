@@ -1,0 +1,164 @@
+{
+    "buildings": [
+        {
+            "names": [ "Mayor's House" ],
+            "category": "other",
+            "attributes": [ "cannot be moved", "cannot be buffed", "cannot be demolished", "storehouse" ],
+            "dimensions": { "bounding box": [4, 5], "anchor": [2, 2], "entrance": [3, 2] },
+            "layout": [
+                ".-.-.-.-.-.",
+                "|#########|",
+                ".#########.",
+                "|#########|",
+                ".#########.",
+                "|#########|",
+                ".###.-.###.",
+                "|###|#|###|",
+                ".-.-.-.-.-."
+            ]
+        },
+        {
+            "names": [ "Storehouse" ],
+            "category": "other",
+            "attributes": [ "cannot be moved", "cannot be buffed", "storehouse" ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Improved Storehouse" ],
+            "category": "other",
+            "attributes": [ "cannot be moved", "cannot be buffed", "storehouse" ],
+            "dimensions": { "bounding box": [3, 2], "anchor": [1, 1], "entrance": [2, 1] },
+            "layout": [
+                ".-.-.",
+                "|###|",
+                ".###.",
+                "|###|",
+                ".-#-.",
+                "|#|#|",
+                ".-.-."
+            ]
+        },
+        {
+            "names": [ "Village School" ],
+            "category": "factory",
+            "cycle time": "2h",
+            "production": [
+                { "resource": "Settler", "amount": 1 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Watermill" ],
+            "category": "factory",
+            "cycle time": "3min",
+            "production": [
+                { "resource": "Water", "amount": 1 }
+            ],
+            "dimensions": { "bounding box": [2, 3], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Recycling manufactory" ],
+            "category": "factory",
+            "cycle time": "3min",
+            "production": [
+                { "resource": "Coal", "amount": 1 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Deerstalker Hut" ],
+            "category": "factory",
+            "cycle time": "8min",
+            "production": [
+                { "resource": "Meat", "amount": 1 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Silo" ],
+            "category": "harvester",
+            "cycle time": "12min",
+            "production": [
+                { "resource": "Wheatfield", "amount": 1 }
+            ],
+            "required deposit": "Wheatfield",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Improved Silo" ],
+            "category": "harvester",
+            "cycle time": "4min",
+            "production": [
+                { "resource": "Wheatfield", "amount": 1 }
+            ],
+            "required deposit": "Wheatfield",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Farm" ],
+            "category": "harvester",
+            "cycle time": "12min",
+            "production": [
+                { "resource": "Wheat", "amount": 1 },
+                { "resource": "Wheatfield", "amount": -1 }
+            ],
+            "required deposit": "Wheatfield",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Improved Farm" ],
+            "category": "harvester",
+            "cycle time": "4min",
+            "production": [
+                { "resource": "Wheat", "amount": 1 },
+                { "resource": "Wheatfield", "amount": -1 }
+            ],
+            "required deposit": "Wheatfield",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Fisherman's Hut" ],
+            "category": "harvester",
+            "cycle time": "3min",
+            "production": [
+                { "resource": "Fish", "amount": 1 },
+                { "resource": "Shoal", "amount": -1 }
+            ],
+            "required deposit": "Shoal",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Hunter" ],
+            "category": "harvester",
+            "cycle time": "6min",
+            "production": [
+                { "resource": "Meat", "amount": 1 },
+                { "resource": "Wild Animal", "amount": -1 }
+            ],
+            "required deposit": "Wild Animal",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Mason" ],
+            "category": "harvester",
+            "cycle time": "5min",
+            "production": [
+                { "resource": "Stone", "amount": 1 },
+                { "resource": "Stone Deposit", "amount": -1 }
+            ],
+            "required deposit": "Stone Deposit",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Marble Mason" ],
+            "category": "harvester",
+            "cycle time": "9min",
+            "production": [
+                { "resource": "Marble", "amount": 1 },
+                { "resource": "Marble Deposit", "amount": -1 }
+            ],
+            "required deposit": "Marble Deposit",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        }
+    ]
+}

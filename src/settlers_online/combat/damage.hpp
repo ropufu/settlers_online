@@ -87,7 +87,6 @@ namespace ropufu::settlers_online
         friend unit_type;
 
     private:
-        // detail::damage_pair<std::size_t> m_value = {};
         std::size_t m_low = 0;
         std::size_t m_high = 0;
         double m_accuracy = 0;      // Probability of high damage.

@@ -1,0 +1,203 @@
+{
+    "buildings": [
+        {
+            "names": [ "Fairytale Castle" ],
+            "category": "factory",
+            "cycle time": "10min",
+            "production": [
+                { "resource": "Magic Beanstalk", "amount": 5 },
+                { "resource": "Magic Bean", "amount": -25 }
+            ],
+            "dimensions": { "bounding box": [4, 4], "anchor": [2, 2], "entrance": [4, 2] }
+        },
+        {
+            "names": [ "Gold Tower" ],
+            "category": "factory",
+            "cycle time": "12min",
+            "production": [
+                { "resource": "Gold", "amount": 1 },
+                { "resource": "Wheat", "amount": -1 }
+            ],
+            "dimensions": { "bounding box": [3, 3], "anchor": [1, 1], "entrance": [2, 2] },
+            "layout": [
+                ".-.-.-.",
+                "|#####|",
+                ".#####.",
+                "|#####|",
+                ".###.-.",
+                "|###| |",
+                ".-.-.-."
+            ]
+        },
+        {
+            "names": [ "Friary" ],
+            "category": "factory",
+            "cycle time": "6min",
+            "production": [
+                { "resource": "Brew", "amount": 4 },
+                { "resource": "Wheat", "amount": -4 },
+                { "resource": "Water", "amount": -8 }
+            ],
+            "dimensions": { "bounding box": [2, 3], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Brewery" ],
+            "category": "factory",
+            "cycle time": "6min",
+            "production": [
+                { "resource": "Brew", "amount": 1 },
+                { "resource": "Wheat", "amount": -1 },
+                { "resource": "Water", "amount": -2 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Coking Plant" ],
+            "category": "factory",
+            "cycle time": "3min",
+            "production": [
+                { "resource": "Coal", "amount": 1 },
+                { "resource": "Pinewood", "amount": -2 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Copper Smelter" ],
+            "category": "factory",
+            "cycle time": "6min",
+            "production": [
+                { "resource": "Bronze", "amount": 1 },
+                { "resource": "Copper Ore", "amount": -1 },
+                { "resource": "Coal", "amount": -1 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Iron Smelter" ],
+            "category": "factory",
+            "cycle time": "12min",
+            "production": [
+                { "resource": "Iron", "amount": 1 },
+                { "resource": "Iron Ore", "amount": -4 },
+                { "resource": "Coal", "amount": -6 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Gold Smelter" ],
+            "category": "factory",
+            "cycle time": "12min",
+            "production": [
+                { "resource": "Gold", "amount": 1 },
+                { "resource": "Gold Ore", "amount": -2 },
+                { "resource": "Coal", "amount": -8 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Steel Smelter" ],
+            "category": "factory",
+            "cycle time": "12min",
+            "production": [
+                { "resource": "Steel", "amount": 1 },
+                { "resource": "Iron", "amount": -2 },
+                { "resource": "Coal", "amount": -6 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Titanium Smelter" ],
+            "category": "factory",
+            "cycle time": "16min",
+            "production": [
+                { "resource": "Titanium", "amount": 1 },
+                { "resource": "Titanium Ore", "amount": -2 },
+                { "resource": "Coal", "amount": -16 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Coinage" ],
+            "category": "factory",
+            "cycle time": "24min",
+            "production": [
+                { "resource": "Coin", "amount": 1 },
+                { "resource": "Gold", "amount": -4 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Toolmaker" ],
+            "category": "factory",
+            "cycle time": "6min",
+            "production": [
+                { "resource": "Tool", "amount": 1 },
+                { "resource": "Bronze", "amount": -1 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Wheelmaker" ],
+            "category": "factory",
+            "cycle time": "18min",
+            "production": [
+                { "resource": "Wheel", "amount": 1 },
+                { "resource": "Exotic Wood", "amount": -3 },
+                { "resource": "Iron", "amount": -6 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Carpenter" ],
+            "category": "factory",
+            "cycle time": "25min",
+            "production": [
+                { "resource": "Carriage", "amount": 1 },
+                { "resource": "Wheel", "amount": -4 },
+                { "resource": "Exotic Wood Plank", "amount": -6 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Powderhut" ],
+            "category": "factory",
+            "cycle time": "18min",
+            "production": [
+                { "resource": "Gunpowder", "amount": 1 },
+                { "resource": "Saltpetre", "amount": -6 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Mill" ],
+            "category": "factory",
+            "cycle time": "6min",
+            "production": [
+                { "resource": "Flour", "amount": 1 },
+                { "resource": "Wheat", "amount": -1 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Bakery" ],
+            "category": "factory",
+            "cycle time": "3min",
+            "production": [
+                { "resource": "Bread", "amount": 1 },
+                { "resource": "Flour", "amount": -1 },
+                { "resource": "Water", "amount": -2 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Butcher" ],
+            "category": "factory",
+            "cycle time": "12min",
+            "production": [
+                { "resource": "Sausage", "amount": 1 },
+                { "resource": "Meat", "amount": -4 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        }
+    ]
+}

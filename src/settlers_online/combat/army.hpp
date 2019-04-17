@@ -6,7 +6,7 @@
 #include <ropufu/enum_array.hpp>
 #include <ropufu/on_error.hpp>
 
-#include "../arithmetic.hpp"
+#include "../algebra.hpp"
 #include "../enums.hpp"
 #include "../char_string.hpp"
 

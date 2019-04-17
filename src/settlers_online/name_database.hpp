@@ -20,19 +20,7 @@
 
 namespace ropufu::settlers_online
 {
-    // namespace detail
-    // {
-    //     template <typename t_value_type, bool t_predicate_value = true>
-    //     struct trivial_filter
-    //     {
-    //         constexpr bool operator ()(const t_value_type& unit) const noexcept { return t_predicate_value; }
-    //     }; // struct no_filter
-    // } // namespace detail
-
-    /** @brief Class for accessing known units.
-     *  @remark The class has to implement the following functions:
-     *          static key_type build_key(const value_type& unit) const noexcept
-     */
+    /** @brief Class for accessing items by name. */
     template <typename t_derived_type, typename t_value_type, typename t_key_type>
     struct name_database
     {
@@ -154,7 +142,7 @@ namespace ropufu::settlers_online
 
     protected:
         /** @brief Retrieves the database key. */
-        key_type on_build_key(const value_type& unit) const noexcept
+        key_type on_build_key(const value_type& item) const noexcept
         {
             constexpr bool is_overwritten = !std::is_same<
                 decltype(&derived_type::on_build_key), 
@@ -162,11 +150,11 @@ namespace ropufu::settlers_online
             static_assert(is_overwritten, "on_build_key(..) -> key_type has not been overloaded.");
 
             const derived_type* that = static_cast<const derived_type*>(this);
-            return that->on_build_key(unit);
+            return that->on_build_key(item);
         } // on_build_key(...)
 
         /** @brief Retrieves the names of the database entry. */
-        std::set<name_type> on_build_names(const value_type& unit) const noexcept
+        std::set<name_type> on_build_names(const value_type& item) const noexcept
         {
             constexpr bool is_overwritten = !std::is_same<
                 decltype(&derived_type::on_build_names), 
@@ -174,31 +162,31 @@ namespace ropufu::settlers_online
             static_assert(is_overwritten, "on_build_names(..) -> std::set<name_type> has not been overloaded.");
 
             const derived_type* that = static_cast<const derived_type*>(this);
-            return that->on_build_names(unit);
+            return that->on_build_names(item);
         } // on_relaxing(...)
 
         /** @brief Happens before \c relax(...) is called. */
-        void on_relaxing(const value_type& unit, bool& do_cancel) const noexcept
+        void on_relaxing(const value_type& item, bool& do_cancel) const noexcept
         {
             constexpr bool is_overwritten = !std::is_same<
                 decltype(&derived_type::on_relaxing), 
                 decltype(&type::on_relaxing)>::value;
-            if (!is_overwritten) return; // Do nothing if the function has not been overridden.
+            static_assert(is_overwritten, "on_relaxing(..) -> void has not been overloaded.");
 
             const derived_type* that = static_cast<const derived_type*>(this);
-            that->on_relaxing(unit, do_cancel);
+            that->on_relaxing(item, do_cancel);
         } // on_relaxing(...)
 
         /** @brief Happens after \c relax(...) has been called. */
-        void on_relaxed(const value_type& unit, const std::set<name_type>& relaxed_names, std::set<name_type>& strict_names) const noexcept
+        void on_relaxed(const value_type& item, const std::set<name_type>& relaxed_names, std::set<name_type>& strict_names) const noexcept
         {
             constexpr bool is_overwritten = !std::is_same<
                 decltype(&derived_type::on_relaxed), 
                 decltype(&type::on_relaxed)>::value;
-            if (!is_overwritten) return; // Do nothing if the function has not been overridden.
+            static_assert(is_overwritten, "on_relaxed(..) -> void has not been overloaded.");
 
             const derived_type* that = static_cast<const derived_type*>(this);
-            that->on_relaxed(unit, relaxed_names, strict_names);
+            that->on_relaxed(item, relaxed_names, strict_names);
         } // on_relaxed(...)
 
         /** @brief Happens when \c clear() is called. */
@@ -207,36 +195,36 @@ namespace ropufu::settlers_online
             constexpr bool is_overwritten = !std::is_same<
                 decltype(&derived_type::on_clear), 
                 decltype(&type::on_clear)>::value;
-            if (!is_overwritten) return; // Do nothing if the function has not been overridden.
+            static_assert(is_overwritten, "on_clear(..) -> void has not been overloaded.");
 
             derived_type* that = static_cast<derived_type*>(this);
             that->on_clear();
         } // on_clear(...)
 
-        /** @brief Happens when a unit is about to be loaded. */
+        /** @brief Happens when an item is about to be loaded. */
         template <typename t_logger_type>
-        void on_loading(const value_type& unit, bool& do_cancel, t_logger_type& logger) const noexcept
+        void on_loading(const value_type& item, bool& do_cancel, t_logger_type& logger) const noexcept
         {
             do_cancel = false;
             constexpr bool is_overwritten = !std::is_same<
                 decltype(&derived_type::template on_loading<t_logger_type>), 
                 decltype(&type::template on_loading<t_logger_type>)>::value;
-            if (!is_overwritten) return; // Do nothing if the function has not been overridden.
+            static_assert(is_overwritten, "on_loading(..) -> void has not been overloaded.");
 
             const derived_type* that = static_cast<const derived_type*>(this);
-            that->on_loading(unit, do_cancel, logger);
+            that->on_loading(item, do_cancel, logger);
         } // on_loading(...)
 
-        /** @brief Happens when a unit has been loaded. */
-        void on_loaded(const value_type& unit) noexcept
+        /** @brief Happens when an item has been loaded. */
+        void on_loaded(const value_type& item) noexcept
         {
             constexpr bool is_overwritten = !std::is_same<
                 decltype(&derived_type::on_loaded), 
                 decltype(&type::on_loaded)>::value;
-            if (!is_overwritten) return; // Do nothing if the function has not been overridden.
+            static_assert(is_overwritten, "on_loaded(..) -> void has not been overloaded.");
 
             derived_type* that = static_cast<derived_type*>(this);
-            that->on_loaded(unit);
+            that->on_loaded(item);
         } // on_loaded(...)
 
     public:
@@ -250,11 +238,11 @@ namespace ropufu::settlers_online
             this->on_clear();
         } // clear(...)
 
-        bool is_valid(const value_type& unit) const noexcept { return &unit != &this->m_invalid; }
+        bool is_valid(const value_type& item) const noexcept { return &item != &this->m_invalid; }
 
-        key_type build_key(const value_type& unit) const noexcept { return this->on_build_key(unit); }
+        key_type build_key(const value_type& item) const noexcept { return this->on_build_key(item); }
 
-        std::set<name_type> build_names(const value_type& unit) const noexcept { return this->on_build_names(unit); }
+        std::set<name_type> build_names(const value_type& item) const noexcept { return this->on_build_names(item); }
 
         const std::map<key_type, value_type>& data() const noexcept { return this->m_database; }
 
@@ -271,7 +259,7 @@ namespace ropufu::settlers_online
             return this->m_invalid;
         } // at(...)
 
-        /** @brief Tries to find a unit matching the \p query in the database.
+        /** @brief Tries to find an item matching the \p query in the database.
          *  @param filter Allows filtering search results. Use \c nullptr if you do not want fitering.
          */
         template <typename t_predicate_type>
@@ -292,16 +280,16 @@ namespace ropufu::settlers_online
             std::optional<node_type> search_a = this->m_name_tree.search(query);
             if (search_a.has_value())
             {
-                const value_type& unit = this->as_single(search_a.value(), filter, is_valid);
-                if (is_valid) return unit;
+                const value_type& item = this->as_single(search_a.value(), filter, is_valid);
+                if (is_valid) return item;
             } // if (...)
 
             // Stage 1: lowercase lookup.
             std::optional<node_type> search_b = this->m_name_tree.search(lowercase);
             if (search_b.has_value())
             {
-                const value_type& unit = this->as_single(search_b.value(), filter, is_valid);
-                if (is_valid) return unit;
+                const value_type& item = this->as_single(search_b.value(), filter, is_valid);
+                if (is_valid) return item;
                 logger.write(std::string("Multiple units match the specified query: ") + lowercase + std::string("."));
                 return this->m_invalid;
             } // if (...)
@@ -310,8 +298,8 @@ namespace ropufu::settlers_online
             std::optional<node_type> search_c = this->m_name_tree.search(misspelled);
             if (search_c.has_value())
             {
-                const value_type& unit = this->as_single(search_c.value(), filter, is_valid);
-                if (is_valid) return unit;
+                const value_type& item = this->as_single(search_c.value(), filter, is_valid);
+                if (is_valid) return item;
                 logger.write(std::string("Multiple units match the specified query: ") + misspelled + std::string("."));
                 return this->m_invalid;
             } // if (...)
@@ -320,16 +308,16 @@ namespace ropufu::settlers_online
         } // find(...)
 
         template <typename t_logger_type>
-        bool add(const value_type& unit, t_logger_type& logger) noexcept
+        bool add(const value_type& item, t_logger_type& logger) noexcept
         {
             bool do_cancel = false;
-            this->on_loading(unit, do_cancel, logger);
+            this->on_loading(item, do_cancel, logger);
             if (do_cancel) return false;
 
-            key_type key = this->build_key(unit);
-            std::set<name_type> names = this->build_names(unit); // Names for logging purposes.
+            key_type key = this->build_key(item);
+            std::set<name_type> names = this->build_names(item); // Names for logging purposes.
             std::set<name_type> strict_names {};
-            std::set<name_type> tree_names = this->relax(unit, strict_names);
+            std::set<name_type> tree_names = this->relax(item, strict_names);
             std::set<name_type> tree_synonyms = type::relax(strict_names);
 
             if (this->m_database.count(key) != 0)
@@ -344,10 +332,10 @@ namespace ropufu::settlers_online
             } // if (...)
             else
             {
-                this->m_database.emplace(key, unit);
+                this->m_database.emplace(key, item);
                 this->m_name_tree.try_add_many(key, tree_names);
                 for (const name_type& explicit_synonym : tree_synonyms) this->m_name_tree.add_synonym(key, explicit_synonym);
-                this->on_loaded(unit);
+                this->on_loaded(item);
                 return true;
             } // if (...)
         } // add(...)

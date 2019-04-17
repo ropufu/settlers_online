@@ -1,0 +1,60 @@
+{
+    "buildings": [
+        {
+            "names": [ "Wheatfield" ],
+            "category": "deposit",
+            "attributes": [ "cannot be moved" ],
+            "inner deposit": { "resource": "Wheatfield", "amount": 200 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [1, 1] },
+            "layout": [
+                ".-.-.",
+                "|#|#|",
+                ".-.-.",
+                "|#|#|",
+                ".-.-."
+            ]
+        },
+        {
+            "names": [ "Medium Wheatfield" ],
+            "category": "deposit",
+            "attributes": [ "cannot be moved" ],
+            "inner deposit": { "resource": "Wheatfield", "amount": 400 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [1, 1] },
+            "layout": [
+                ".-.-.",
+                "|#|#|",
+                ".-.-.",
+                "|#|#|",
+                ".-.-."
+            ]
+        },
+        {
+            "names": [ "Tightly Sown Wheatfield" ],
+            "category": "deposit",
+            "attributes": [ "cannot be moved" ],
+            "inner deposit": { "resource": "Wheatfield", "amount": 800 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [1, 1] },
+            "layout": [
+                ".-.-.",
+                "|#|#|",
+                ".-.-.",
+                "|#|#|",
+                ".-.-."
+            ]
+        },
+        {
+            "names": [ "Packed Wheatfield" ],
+            "category": "deposit",
+            "attributes": [ "cannot be moved" ],
+            "inner deposit": { "resource": "Wheatfield", "amount": 3000 },
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [1, 1] },
+            "layout": [
+                ".-.-.",
+                "|#|#|",
+                ".-.-.",
+                "|#|#|",
+                ".-.-."
+            ]
+        }
+    ]
+}

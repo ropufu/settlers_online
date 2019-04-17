@@ -2,7 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_UNIT_GROUP_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_UNIT_GROUP_HPP_INCLUDED
 
-#include "../arithmetic.hpp"
+#include "../algebra.hpp"
 
 #include "unit_type.hpp"
 

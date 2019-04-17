@@ -6,7 +6,7 @@
 #include <ropufu/json_traits.hpp>
 #include <ropufu/on_error.hpp>
 
-#include "../arithmetic.hpp"
+#include "../algebra.hpp"
 
 #include <cstddef>      // std::size_t
 #include <functional>   // std::hash

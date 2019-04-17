@@ -1,0 +1,100 @@
+{
+    "buildings": [
+        {
+            "names": [ "Pinewood Cutter" ],
+            "category": "harvester",
+            "cycle time": "1min 30s",
+            "production": [
+                { "resource": "Pinewood", "amount": 1 },
+                { "resource": "Pine Tree", "amount": -1 }
+            ],
+            "required deposit": "Pine Tree",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Pinewood Forester" ],
+            "category": "harvester",
+            "cycle time": "2min 15s",
+            "production": [
+                { "resource": "Pine Tree", "amount": 1 },
+                { "resource": "Seed", "amount": -1 }
+            ],
+            "required deposit": "Pine Tree",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Hardwood Cutter" ],
+            "category": "harvester",
+            "cycle time": "4min 30s",
+            "production": [
+                { "resource": "Hardwood", "amount": 1 },
+                { "resource": "Hardwood Tree", "amount": -1 }
+            ],
+            "required deposit": "Hardwood Tree",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Hardwood Forester" ],
+            "category": "harvester",
+            "cycle time": "6min 45s",
+            "production": [
+                { "resource": "Hardwood Tree", "amount": 1 },
+                { "resource": "Seed", "amount": -1 }
+            ],
+            "required deposit": "Hardwood Tree",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Exotic Wood Cutter" ],
+            "category": "harvester",
+            "cycle time": "6min",
+            "production": [
+                { "resource": "Exotic Wood", "amount": 1 },
+                { "resource": "Exotic Tree", "amount": -1 }
+            ],
+            "required deposit": "Exotic Tree",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Exotic Wood Forester" ],
+            "category": "harvester",
+            "cycle time": "9min",
+            "production": [
+                { "resource": "Exotic Tree", "amount": 1 },
+                { "resource": "Seed", "amount": -1 }
+            ],
+            "required deposit": "Exotic Tree",
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Pinewood Sawmill" ],
+            "category": "factory",
+            "cycle time": "3min",
+            "production": [
+                { "resource": "Pinewood Plank", "amount": 1 },
+                { "resource": "Pinewood", "amount": -1 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Hardwood Sawmill" ],
+            "category": "factory",
+            "cycle time": "9min",
+            "production": [
+                { "resource": "Hardwood Plank", "amount": 1 },
+                { "resource": "Hardwood", "amount": -1 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        },
+        {
+            "names": [ "Exotic Wood Sawmill" ],
+            "category": "factory",
+            "cycle time": "12min",
+            "production": [
+                { "resource": "Exotic Wood Plank", "amount": 1 },
+                { "resource": "Exotic Wood", "amount": -1 }
+            ],
+            "dimensions": { "bounding box": [2, 2], "anchor": [1, 1], "entrance": [2, 1] }
+        }
+    ]
+}

@@ -8,7 +8,7 @@
 
 #include <ropufu/enum_array.hpp>
 
-#include "../arithmetic.hpp"
+#include "../algebra.hpp"
 #include "../enums.hpp"
 
 #include "damage.hpp"

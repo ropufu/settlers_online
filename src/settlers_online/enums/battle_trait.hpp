@@ -4,7 +4,7 @@
 
 #include <ropufu/enum_array.hpp>
 
-#include "../arithmetic.hpp"
+#include "../algebra.hpp"
 
 #include <cstddef>     // std::size_t
 #include <string>      // std::string, std::to_string

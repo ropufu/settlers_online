@@ -1,6 +1,6 @@
 
-#ifndef ROPUFU_SETTLERS_ONLINE_ARITHMETIC_CORE_HPP_INCLUDED
-#define ROPUFU_SETTLERS_ONLINE_ARITHMETIC_CORE_HPP_INCLUDED
+#ifndef ROPUFU_SETTLERS_ONLINE_ALGEBRA_ARITHMETIC_HPP_INCLUDED
+#define ROPUFU_SETTLERS_ONLINE_ALGEBRA_ARITHMETIC_HPP_INCLUDED
 
 #include <cstddef> // std::size_t
 #include <limits>  // std::numeric_limits::is_integer, std::numeric_limits::is_signed
@@ -78,4 +78,4 @@ namespace ropufu::settlers_online
     } // indicator_is_non_zero(...)
 } // namespace ropufu::settlers_online
 
-#endif // ROPUFU_SETTLERS_ONLINE_ARITHMETIC_CORE_HPP_INCLUDED
+#endif // ROPUFU_SETTLERS_ONLINE_ALGEBRA_ARITHMETIC_HPP_INCLUDED

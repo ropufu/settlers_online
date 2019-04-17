@@ -5,8 +5,8 @@
 #include <nlohmann/json.hpp>
 
 #include "../settlers_online/combat/army.hpp"
-#include "../settlers_online/text/army_decorator.hpp"
-#include "../settlers_online/text/report_entry.hpp"
+#include "../settlers_online/io/army_decorator.hpp"
+#include "../settlers_online/io/report_entry.hpp"
 
 #include <cstdint>  // std::uint8_t
 #include <fstream>  // std::ifstream, std::ofstream

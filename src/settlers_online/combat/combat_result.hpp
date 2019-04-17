@@ -2,7 +2,7 @@
 #ifndef ROPUFU_SETTLERS_ONLINE_COMBAT_RESULT_HPP_INCLUDED
 #define ROPUFU_SETTLERS_ONLINE_COMBAT_RESULT_HPP_INCLUDED
 
-#include "../arithmetic.hpp"
+#include "../algebra.hpp"
 
 #include <cstddef>    // std::size_t
 #include <cstdint>    // std::uint_fast64_t

@@ -4,7 +4,7 @@
 
 #include <ropufu/algebra.hpp> // aftermath::algebra::permutation
 
-#include "../arithmetic.hpp"
+#include "../algebra.hpp"
 
 #include "battle_clock.hpp"
 #include "battle_invariant.hpp"

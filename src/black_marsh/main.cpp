@@ -3,8 +3,8 @@
 #include "turtle.hpp"
 #include "../settlers_online/combat/army.hpp"
 #include "../settlers_online/combat/unit_type.hpp"
-#include "../settlers_online/text/report_entry.hpp"
-#include "../settlers_online/text/unit_database.hpp"
+#include "../settlers_online/io/report_entry.hpp"
+#include "../settlers_online/io/unit_database.hpp"
 #include "../settlers_online/char_string.hpp"
 #include "../settlers_online/enums.hpp"
 
