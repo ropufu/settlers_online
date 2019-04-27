@@ -116,7 +116,6 @@ namespace ropufu::settlers_online
             logger.touch(); // To avoid unreferenced named parameter whenever \c t_logger_type::is_enabled is \c false.
             std::size_t n = defender.m_underlying.count_groups();
             const unit_group& attacking_group = this->m_underlying[i]; // Attacking group.
-            const unit_type& attacker_type = attacking_group.unit(); // Attacking group type.
             const detail::damageplex& damage_table = invariant.at(clock.round_index());
             const aftermath::algebra::matrix<std::size_t>& attack_order = invariant.attack_order();
             const damage& attacker_damage = damage_table.effective_damage(i, 0);
@@ -132,6 +131,7 @@ namespace ropufu::settlers_online
 
             if constexpr (t_logger_type::is_enabled)
             {
+                const unit_type& attacker_type = attacking_group.unit(); // Attacking group type.
                 logger << '\t' <<
                     count_attackers << " " << attacker_type.first_name() <<
                     " dealing " << total_damage <<
@@ -176,13 +176,13 @@ namespace ropufu::settlers_online
             logger.touch(); // To avoid unreferenced named parameter whenever \c t_logger_type::is_enabled is \c false.
             std::size_t n = defender.m_underlying.count_groups();
             const unit_group& attacking_group = this->m_underlying[i]; // Attacking group.
-            const unit_type& attacker_type = attacking_group.unit(); // Attacking group type.
             const detail::damageplex& damage_table = invariant.at(clock.round_index());
             const aftermath::algebra::matrix<std::size_t>& attack_order = invariant.attack_order();
             const aftermath::algebra::matrix<bool>& is_one_to_one = invariant.is_one_to_one();
 
             if constexpr (t_logger_type::is_enabled)
             {
+                const unit_type& attacker_type = attacking_group.unit(); // Attacking group type.
                 logger << '\t' <<
                     attacking_group.count_as_attacker() << " " << attacker_type.first_name() <<
                     " attacking..." << nullptr;

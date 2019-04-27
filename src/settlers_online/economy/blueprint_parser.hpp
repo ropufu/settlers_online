@@ -75,7 +75,6 @@ namespace ropufu::settlers_online
                 default:
                     return '\0';
             } // switch (...)
-            return '\0';
         } // write(...)
 
         static void to_lines(std::vector<std::string>& lines, const matrix_type& value, std::error_code& ec) noexcept

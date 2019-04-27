@@ -55,7 +55,6 @@ namespace ropufu::settlers_online
         using pathfinder_type = aftermath::algorithm::pathfinder<projector_type>;
 
     private:
-        footprint m_layout = {};
         projector_type m_projector = {};
         // ~~ Buildings ~~
         island_building m_invalid_building = {};
@@ -65,19 +64,21 @@ namespace ropufu::settlers_online
         face_size m_bounding_box = {};
 
     public:
-        island_map() noexcept { }
+        island_map() noexcept
+        {
+        } // island_map(...)
 
         /** @brief Creates an empty island map. */
         island_map(std::size_t face_height, std::size_t face_width) noexcept
-            : m_layout(face_height, face_width), m_projector(this->m_layout),
+            : m_projector(face_height, face_width),
             m_building_keys(face_height, face_width), m_bounding_box(face_height, face_width)
         {
         } // island_map(...)
 
-        const footprint& layout() const noexcept { return this->m_layout; }
+        const footprint& layout() const noexcept { return this->m_projector.surface(); }
 
-        std::size_t face_height() const noexcept { return this->m_layout.face_height(); }
-        std::size_t face_width() const noexcept { return this->m_layout.face_width(); }
+        std::size_t face_height() const noexcept { return this->layout().face_height(); }
+        std::size_t face_width() const noexcept { return this->layout().face_width(); }
 
         bool contains(const island_building& building) const noexcept
         {
@@ -110,13 +111,14 @@ namespace ropufu::settlers_online
         
         bool can_be_built(const building& item, const vertex_index& position) const noexcept
         {
-            const footprint_matrix_type& absolute = this->m_layout.cells();
+            const footprint& layout = this->m_projector.surface();
+            const footprint_matrix_type& absolute = layout.cells();
             const footprint_matrix_type& relative = item.layout().cells();
 
             matrix_index_type top_left {}; // Absolute top left corner.
             matrix_index_type bottom_right {}; // Absolute bottom right corner.
             // Check if the bounding box vertex of the building should be on the map.
-            if (!this->m_layout.fit(position, item.dimensions(), top_left, bottom_right)) return false;
+            if (!layout.fit(position, item.dimensions(), top_left, bottom_right)) return false;
 
             std::size_t local_i = 0;
             // Check cells (faces/vertices/edges).
@@ -140,18 +142,19 @@ namespace ropufu::settlers_online
             if (!this->can_be_built(item, position))
                 return aftermath::detail::on_error(ec, std::errc::operation_not_permitted, "Building cannot be built at this location.", this->m_invalid_building);
 
+            footprint& layout = this->m_projector.surface();
             building_key_type key = this->m_buildings.emplace_back(item, position);
             island_building& result = this->m_buildings.back();
             result.key = key;
 
             typename blueprint<building_key_type>::matrix_type& keys = this->m_building_keys.cells();
-            footprint_matrix_type& absolute = this->m_layout.cells();
+            footprint_matrix_type& absolute = layout.cells();
             const footprint_matrix_type& relative = item.layout().cells();
 
             matrix_index_type top_left {}; // Absolute top left corner.
             matrix_index_type bottom_right {}; // Absolute bottom right corner.
             // Initialize the corners.
-            this->m_layout.fit(position, item.dimensions(), top_left, bottom_right);
+            layout.fit(position, item.dimensions(), top_left, bottom_right);
 
             std::size_t local_i = 0;
             for (std::size_t i = top_left.row; i <= bottom_right.row; ++i)
@@ -160,14 +163,11 @@ namespace ropufu::settlers_online
                 for (std::size_t j = top_left.column; j <= bottom_right.column; ++j)
                 {
                     keys(i, j) = key;
-                    absolute(i, j) |= relative(local_i, local_j);
+                    absolute(i, j) = absolute(i, j) || relative(local_i, local_j);
                     ++local_j;
                 } // for (...)
                 ++local_i;
             } // for (...)
-
-            // Update the projector for pathfinding.
-            this->m_projector = projector_type(this->m_layout);
 
             return result;
         } // build(...)

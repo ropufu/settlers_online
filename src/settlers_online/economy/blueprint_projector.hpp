@@ -10,6 +10,7 @@
 
 #include <cstddef> // std::size_t
 #include <type_traits> // std::is_same_v
+#include <utility> // std::forward
 #include <vector>  // std::vector
 
 namespace ropufu::settlers_online
@@ -41,14 +42,14 @@ namespace ropufu::settlers_online
         static constexpr bool blocked_indicator = true;
 
     protected:
-        std::size_t height_override() const noexcept 
+        std::size_t height_override(const surface_type& surface) const noexcept 
         {
-            return this->surface().vertex_height();
+            return surface.vertex_height();
         } // height_override(...)
 
-        std::size_t width_override() const noexcept 
+        std::size_t width_override(const surface_type& surface) const noexcept 
         {
-            return this->surface().vertex_width();
+            return surface.vertex_width();
         } // width_override(...)
 
         /** L1 distance between two indices. */
@@ -59,9 +60,9 @@ namespace ropufu::settlers_online
             return dx + dy;
         } // distance_override(...)
 
-        void neighbors_override(const index_type& source, std::vector<pair_type>& projected_neighbors) const noexcept
+        void neighbors_override(const surface_type& surface, const index_type& source, std::vector<pair_type>& projected_neighbors) const noexcept
         {
-            const matrix_type& cells = this->surface().cells();
+            const matrix_type& cells = surface.cells();
             index_type absolute {2 * source.row, 2 * source.column};
 
             projected_neighbors.clear();
@@ -103,6 +104,12 @@ namespace ropufu::settlers_online
 
     public:
         using base_type::projector; // Inherit constructors.
+
+        template <typename... t_arg_types>
+        explicit blueprint_projector(t_arg_types&&... args)
+            : base_type(std::forward<t_arg_types>(args)...)
+        {
+        } // blueprint_projector(...)
     }; // struct blueprint_projector
 } // namespace ropufu::settlers_online
 
