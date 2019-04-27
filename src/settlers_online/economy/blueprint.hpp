@@ -16,6 +16,7 @@
 
 #include <cstddef>      // std::size_t
 #include <cstdint>      // std::int_fast32_t
+#include <ostream>      // std::ostream
 #include <stdexcept>    // std::runtime_error
 #include <string>       // std::string
 #include <system_error> // std::error_code, std::errc
@@ -46,6 +47,13 @@ namespace ropufu::settlers_online
                 const derived_type* that = static_cast<const derived_type*>(this);
                 parser_type::to_json(j, that->m_cells, ec);
             } // to_json(...)
+
+            friend std::ostream& operator <<(std::ostream& os, const derived_type& self) noexcept
+            {
+                std::error_code ec {};
+                parser_type::to_stream(os, self.cells(), ec);
+                return os;
+            } // operator <<(...)
         }; // struct blueprint_parsing_module<...>
     } // namespace detail
 
@@ -103,6 +111,11 @@ namespace ropufu::settlers_online
         {
         } // blueprint(...)
 
+        /*implicit*/ blueprint(const dimension& dimensions) noexcept
+            : blueprint(dimensions.bounding_box().height, dimensions.bounding_box().width)
+        {
+        } // blueprint(...)
+
         blueprint(std::size_t face_height, std::size_t face_width) noexcept
             : m_cells(2 * face_height + 1, 2 * face_width + 1)
         {
@@ -112,6 +125,11 @@ namespace ropufu::settlers_online
         std::size_t face_height() const noexcept { return this->m_cells.height() / 2; }
         /** Number of faces in the horizontal direction. */
         std::size_t face_width() const noexcept { return this->m_cells.width() / 2; }
+
+        /** Number of vertices in the vertical direction. */
+        std::size_t vertex_height() const noexcept { return (this->m_cells.height() / 2) + 1; }
+        /** Number of vertices in the horizontal direction. */
+        std::size_t vertex_width() const noexcept { return (this->m_cells.width() / 2) + 1; }
 
         /** Offsets \p index if it is within current blueprint's dimensions. */
         bool fit(const vertex_index& position, const dimension& dimensions, matrix_index_type& top_left, matrix_index_type& bottom_right) const noexcept
@@ -132,7 +150,7 @@ namespace ropufu::settlers_online
             if (bottom_right_corner.row > this->face_height()) return false;
             if (bottom_right_corner.column > this->face_width()) return false;
 
-            top_left = geometry::to_absolute(bottom_right_corner);
+            top_left = geometry::to_absolute(top_left_corner);
             bottom_right = geometry::to_absolute(bottom_right_corner);
 
             return true;
@@ -147,14 +165,14 @@ namespace ropufu::settlers_online
 
     void to_json(nlohmann::json& j, const footprint& x) noexcept
     {
-        using type = footprint;
+        // using type = footprint;
         std::error_code ec {};
         x.to_json(j, ec);
     } // to_json(...)
 
     void from_json(const nlohmann::json& j, footprint& x)
     {
-        using type = footprint;
+        // using type = footprint;
         std::error_code ec {};
         x.from_json(j, ec);
         if (ec) throw std::runtime_error("Parsing JSON failed: " + ec.message());

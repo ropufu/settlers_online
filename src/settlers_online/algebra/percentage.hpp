@@ -12,6 +12,7 @@
 #include <cmath>        // std::round
 #include <functional>   // std::hash
 #include <limits>       // std::numeric_limits<...>::is_integer
+#include <ostream>      // std::ostream
 #include <stdexcept>    // std::runtime_error
 #include <system_error> // std::error_code, std::errc
 #include <type_traits>  // std::make_signed_t
@@ -158,6 +159,12 @@ namespace ropufu::settlers_online
         /** Something clever taken from http://en.cppreference.com/w/cpp/language/operators */
         friend type operator +(type left, const type& right) noexcept { left += right; return left; }
         friend type operator -(type left, const type& right) noexcept { left -= right; return left; }
+
+        friend std::ostream& operator <<(std::ostream& os, const type& self) noexcept
+        {
+            nlohmann::json j = self;
+            return os << j;
+        } // operator <<(...)
     }; // struct percentage
     
     template <typename t_integer_type, cast_direction t_direction>

@@ -93,12 +93,14 @@ namespace ropufu::settlers_online
         type& operator +=(std::int_fast32_t value) noexcept
         {
             this->m_amount += value;
+            return *this;
         } // operator +=(...)
 
         /** Modifies resource amount. */
         type& operator -=(std::int_fast32_t value) noexcept
         {
             this->m_amount -= value;
+            return *this;
         } // operator +=(...)
 
         /** Something clever taken from http://en.cppreference.com/w/cpp/language/operators */

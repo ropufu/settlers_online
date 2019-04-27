@@ -13,6 +13,7 @@
 #include "../enums/blueprint_cell.hpp"    // blueprint_cell
 
 #include <cstddef>      // std::size_t
+#include <ostream>      // std::ostream, std::endl
 #include <string>       // std::string
 #include <system_error> // std::error_code, std::errc
 #include <vector>       // std::vector
@@ -77,10 +78,28 @@ namespace ropufu::settlers_online
             return '\0';
         } // write(...)
 
-    public:
-        static void from_json(const nlohmann::json& j, matrix_type& value, std::error_code& ec) noexcept
+        static void to_lines(std::vector<std::string>& lines, const matrix_type& value, std::error_code& ec) noexcept
         {
-            if (!j.is_array())
+            std::size_t m = value.height();
+            std::size_t n = value.width();
+            lines.clear();
+            lines.reserve(m);
+            for (std::size_t i = 0; i < m; ++i)
+            {
+                std::string line(n, '\0');
+                for (std::size_t j = 0; j < n; ++j)
+                {
+                    line[j] = type::write(blueprint_cell_traits::which(i, j), value(i, j), ec);
+                    if (ec.value() != 0) return;
+                } // for (...)
+                lines.push_back(line);
+            } // for (...)
+        } // to_lines(...)
+
+    public:
+        static void from_json(const nlohmann::json& json, matrix_type& value, std::error_code& ec) noexcept
+        {
+            if (!json.is_array())
             {
                 aftermath::detail::on_error(ec, std::errc::illegal_byte_sequence, "Array expected.");
                 return;
@@ -89,7 +108,7 @@ namespace ropufu::settlers_online
             std::size_t m = 0;
             std::size_t n = 0;
             std::vector<std::vector<bool>> occupied {};
-            for (const nlohmann::json& k : j)
+            for (const nlohmann::json& k : json)
             {
                 if (!k.is_string())
                 {
@@ -121,24 +140,26 @@ namespace ropufu::settlers_online
             for (std::size_t i = 0; i < m; ++i) for (std::size_t j = 0; j < n; ++j) value(i, j) = occupied[i][j];
         } // from_json(...)
     
-        static void to_json(nlohmann::json& j, const matrix_type& value, std::error_code& ec) noexcept
+        static void to_json(nlohmann::json& json, const matrix_type& value, std::error_code& ec) noexcept
         {
-            std::error_code ec {};
-            std::size_t m = value.height();
-            std::size_t n = value.width();
             std::vector<std::string> lines {};
-            lines.reserve(m);
-            for (std::size_t i = 0; i < m; ++i)
-            {
-                std::string line(n, '\0');
-                for (std::size_t j = 0; j < n; ++j)
-                {
-                    line[j] = type::write(blueprint_cell_traits::which(i, j), value(i, j), ec);
-                } // for (...)
-                lines.push_back(line);
-            } // for (...)
-            j = lines;
+            type::to_lines(lines, value, ec);
+            if (ec.value() != 0) return;
+            json = lines;
         } // to_json(...)
+
+        static void to_stream(std::ostream& os, const matrix_type& value, std::error_code& ec) noexcept
+        {
+            std::vector<std::string> lines {};
+            type::to_lines(lines, value, ec);
+            if (ec.value() != 0) return;
+
+            for (std::size_t i = 0; i < lines.size(); ++i)
+            {
+                if (i != 0) os << std::endl;
+                os << lines[i];
+            } // for (...)
+        } // to_stream(...)
     }; // struct blueprint_parser<...>
 } // namespace ropufu::settlers_online
 

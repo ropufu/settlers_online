@@ -15,6 +15,7 @@
 #include <array>        // std::array
 #include <cstddef>      // std::size_t
 #include <functional>   // std::hash
+#include <ostream>      // std::ostream
 #include <stdexcept>    // std::runtime_error
 #include <system_error> // std::error_code, std::errc
 
@@ -46,7 +47,7 @@ namespace ropufu::settlers_online
         {
             std::array<std::size_t, 2> dims {};
             detail::read_size_tuple(j, dims, ec);
-            if (ec.value() != 0)
+            if (ec.value() == 0)
             {
                 this->row = dims[0];
                 this->column = dims[1];
@@ -77,6 +78,12 @@ namespace ropufu::settlers_online
 
         friend type operator *(type left, std::size_t scalar) noexcept { left *= scalar; return left; }
         friend type operator *(std::size_t scalar, type right) noexcept { right *= scalar; return right; }
+
+        friend std::ostream& operator <<(std::ostream& os, const type& self) noexcept
+        {
+            nlohmann::json j = self;
+            return os << j;
+        } // operator <<(...)
     }; // struct blueprint_index
     
     template <blueprint_cell t_cell>

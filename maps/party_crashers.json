@@ -3,7 +3,7 @@
         {
             "id": 1701,
             "names": [ "Rascal" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 20,
             "damage": { "low": 15, "high": 30, "accuracy": 0.9 },
@@ -12,7 +12,7 @@
         {
             "id": 1702,
             "names": [ "Vandal" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 50,
             "damage": { "low": 20, "high": 40, "accuracy": 0.9 },
@@ -21,7 +21,7 @@
         {
             "id": 1703,
             "names": [ "Bully" ],
-            "category": "unknown",
+            "category": "melee",
             "phases": [ "normal" ],
             "hit points": 90,
             "damage": { "low": 20, "high": 40, "accuracy": 0.9 },
@@ -30,7 +30,7 @@
         {
             "id": 1704,
             "names": [ "Prankster" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 20,
             "damage": { "low": 10, "high": 20, "accuracy": 0.8 },
@@ -40,7 +40,7 @@
         {
             "id": 1705,
             "names": [ "Ruffian" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 10,
             "damage": { "low": 25, "high": 50, "accuracy": 0.9 },
@@ -50,7 +50,7 @@
         {
             "id": 1706,
             "names": [ "Scoundrel" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 10,
             "damage": { "low": 40, "high": 75, "accuracy": 0.9 },
@@ -60,7 +60,7 @@
         {
             "id": 1707,
             "names": [ "Cad" ],
-            "category": "unknown",
+            "category": "ranged",
             "phases": [ "normal" ],
             "hit points": 10,
             "damage": { "low": 50, "high": 100, "accuracy": 0.9 },
@@ -71,7 +71,7 @@
             "id": 1708,
             "names": [ "Grouch" ],
             "category": "unknown",
-            "phases": [ "normal" ],
+            "phases": [ "melee" ],
             "hit points": 120,
             "damage": { "low": 20, "high": 40, "accuracy": 0.9 },
             "experience when killed": 2
@@ -79,7 +79,7 @@
         {
             "id": 1709,
             "names": [ "Whiner" ],
-            "category": "unknown",
+            "category": "artillery",
             "phases": [ "last strike" ],
             "hit points": 40,
             "damage": { "low": 70, "high": 120, "accuracy": 0.9, "splash chance": 1 },
@@ -88,7 +88,7 @@
         {
             "id": 1710,
             "names": [ "Scallywag" ],
-            "category": "unknown",
+            "category": "cavalry",
             "phases": [ "first strike" ],
             "hit points": 50,
             "damage": { "low": 25, "high": 50, "accuracy": 0.9 },

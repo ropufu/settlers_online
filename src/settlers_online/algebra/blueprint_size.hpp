@@ -12,6 +12,7 @@
 #include <array>        // std::array
 #include <cstddef>      // std::size_t
 #include <functional>   // std::hash
+#include <ostream>      // std::ostream
 #include <stdexcept>    // std::runtime_error
 #include <system_error> // std::error_code, std::errc
 
@@ -50,7 +51,7 @@ namespace ropufu::settlers_online
         {
             std::array<std::size_t, 2> dims {};
             detail::read_size_tuple(j, dims, ec);
-            if (ec.value() != 0)
+            if (ec.value() == 0)
             {
                 this->height = dims[0];
                 this->width = dims[1];
@@ -70,6 +71,12 @@ namespace ropufu::settlers_online
         {
             return !(this->operator ==(other));
         } // operator !=(...)
+
+        friend std::ostream& operator <<(std::ostream& os, const type& self) noexcept
+        {
+            nlohmann::json j = self;
+            return os << j;
+        } // operator <<(...)
     }; // struct blueprint_size
     
     template <blueprint_cell t_cell>

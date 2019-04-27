@@ -20,6 +20,7 @@
 #include <chrono>     // std::chrono::seconds
 #include <cstddef>    // std::size_t
 #include <cstdint>    // std::int_fast32_t
+#include <ostream>    // std::ostream
 #include <stdexcept>  // std::runtime_error
 #include <string>     // std::string
 #include <system_error> // std::error_code, std::errc
@@ -117,7 +118,7 @@ namespace ropufu::settlers_online
 
         /** @brief Solid rectangular building of a given size. */
         building(const std::string& name, const dimension& dimensions, std::error_code& ec) noexcept
-            : m_names({ name }), m_dimensions(dimensions), m_layout(dimensions.bounding_box.height, dimensions.bounding_box.width)
+            : m_names({ name }), m_dimensions(dimensions), m_layout(dimensions.bounding_box().height, dimensions.bounding_box().width)
         {
             this->default_layout();
             this->validate(ec);
@@ -270,6 +271,12 @@ namespace ropufu::settlers_online
             } // if (...)
             this->m_production.push_back(item);
         } // add_production(...)
+
+        friend std::ostream& operator <<(std::ostream& os, const type& self) noexcept
+        {
+            nlohmann::json j = self;
+            return os << j;
+        } // operator <<(...)
     }; // struct building
 
     // ~~ Json name definitions ~~

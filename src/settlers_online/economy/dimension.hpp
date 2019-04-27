@@ -10,7 +10,7 @@
 #include "../algebra/blueprint_size.hpp"  // face_size
 #include "../enums/blueprint_cell.hpp"    // blueprint_cell
 
-#include <cstddef>    // std::size_t
+#include <cstddef>    // std::size_t, std::nullptr_t
 #include <functional> // std::hash
 #include <ostream>    // std::ostream
 #include <stdexcept>  // std::runtime_error
@@ -66,12 +66,23 @@ namespace ropufu::settlers_online
             geometry::force_inside(this->m_entrance, this->m_bounding_box);
         } // coerce(...)
 
+        /** Unchecked constructor. */
+        dimension(const face_size& bounding_box, const vertex_index& anchor, const vertex_index& entrance, std::nullptr_t) noexcept
+            : m_bounding_box(bounding_box), m_anchor(anchor), m_entrance(entrance)
+        {
+        } // dimension(...)
+
     public:
         /** @brief Dimensions of a building. */
         dimension() noexcept { }
 
+        /** @brief Dimensions of a building. */
+        dimension(const face_size& bounding_box) noexcept
+            : dimension(bounding_box, {bounding_box.height / 2, bounding_box.width / 2}, {bounding_box.height, (bounding_box.width + 1) / 2}, nullptr)
+        {
+        } // dimension(...)
+
         /** @brief Dimensions of a building.
-         *  @param ec Set to std::errc::invalid_argument if \p bounding_box is trivial.
          *  @param ec Set to std::errc::invalid_argument if \p anchor or \p entrance is outside the \p bounding box.
          */
         dimension(const face_size& bounding_box, const vertex_index& anchor, const vertex_index& entrance, std::error_code& ec) noexcept
@@ -131,6 +142,12 @@ namespace ropufu::settlers_online
         {
             return !(this->operator ==(other));
         } // operator !=(...)
+
+        friend std::ostream& operator <<(std::ostream& os, const type& self) noexcept
+        {
+            nlohmann::json j = self;
+            return os << j;
+        } // operator <<(...)
     }; // struct dimension
 
     // ~~ Json name definitions ~~
