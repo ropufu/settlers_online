@@ -15,20 +15,6 @@
         },
         {
             "id": 216,
-            "names": [ "Hound" ],
-            "category": "unknown",
-            "phases": [ "first strike" ],
-            "hit points": 5,
-            "damage": {
-                "low": 5,
-                "high": 10,
-                "accuracy": 0.6
-            },
-            "experience when killed": 4,
-            "special abilities": [ "attack weakest target" ]
-        },
-        {
-            "id": 218,
             "names": [ "Rabbit Hunter" ],
             "category": "unknown",
             "phases": [ "normal" ],
@@ -40,6 +26,20 @@
             },
             "experience when killed": 3,
             "special abilities": [ "tower bonus" ]
+        },
+        {
+            "id": 218,
+            "names": [ "Hound" ],
+            "category": "unknown",
+            "phases": [ "first strike" ],
+            "hit points": 5,
+            "damage": {
+                "low": 5,
+                "high": 10,
+                "accuracy": 0.6
+            },
+            "experience when killed": 4,
+            "special abilities": [ "attack weakest target" ]
         },
         {
             "id": 221,
