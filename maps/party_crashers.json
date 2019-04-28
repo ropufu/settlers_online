@@ -70,8 +70,8 @@
         {
             "id": 1708,
             "names": [ "Grouch" ],
-            "category": "unknown",
-            "phases": [ "melee" ],
+            "category": "melee",
+            "phases": [ "normal" ],
             "hit points": 120,
             "damage": { "low": 20, "high": 40, "accuracy": 0.9 },
             "experience when killed": 2
