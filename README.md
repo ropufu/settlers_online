@@ -1,4 +1,6 @@
 # settlers_online
+**This repository has been archived, and will no longer be updated or maintained.**
+
 
 This is a collection of tools for simulating combat in [The Settlers Online](https://www.thesettlersonline.com).
 Currently, it consists of three major components:
